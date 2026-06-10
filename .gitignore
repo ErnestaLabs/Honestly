@@ -1,0 +1,43 @@
+# Secrets - never commit
+.env
+.env.*
+*.key
+*.pem
+secrets*.json
+.vps_secret
+.vps_pw
+.vps_*
+
+# Working/temp files
+_*.py
+_*.json
+_*.html
+_*.txt
+_PRIVATE_*
+
+# Generated intermediates (keep the .md sources + final .pdf)
+*_appraisal.html
+
+# Bot runtime state + scratch images
+entitlements.json
+testimonials.json
+testimonials/
+_frontage.jpg
+_route.png
+
+# Logs
+*.log
+
+# Python caches
+__pycache__/
+*.pyc
+.pytest_cache/
+.gstack/
+cache/
+
+# Browser profile used by render/screenshot tooling - can hold cookies/tokens, never commit
+site/_cprofile/
+_cprofile/
+
+# Real module that the _*.py rule would otherwise hide (MCP seam used by reddit_intel.py)
+!_hit_sdk.py

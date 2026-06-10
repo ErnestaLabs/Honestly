@@ -1,0 +1,1870 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Honestly - know what it is really worth</title>
+  <meta name="description" content="Know what it is really worth, and why. One evidence-backed UK property valuation, built from real HM Land Registry sold prices, with every figure shown. Free first valuation on Telegram." />
+  <meta property="og:title" content="Honestly - honest UK property valuations" />
+  <meta property="og:description" content="One address in. One evidence-backed valuation out. Anchored in HM Land Registry sold evidence. Free first valuation on Telegram." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://usehonestly.co.uk" />
+  <meta property="og:image" content="https://usehonestly.co.uk/img/logo-lockup.png" />
+  <meta name="theme-color" content="#0e2747" />
+
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="256x256" href="img/favicon-256.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="img/favicon-180.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,600;1,9..144,400;1,9..144,500;1,9..144,600&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream: "#f6f3ec", paper: "#fbf9f4", ink: "#1c1a16", muted: "#6b6557",
+            green: "#15807f", dark: "#0e2747", terra: "#2aa39a", gold: "#d89a32",
+            tg: "#229ED9", tgdark: "#1b88bd",
+            sand: "#c9c1ad", pale: "#e7eef0", line: "#e7e1d4",
+          },
+          fontFamily: {
+            display: ["Fraunces", "Georgia", "Times New Roman", "serif"],
+            logo: ["Fraunces", "Georgia", "serif"],
+            sans: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
+          },
+          letterSpacing: { mega: "0.32em" },
+          boxShadow: {
+            doc: "0 1px 2px rgba(14,39,71,0.05), 0 18px 40px rgba(14,39,71,0.12), 0 48px 90px rgba(14,39,71,0.14)",
+            cta: "0 10px 22px rgba(216,154,50,0.32), 0 2px 6px rgba(14,39,71,0.22)",
+            tg: "0 10px 22px rgba(34,158,217,0.34), 0 2px 6px rgba(14,39,71,0.22)",
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    :root {
+      --cream:#f6f3ec; --paper:#fbf9f4; --ink:#1c1a16; --muted:#6b6557; --green:#15807f;
+      --dark:#0e2747; --terra:#2aa39a; --gold:#d89a32; --sand:#c9c1ad; --pale:#e7eef0; --line:#e7e1d4;
+      --tg:#229ED9; --tgdark:#1b88bd;
+    }
+    /* animatable angle for the travelling border light (ported from 21st.dev Shiny Button) */
+    @property --beam-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--cream);
+      color: var(--ink);
+      font-feature-settings: "ss01", "cv01";
+    }
+    .font-display { font-optical-sizing: auto; }
+    h1, h2, h3 { letter-spacing: -0.02em; }
+    ::selection { background: var(--green); color: var(--cream); }
+    *:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 2px; }
+
+    /* Paper grain - reinforces the appraisal-document feel */
+    .grain {
+      position: fixed; inset: 0; z-index: 9; pointer-events: none; opacity: 0.05;
+      mix-blend-mode: multiply;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    }
+
+    /* Section dividers - single clean hairline (was a heavy broadsheet double-rule) */
+    .rule-double { border-top: 1px solid var(--line); }
+    .rule-double-light { border-top: 1px solid rgba(246,243,236,0.16); }
+    .hair { background: var(--line); }
+
+    /* Uppercase document labels */
+    .label { text-transform: uppercase; letter-spacing: 0.26em; font-weight: 600; }
+
+    .glass-panel {
+      background: rgba(246, 243, 236, 0.82);
+      backdrop-filter: blur(14px) saturate(1.1);
+      -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    }
+
+    /* Premium aurora wash (ported from 21st.dev Magic - "Aurora Hero" + aurora-1/aurora-2 blobs).
+       A repeating-linear sweep gives the colour band; three drifting blobs give it real depth.
+       Masked to the top-right so it frames the certificate, but now reads clearly at rest. */
+    .hero-aurora {
+      position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+      -webkit-mask-image: radial-gradient(135% 108% at 80% -6%, #000 20%, transparent 74%);
+              mask-image: radial-gradient(135% 108% at 80% -6%, #000 20%, transparent 74%);
+    }
+    .hero-aurora::before, .hero-aurora::after {
+      content: ""; position: absolute; inset: -45%;
+      background-image: repeating-linear-gradient(
+        100deg, var(--tg) 4%, var(--green) 11%, var(--terra) 17%, var(--dark) 24%, var(--tg) 30%);
+      background-size: 200% 200%;
+      filter: blur(46px) saturate(1.18);
+      will-change: background-position;
+    }
+    .hero-aurora::before { opacity: 0.52; animation: aurora-drift 26s linear infinite; }
+    .hero-aurora::after  { opacity: 0.30; animation: aurora-drift 44s linear infinite reverse; }
+    .aurora-blob { position: absolute; border-radius: 9999px; filter: blur(64px); will-change: transform; mix-blend-mode: screen; }
+    .aurora-blob.b1 { top: -12%; right: 1%;  width: 32rem; height: 32rem; background: radial-gradient(circle at 32% 32%, rgba(34,158,217,0.62), transparent 60%); animation: aurora-1 19s ease-in-out infinite; }
+    .aurora-blob.b2 { top: -20%; right: 22%; width: 25rem; height: 25rem; background: radial-gradient(circle at 50% 50%, rgba(42,163,154,0.55), transparent 62%); animation: aurora-2 25s ease-in-out infinite; }
+    .aurora-blob.b3 { top: 4%;   right: -7%; width: 21rem; height: 21rem; background: radial-gradient(circle at 50% 50%, rgba(216,154,50,0.34), transparent 64%); animation: aurora-1 31s ease-in-out infinite reverse; }
+    @keyframes aurora-drift {
+      0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; }
+    }
+    @keyframes aurora-1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-8%,12%) scale(1.16); } }
+    @keyframes aurora-2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(12%,9%) scale(0.86); } }
+
+    /* Gradient ink for the headline accent */
+    .grad-accent {
+      background-image: linear-gradient(105deg, var(--tg) 0%, var(--green) 44%, var(--terra) 82%, var(--dark) 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+
+    /* The certificate - deeper layered glass + inset top highlight */
+    .certificate {
+      background:
+        linear-gradient(180deg, #ffffff, rgba(255,255,255,0) 30%),
+        var(--paper);
+      border: 1px solid var(--sand);
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,0.92),
+        0 2px 5px rgba(14,39,71,0.06),
+        0 22px 48px rgba(14,39,71,0.14),
+        0 60px 110px rgba(14,39,71,0.18);
+      transition: transform 0.55s cubic-bezier(0.16,1,0.3,1), box-shadow 0.55s ease;
+    }
+    .certificate:hover { transform: translateY(-6px) rotate(-0.4deg); }
+    .cert-edge { box-shadow: inset 0 0 0 1px var(--line); }
+
+    /* Wax-seal style evidence stamp */
+    .seal {
+      transform: rotate(-9deg);
+      border: 1.5px solid var(--gold);
+      color: var(--gold);
+    }
+    .seal::before {
+      content: ""; position: absolute; inset: 4px; border: 1px solid var(--gold); border-radius: 9999px; opacity: 0.55;
+    }
+
+    .data-bar { background: linear-gradient(180deg, #2a8a72, var(--dark)); }
+    .data-bar-muted { background: linear-gradient(180deg, var(--sand), #b3a98f); }
+    .bar { transform-origin: bottom; transform: scaleY(0); }
+
+    /* Marginal numerals */
+    .marg { font-family: "Fraunces", Georgia, serif; font-variant-numeric: lining-nums; line-height: 0.8; }
+    .sec-no { font-family: "Fraunces", Georgia, serif; font-variant-numeric: lining-nums; }
+
+    /* Travelling-light CTA: a bright comet runs the perimeter (conic border-box, animated angle) */
+    .beam-cta {
+      position: relative; border: 2.5px solid transparent;
+      background:
+        linear-gradient(var(--tg), var(--tg)) padding-box,
+        conic-gradient(from var(--beam-angle),
+          rgba(27,136,189,0.9) 0%,
+          rgba(27,136,189,0.9) 50%,
+          rgba(206,238,255,0.95) 66%,
+          #ffffff 78%,
+          #f4fbff 82%,
+          rgba(206,238,255,0.95) 90%,
+          rgba(27,136,189,0.9) 100%) border-box;
+      box-shadow: 0 8px 20px rgba(14,39,71,0.18), 0 1px 2px rgba(14,39,71,0.18);
+      animation: beam-rotate 3.2s linear infinite;
+      transition: box-shadow 0.3s ease, transform 0.25s cubic-bezier(0.16,1,0.3,1);
+    }
+    .beam-cta:hover {
+      box-shadow: 0 12px 26px rgba(34,158,217,0.3), 0 1px 2px rgba(14,39,71,0.2);
+      animation-duration: 1.8s;
+    }
+    @keyframes beam-rotate { to { --beam-angle: 360deg; } }
+
+    .btn-lift { transition: transform 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s ease, background-color 0.25s ease, color 0.25s ease; }
+    .btn-lift:hover { transform: translateY(-2px); }
+    .btn-lift .arrow { transition: transform 0.25s ease; }
+    .btn-lift:hover .arrow { transform: translateX(4px); }
+    .link-u { background-image: linear-gradient(var(--green),var(--green)); background-size: 0% 1.5px; background-repeat: no-repeat; background-position: 0 100%; transition: background-size 0.3s ease; }
+    .link-u:hover { background-size: 100% 1.5px; }
+
+    /* Orchestrated entrance */
+    @keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+    @keyframes grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    @keyframes sealin { from { opacity: 0; transform: rotate(-9deg) scale(1.4); } to { opacity: 1; transform: rotate(-9deg) scale(1); } }
+    @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+    .anim { opacity: 0; animation: rise 0.9s cubic-bezier(0.16,1,0.3,1) forwards; }
+    .d1 { animation-delay: 0.05s; } .d2 { animation-delay: 0.13s; } .d3 { animation-delay: 0.21s; }
+    .d4 { animation-delay: 0.30s; } .d5 { animation-delay: 0.40s; } .d6 { animation-delay: 0.50s; }
+    .seal-anim { animation: sealin 0.7s cubic-bezier(0.16,1,0.3,1) 0.95s both; }
+    .float-slow { animation: floaty 7s ease-in-out infinite; }
+
+    .reveal {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+    .rd-1 { transition-delay: 0.06s; } .rd-2 { transition-delay: 0.16s; } .rd-3 { transition-delay: 0.26s; }
+
+    /* valuation widget */
+    @keyframes hermes-pulse {
+      0%, 100% { box-shadow: 0 12px 30px rgba(34,158,217,0.42), 0 0 0 0 rgba(34,158,217,0.42); }
+      50% { box-shadow: 0 12px 30px rgba(34,158,217,0.42), 0 0 0 12px rgba(34,158,217,0); }
+    }
+    .hermes-launcher { /* travelling-light handled by .beam-cta */ }
+    .hermes-panel {
+      transform: translateY(16px) scale(0.98); opacity: 0; pointer-events: none;
+      transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.16,1,0.3,1);
+    }
+    .hermes-panel.open { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+
+    /* Straight-answers accordion (objection handling) */
+    .qa { border-bottom: 1px dashed var(--sand); }
+    .qa-q {
+      width: 100%; display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 1.25rem; padding: 1.4rem 0; text-align: left; cursor: pointer;
+      transition: color 0.25s ease;
+    }
+    .qa-q:hover { color: var(--green); }
+    .qa-tag { transition: color 0.3s ease, background-color 0.3s ease; }
+    .qa.open .qa-tag { color: var(--green); }
+    .qa-sign { position: relative; flex: 0 0 auto; width: 18px; height: 18px; margin-top: 3px; }
+    .qa-sign::before, .qa-sign::after {
+      content: ""; position: absolute; background: currentColor; border-radius: 2px;
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease;
+    }
+    .qa-sign::before { top: 8px; left: 0; width: 18px; height: 2px; }     /* horizontal */
+    .qa-sign::after  { left: 8px; top: 0; width: 2px; height: 18px; }      /* vertical */
+    .qa.open .qa-sign { color: var(--green); }
+    .qa.open .qa-sign::after { transform: rotate(90deg); opacity: 0; }
+    .qa-a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.42s cubic-bezier(0.16,1,0.3,1); }
+    .qa.open .qa-a { grid-template-rows: 1fr; }
+    .qa-a-inner { overflow: hidden; }
+
+    /* Honest comparison matrix (ported from 21st.dev Magic comparison pattern, brand-skinned) */
+    .cmp-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .cmp { width: 100%; min-width: 660px; border-collapse: separate; border-spacing: 0; }
+    .cmp th, .cmp td { padding: 1rem 1.15rem; text-align: center; vertical-align: middle; }
+    .cmp thead th { vertical-align: bottom; }
+    .cmp thead th:first-child, .cmp tbody td:first-child { text-align: left; }
+    .cmp tbody tr td { border-top: 1px solid var(--line); transition: background-color 0.2s ease; }
+    .cmp tbody tr:hover td { background: rgba(14,39,71,0.028); }
+    /* featured column runs teal-tinted top to bottom (brand identity; CTAs stay blue) */
+    .cmp .feat { background: rgba(21,128,127,0.07); }
+    .cmp thead th.feat { background: rgba(21,128,127,0.11); border-radius: 14px 14px 0 0; box-shadow: inset 0 3px 0 0 var(--green); }
+    .cmp tbody tr:last-child td.feat { border-radius: 0 0 14px 14px; }
+    .cmp tbody tr:hover td.feat { background: rgba(21,128,127,0.13); }
+    .cmp-yes { color: var(--green); }
+    .cmp-no { color: rgba(14,39,71,0.20); }
+    .cmp-part { color: #9a9482; }
+    .cmp-badge {
+      display: inline-block; background: var(--green); color: var(--cream);
+      font-size: 9px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
+      padding: 3px 9px; border-radius: 999px; margin-bottom: 0.6rem;
+    }
+
+    /* ============================================================
+       SOUL LAYER - crafted micro-motion adapted from Uiverse.io
+       (MIT, the open-source UI library). Techniques: text sheen,
+       pulse rings, polka dot-grid (uiverse-astronaut), glass card
+       sweep, shine-on-hover, drifting glow. All retuned to brand.
+       ============================================================ */
+
+    /* Headline accent now glints - a bright teal-white band drifts through the gradient */
+    .grad-accent {
+      background-image: linear-gradient(105deg,
+        var(--tg) 0%, var(--green) 26%, #c7f2ee 44%, #ffffff 50%, #c7f2ee 56%, var(--terra) 74%, var(--dark) 100%);
+      background-size: 230% 100%;
+      animation: text-shine 6s ease-in-out infinite;
+    }
+    @keyframes text-shine { 0%,100% { background-position: 128% 0; } 50% { background-position: -28% 0; } }
+
+    /* Live indicator - real expanding pulse rings (uiverse pulse loader) */
+    .pulse-dot { position: relative; display: inline-flex; height: 8px; width: 8px; }
+    .pulse-dot i { position: absolute; inset: 0; border-radius: 9999px; background: var(--green); }
+    .pulse-dot::before, .pulse-dot::after {
+      content: ""; position: absolute; inset: 0; border-radius: 9999px;
+      border: 1.5px solid var(--green); animation: pulse-ring 2.6s cubic-bezier(0.2,0.6,0.2,1) infinite;
+    }
+    .pulse-dot::after { animation-delay: 1.3s; }
+    @keyframes pulse-ring { 0% { transform: scale(1); opacity: 0.65; } 100% { transform: scale(4); opacity: 0; } }
+
+    /* Dot-grid texture for dark grounds (radial-gradient polka technique, uiverse-astronaut) */
+    .uiv-dots {
+      position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      background-image: radial-gradient(rgba(42,163,154,0.18) 1px, transparent 1.4px);
+      background-size: 24px 24px;
+      -webkit-mask-image: radial-gradient(125% 85% at 50% -5%, #000 28%, transparent 76%);
+              mask-image: radial-gradient(125% 85% at 50% -5%, #000 28%, transparent 76%);
+    }
+    /* Slow drifting glow that makes navy sections feel lit, not flat */
+    .dark-glow {
+      position: absolute; z-index: 0; pointer-events: none; border-radius: 9999px;
+      filter: blur(70px); opacity: 0.5;
+      background: radial-gradient(circle, rgba(34,158,217,0.30), transparent 62%);
+      animation: glow-drift 22s ease-in-out infinite;
+    }
+    .dark-glow.g2 { background: radial-gradient(circle, rgba(42,163,154,0.26), transparent 62%); animation-duration: 30s; animation-direction: reverse; }
+    @keyframes glow-drift { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(8%,-10%) scale(1.18); } }
+
+    /* Certificate glass glint - a light band sweeps the card every few seconds */
+    .cert-shine { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; z-index: 5; }
+    .cert-shine::before {
+      content: ""; position: absolute; top: -60%; left: -40%; width: 36%; height: 220%;
+      background: linear-gradient(115deg, transparent, rgba(255,255,255,0.55), transparent);
+      transform: rotate(8deg); animation: cert-sweep 8s ease-in-out infinite; opacity: 0;
+    }
+    @keyframes cert-sweep { 0% { left: -40%; opacity: 0; } 10% { opacity: 0.9; } 26% { left: 130%; opacity: 0; } 100% { left: 130%; opacity: 0; } }
+
+    /* Shine-on-hover for the primary CTA (uiverse shine button) - rides over the travelling beam */
+    /* Magic UI Shiny Button (ported) - the surface shine auto-sweeps on a loop via the
+       animatable --x property, so the CTA is alive at rest, not only on hover. Rides the beam border. */
+    @property --x { syntax: "<percentage>"; initial-value: 100%; inherits: false; }
+    .cta-shine { overflow: hidden; }
+    .cta-shine::after {
+      content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; --x: 100%;
+      background-image: linear-gradient(-75deg,
+        rgba(255,255,255,0) calc(var(--x) + 20%),
+        rgba(255,255,255,0.55) calc(var(--x) + 25%),
+        rgba(255,255,255,0) calc(var(--x) + 60%));
+      animation: shiny-sweep 4.2s ease-in-out infinite;
+    }
+    @keyframes shiny-sweep { 0%, 8% { --x: 100%; } 52%, 100% { --x: -30%; } }
+
+    /* Featured comparison column quietly breathes so the eye lands on it */
+    .feat-live { animation: feat-pulse 4s ease-in-out infinite; }
+    @keyframes feat-pulse {
+      0%,100% { box-shadow: inset 0 3px 0 0 var(--green), 0 0 0 0 rgba(21,128,127,0); }
+      50% { box-shadow: inset 0 3px 0 0 var(--green), 0 12px 30px -6px rgba(21,128,127,0.30); }
+    }
+
+    /* Cursor spotlight on the certificate (driven by JS --mx/--my) */
+    .cert-spot { position: absolute; inset: 0; z-index: 4; pointer-events: none; border-radius: inherit; opacity: 0; transition: opacity 0.4s ease;
+      background: radial-gradient(220px circle at var(--mx,50%) var(--my,50%), rgba(34,158,217,0.10), transparent 60%); }
+    .certificate:hover .cert-spot { opacity: 1; }
+
+    /* Spotlight glow cards (ported from 21st.dev "Spotlight Card" / GlowCard).
+       Pointer position feeds --gx/--gy; an inner radial glow tracks the cursor.
+       Lit at rest from the top numeral so the effect reads without hovering.
+       No border radius / outline, so the ruled gap-px document grid stays intact. */
+    .spot-card { position: relative; overflow: hidden; isolation: isolate; }
+    .spot-card::before {
+      content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      background: radial-gradient(420px circle at var(--gx,18%) var(--gy,8%),
+        rgba(34,158,217,0.20), rgba(42,163,154,0.10) 34%, transparent 66%);
+      opacity: 0.55; transition: opacity 0.45s ease, background 0.18s ease;
+    }
+    .spot-card:hover::before { opacity: 1; }
+    /* hairline top accent that ignites left-to-right on hover */
+    .spot-card::after {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; z-index: 1;
+      background: linear-gradient(90deg, var(--tg), var(--terra), transparent);
+      transform: scaleX(0); transform-origin: left; transition: transform 0.5s cubic-bezier(0.16,1,0.3,1);
+    }
+    .spot-card:hover::after { transform: scaleX(1); }
+    .spot-card > * { position: relative; z-index: 1; }
+
+    /* Process timeline (ported from 21st.dev "Process Timeline" / ark-ui Steps).
+       A gradient spine threads the three steps; each numeral is a glowing node. */
+    .steps { position: relative; }
+    .steps::before {
+      content: ""; position: absolute; left: 27px; top: 38px; bottom: 38px; width: 2px;
+      background: linear-gradient(180deg, var(--tg), var(--green) 52%, var(--terra));
+      opacity: 0.85;
+    }
+    .step-node {
+      position: relative; z-index: 1; flex: 0 0 auto;
+      display: flex; align-items: center; justify-content: center;
+      width: 56px; height: 56px; border-radius: 9999px;
+      font-family: "Fraunces", Georgia, serif; font-variant-numeric: lining-nums;
+      font-size: 1.35rem; font-weight: 600; color: var(--cream);
+      background: linear-gradient(145deg, var(--tg), var(--green));
+      box-shadow: 0 10px 22px -8px rgba(21,128,127,0.6), inset 0 1px 1px rgba(255,255,255,0.35);
+    }
+    .step-node::after {
+      content: ""; position: absolute; inset: -5px; border-radius: inherit;
+      border: 1.5px solid rgba(21,128,127,0.35);
+      animation: pulse-ring 3s cubic-bezier(0.2,0.6,0.2,1) infinite;
+    }
+    .steps li:nth-child(2) .step-node::after { animation-delay: 1s; }
+    .steps li:nth-child(3) .step-node::after { animation-delay: 2s; }
+    .step-row { transition: transform 0.3s cubic-bezier(0.16,1,0.3,1); }
+    .step-row:hover { transform: translateX(4px); }
+    .step-row:hover .step-node { box-shadow: 0 14px 30px -8px rgba(34,158,217,0.7), inset 0 1px 1px rgba(255,255,255,0.4); }
+
+    /* ============================================================
+       THE ENGINE - valuation pipeline schematic. Kills "just a bot":
+       a vertical rail with a travelling data pulse; each stage is a
+       glowing node + glass card showing the worked example transform.
+       Numbers mirror the sample certificate exactly (625 -> 631 -> 640).
+       ============================================================ */
+    .engine-pipe { position: relative; }
+    .engine-pipe::before {                 /* the rail */
+      content: ""; position: absolute; left: 26px; top: 34px; bottom: 70px; width: 2px;
+      background: linear-gradient(180deg, rgba(34,158,217,0.28), rgba(42,163,154,0.22));
+    }
+    .engine-pipe::after {                   /* travelling data pulse */
+      content: ""; position: absolute; left: 24.5px; width: 5px; height: 74px; border-radius: 5px;
+      background: linear-gradient(180deg, transparent, var(--tg) 35%, #d6f2fc 50%, var(--terra) 65%, transparent);
+      box-shadow: 0 0 14px rgba(34,158,217,0.85);
+      animation: engine-flow 3.6s cubic-bezier(0.45,0,0.55,1) infinite;
+    }
+    @keyframes engine-flow {
+      0% { top: 24px; opacity: 0; } 7% { opacity: 1; }
+      90% { opacity: 1; } 100% { top: calc(100% - 96px); opacity: 0; }
+    }
+    .engine-stage { position: relative; display: grid; grid-template-columns: 54px 1fr; gap: 1.15rem; padding-bottom: 1.25rem; }
+    .engine-node {
+      position: relative; z-index: 1; width: 54px; height: 54px; border-radius: 16px; flex: 0 0 auto;
+      display: flex; align-items: center; justify-content: center; font-size: 1.45rem; color: var(--cream);
+      background: linear-gradient(150deg, rgba(34,158,217,0.96), rgba(21,128,127,0.96));
+      box-shadow: 0 10px 24px -8px rgba(34,158,217,0.6), inset 0 1px 1px rgba(255,255,255,0.35);
+    }
+    .engine-out .engine-node {
+      background: linear-gradient(150deg, var(--gold), #b9842a);
+      box-shadow: 0 12px 28px -6px rgba(216,154,50,0.6), inset 0 1px 1px rgba(255,255,255,0.4);
+    }
+    .engine-card {
+      border: 1px solid rgba(255,255,255,0.10); border-radius: 14px; padding: 0.95rem 1.15rem;
+      background: rgba(255,255,255,0.035); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+      transition: border-color 0.3s ease, background 0.3s ease, transform 0.35s cubic-bezier(0.16,1,0.3,1);
+    }
+    .engine-stage:hover .engine-card { border-color: rgba(34,158,217,0.45); background: rgba(34,158,217,0.06); transform: translateX(5px); }
+    .engine-out .engine-card { border-color: rgba(216,154,50,0.35); background: rgba(216,154,50,0.06); }
+    .src-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
+      color: #c3e8f8; background: rgba(34,158,217,0.13); border: 1px solid rgba(34,158,217,0.28);
+    }
+    .engine-fig { color: #7fd0e8; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    /* ============================================================
+       Magic UI Animated Beam + Orbiting Circles (ported to vanilla).
+       Five public registers flow along curved beams into the Honestly
+       engine core; three beams flow out to the deliverables. The lit
+       pulse is a normalised stroke-dashoffset travel (pathLength=100),
+       not framer-motion. Glyphs orbit the core on pure-CSS rotation.
+       ============================================================ */
+    .abeam { position: relative; padding: 0.5rem 0.25rem; }
+    .abeam-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 0; }
+    .ab-wire { fill: none; stroke: rgba(231,238,240,0.13); stroke-width: 1.4; }
+    .ab-flow {
+      fill: none; stroke: url(#abgrad); stroke-width: 2.4; stroke-linecap: round;
+      stroke-dasharray: 16 84; stroke-dashoffset: 100;
+      filter: drop-shadow(0 0 4px rgba(42,163,154,0.55));
+      animation: ab-flow 3.4s linear infinite;
+    }
+    @keyframes ab-flow { to { stroke-dashoffset: 0; } }
+    .abeam-grid {
+      position: relative; z-index: 1;
+      display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+      align-items: center; gap: clamp(1.1rem, 5vw, 3rem);
+    }
+    .abeam-sources, .abeam-outs { display: flex; flex-direction: column; gap: 0.55rem; }
+    .ab-node {
+      display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.7rem;
+      border-radius: 0.65rem; font-size: 11.5px; font-weight: 600; line-height: 1.15;
+      color: rgba(246,243,236,0.82); background: rgba(8,29,52,0.82);
+      border: 1px solid rgba(231,238,240,0.12); box-shadow: 0 6px 18px -10px rgba(0,0,0,0.7);
+      white-space: nowrap;
+    }
+    .ab-node iconify-icon { font-size: 1.05rem; color: var(--terra); flex: 0 0 auto; }
+    .abeam-outs .ab-node { border-color: rgba(216,154,50,0.3); }
+    .abeam-outs .ab-node iconify-icon { color: var(--gold); }
+    .abeam-core { position: relative; display: flex; align-items: center; justify-content: center; min-height: 188px; }
+    .ab-core-node {
+      position: relative; z-index: 2;
+      width: clamp(96px, 15vw, 116px); height: clamp(96px, 15vw, 116px); border-radius: 9999px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+      text-align: center; color: var(--cream);
+      background: radial-gradient(circle at 50% 34%, rgba(42,163,154,0.34), rgba(14,39,71,0.96));
+      border: 1px solid rgba(42,163,154,0.45);
+      box-shadow: 0 0 44px rgba(42,163,154,0.28), inset 0 1px 1px rgba(255,255,255,0.18);
+    }
+    .ab-core-node iconify-icon { font-size: 1.7rem; color: #8fe6dd; }
+    .ab-core-node .ab-core-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(246,243,236,0.72); }
+    .ab-orbit {
+      position: absolute; top: 50%; left: 50%; width: 26px; height: 26px; margin: -13px;
+      display: flex; align-items: center; justify-content: center; border-radius: 9999px; z-index: 1;
+      background: rgba(8,29,52,0.92); border: 1px solid rgba(42,163,154,0.4); color: #bfe9e2;
+      animation: ab-orbit var(--dur, 20s) linear infinite;
+    }
+    .ab-orbit iconify-icon { font-size: 0.82rem; }
+    .ab-orbit.rev { animation-direction: reverse; }
+    @keyframes ab-orbit {
+      from { transform: rotate(var(--angle)) translateX(var(--r)) rotate(calc(-1 * var(--angle))); }
+      to   { transform: rotate(calc(var(--angle) + 360deg)) translateX(var(--r)) rotate(calc((-1 * var(--angle)) - 360deg)); }
+    }
+    .ab-orbit-ring { position: absolute; top: 50%; left: 50%; border-radius: 9999px; transform: translate(-50%,-50%); border: 1px solid rgba(231,238,240,0.08); }
+    @media (max-width: 560px) {
+      .abeam-grid { gap: 0.7rem; }
+      .ab-node { font-size: 10px; padding: 0.4rem 0.5rem; gap: 0.35rem; }
+      .ab-node .ab-node-txt { display: none; }
+      .ab-node iconify-icon { font-size: 1.15rem; }
+    }
+
+    /* Magic UI Terminal (ported from magicuidesign/magicui) - the engine running as real
+       software. macOS window chrome + sequenced line reveal + typed command line. */
+    .mui-terminal {
+      position: relative; z-index: 0; width: 100%; border-radius: 13px; overflow: hidden;
+      background: #081d34; box-shadow: 0 34px 70px -26px rgba(0,0,0,0.6);
+    }
+    .mui-bar { display: flex; gap: 8px; padding: 13px 16px; border-bottom: 1px solid rgba(255,255,255,0.09); }
+    .mui-bar i { display: block; width: 11px; height: 11px; border-radius: 9999px; }
+    .mui-bar .r { background: #ff5f57; } .mui-bar .y { background: #febc2e; } .mui-bar .g { background: #28c840; }
+    .mui-bar .ttl { margin-left: 10px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.4); align-self: center; letter-spacing: 0.02em; }
+    .mui-terminal pre { margin: 0; padding: 16px 18px; overflow: auto; }
+    .mui-terminal code {
+      display: grid; gap: 7px;
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+      font-size: 12.5px; line-height: 1.45; color: #cfe7d8;
+    }
+    .t-line { opacity: 0; transform: translateY(-5px); transition: opacity 0.3s ease, transform 0.3s ease; }
+    .t-line.in { opacity: 1; transform: none; }
+    .t-line.row { display: flex; align-items: baseline; gap: 0.55rem; }
+    .t-ok { color: #5fd0a0; } .t-arrow { color: var(--gold); font-weight: 700; }
+    .t-key { color: #d7e3ee; } .t-val { margin-left: auto; color: #7f9bb5; font-variant-numeric: tabular-nums; }
+    .t-val.fig { color: #7fd0e8; font-weight: 700; }
+    .t-rule { color: rgba(255,255,255,0.18); letter-spacing: -1px; }
+    .t-cursor::after { content: "\258B"; color: var(--terra); margin-left: 1px; animation: t-blink 1s steps(1) infinite; }
+    @keyframes t-blink { 50% { opacity: 0; } }
+
+    /* Magic UI Border Beam (ported) - a light travels the card's border ring */
+    .beam-frame { position: relative; }
+    .border-beam {
+      position: absolute; inset: 0; border-radius: inherit; pointer-events: none; padding: 1.5px;
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+              mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude; overflow: hidden;
+    }
+    .border-beam::before {
+      content: ""; position: absolute; top: 0; left: 0; width: 72px; aspect-ratio: 1;
+      background: linear-gradient(to left, var(--bb-to,#2aa39a), var(--bb-from,#229ED9), transparent);
+      offset-path: rect(0 auto auto 0 round 72px); offset-distance: 0%;
+      animation: bb-travel 6s linear infinite;
+    }
+    .border-beam.b2::before { animation-delay: -3s; --bb-from:#2aa39a; --bb-to:#d89a32; }
+    @keyframes bb-travel { to { offset-distance: 100%; } }
+
+    /* ============================================================
+       Magic UI Bento Grid + Magic Card (ported). Asymmetric CSS grid;
+       each card carries the shared cursor spotlight (spot-card / --gx,--gy)
+       and a Border Beam that ignites on hover. Light surface, brand tokens.
+       ============================================================ */
+    .bento { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; }
+    .bento-card {
+      position: relative; overflow: hidden; border-radius: 18px; min-height: 15.5rem;
+      display: flex; flex-direction: column; justify-content: flex-end; gap: 0.5rem;
+      padding: 1.5rem; background: var(--paper); border: 1px solid var(--line);
+      box-shadow: 0 1px 0 rgba(28,26,22,0.02), 0 18px 42px -32px rgba(14,39,71,0.55);
+      transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), box-shadow 0.4s ease, border-color 0.3s ease;
+    }
+    .bento-card:hover { transform: translateY(-4px); border-color: rgba(34,158,217,0.4);
+      box-shadow: 0 1px 0 rgba(28,26,22,0.02), 0 32px 64px -36px rgba(14,39,71,0.6); }
+    .bento-2 { grid-column: span 2; }
+    .bento-deco { position: absolute; top: -0.7rem; right: -0.4rem; z-index: 0; pointer-events: none;
+      font-size: 6.5rem; line-height: 1; color: rgba(21,128,127,0.07); }
+    .bento-card:hover .bento-deco { color: rgba(34,158,217,0.12); }
+    .bento-icon { display: inline-flex; align-items: center; justify-content: center;
+      width: 44px; height: 44px; border-radius: 12px; font-size: 1.5rem; color: var(--cream);
+      background: linear-gradient(150deg, var(--tg), var(--green));
+      box-shadow: 0 10px 22px -10px rgba(34,158,217,0.6), inset 0 1px 1px rgba(255,255,255,0.35); }
+    .bento-out .bento-icon { background: linear-gradient(150deg, var(--gold), #b9842a); box-shadow: 0 10px 22px -10px rgba(216,154,50,0.6), inset 0 1px 1px rgba(255,255,255,0.4); }
+    .bento-h { font-family: "Fraunces", Georgia, serif; font-size: 1.15rem; font-weight: 600; color: var(--ink); line-height: 1.15; }
+    .bento-p { font-size: 13px; font-weight: 500; line-height: 1.55; color: var(--muted); max-width: 34ch; }
+    .bento-fig { font-family: "Fraunces", Georgia, serif; font-variant-numeric: tabular-nums; font-size: 2rem; font-weight: 600; color: var(--dark); line-height: 1; }
+    .bento-card .border-beam { opacity: 0; transition: opacity 0.45s ease; }
+    .bento-card:hover .border-beam { opacity: 1; }
+    @media (max-width: 860px) { .bento { grid-template-columns: repeat(2, minmax(0,1fr)); } .bento-2 { grid-column: span 2; } }
+    @media (max-width: 560px) { .bento { grid-template-columns: 1fr; } .bento-2 { grid-column: span 1; } }
+
+    /* Magic UI Marquee (ported) - the evidence backbone scrolls as one continuous track.
+       --duration / --gap as in the source; edges faded; pauses on hover. */
+    .marquee {
+      --duration: 38s; --gap: 1.15rem;
+      display: flex; overflow: hidden; gap: var(--gap);
+      -webkit-mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+              mask-image: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+    }
+    .marquee-track {
+      display: flex; flex-shrink: 0; align-items: center; gap: var(--gap);
+      min-width: 100%; justify-content: space-around;
+      animation: marquee var(--duration) linear infinite;
+    }
+    .marquee:hover .marquee-track { animation-play-state: paused; }
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(calc(-100% - var(--gap))); } }
+    .src-pill {
+      display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap;
+      padding: 0.5rem 0.9rem; border-radius: 9999px; border: 1px solid var(--line);
+      background: var(--paper); font-size: 12.5px; font-weight: 600; color: var(--ink);
+      box-shadow: 0 1px 0 rgba(28,26,22,0.02);
+    }
+    .src-pill iconify-icon { font-size: 1rem; color: var(--green); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .marquee-track { animation: none !important; }
+      .engine-pipe::after { animation: none !important; opacity: 0 !important; }
+      .engine-stage:hover .engine-card { transform: none !important; }
+      .t-line { opacity: 1 !important; transform: none !important; transition: none !important; }
+      .t-cursor::after { animation: none !important; }
+      .border-beam::before { animation: none !important; }
+      .ab-flow { animation: none !important; }
+      .ab-orbit { animation: none !important; }
+    }
+
+    /* ============================================================
+       WIDGET SURFACES - real Uiverse.io components, brand-skinned (MIT):
+         floating-label input + focus glow + reveal  (Inputs/mRcOol7 "white-wombat-51")
+         sliding segmented audience control          (Toggle-switches segmented technique)
+         conic ring + bouncing-dots handoff loader   (loaders/Li-Deheng "bright-firefox-37")
+         glass glow lift on the Telegram CTA         (Buttons/Dashrath-Sharma "chatty-tiger-70")
+       ============================================================ */
+
+    /* Floating-label address field - label rests as the placeholder, floats to green on focus/fill */
+    .fld { position: relative; }
+    .fld > input {
+      width: 100%; border: 1.5px solid var(--line); background: #fff; border-radius: 12px;
+      padding: 20px 14px 8px; font-size: 14px; font-weight: 500; color: var(--ink); outline: none;
+      transition: border-color 0.25s ease, box-shadow 0.3s ease;
+    }
+    .fld > input::placeholder { color: transparent; transition: color 0.2s ease; }
+    .fld > input:focus::placeholder { color: rgba(107,101,87,0.55); }
+    .fld > input:focus { border-color: var(--green); box-shadow: 0 0 0 4px rgba(21,128,127,0.14); }
+    .fld > input:not(:placeholder-shown) { border-color: var(--green); }
+    .fld > label {
+      position: absolute; left: 15px; top: 15px; font-size: 14px; font-weight: 500; color: var(--muted);
+      pointer-events: none; transform-origin: left center;
+      transition: transform 0.22s cubic-bezier(0.16,1,0.3,1), color 0.22s ease, top 0.22s ease;
+    }
+    .fld > input:focus + label,
+    .fld > input:not(:placeholder-shown) + label {
+      top: 8px; transform: scale(0.72); color: var(--green); font-weight: 700; letter-spacing: 0.04em;
+    }
+
+    /* Sliding segmented audience control - one teal thumb glides between the three roles */
+    .seg { position: relative; display: grid; grid-template-columns: repeat(3, 1fr);
+      background: #fff; border: 1.5px solid var(--line); border-radius: 12px; padding: 4px; }
+    .seg-thumb { position: absolute; top: 4px; left: 4px; height: calc(100% - 8px);
+      width: calc((100% - 8px) / 3); border-radius: 9px; background: var(--green);
+      box-shadow: 0 8px 18px -6px rgba(21,128,127,0.55);
+      transition: transform 0.34s cubic-bezier(0.16,1,0.3,1); }
+    .seg-btn { position: relative; z-index: 1; border: 0; background: transparent; cursor: pointer;
+      padding: 9px 0; font-size: 13px; font-weight: 600; color: var(--ink); border-radius: 9px;
+      transition: color 0.26s ease; }
+    .seg-btn[aria-pressed="true"] { color: var(--cream); }
+
+    /* Telegram CTA - glass glow lift on hover (rides over the travelling beam) */
+    .wv-go { position: relative; transition: box-shadow 0.3s ease, transform 0.15s ease; }
+    .wv-go:hover { box-shadow: 0 14px 32px -8px rgba(34,158,217,0.65); }
+
+    /* Handoff loader - conic ring + bouncing dots, shown while Telegram opens */
+    .wv-load {
+      position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 14px; background: rgba(246,243,236,0.93);
+      -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); border-radius: inherit;
+      opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+    .wv-load.show { opacity: 1; visibility: visible; }
+    .wv-ring { width: 48px; height: 48px; border-radius: 50%;
+      background: conic-gradient(from 0deg, var(--green), var(--terra) 55%, rgba(21,128,127,0) 78%);
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 0);
+              mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 0);
+      animation: wv-spin 0.85s linear infinite; }
+    @keyframes wv-spin { to { transform: rotate(360deg); } }
+    .wv-load-txt { font-size: 13px; font-weight: 600; color: var(--dark); }
+    .wv-dots { display: inline-flex; gap: 6px; }
+    .wv-dots i { width: 8px; height: 8px; border-radius: 9999px; background: var(--green);
+      animation: wv-bounce 1s ease-in-out infinite; }
+    .wv-dots i:nth-child(2) { animation-delay: 0.14s; }
+    .wv-dots i:nth-child(3) { animation-delay: 0.28s; }
+    @keyframes wv-bounce { 0%,100% { transform: translateY(0); opacity: 0.35; } 50% { transform: translateY(-7px); opacity: 1; } }
+
+    /* Glass tooltip - each sourced figure explains itself on hover (Tooltips/Invacui "smart-kangaroo-41") */
+    .uiv-tip { position: relative; cursor: help; border-bottom: 1px dotted rgba(14,39,71,0.35); outline: none; }
+    .uiv-tip > .tip-body {
+      position: absolute; bottom: calc(100% + 9px); left: 50%; transform: translate(-50%, 6px);
+      width: max-content; max-width: 210px; padding: 8px 11px; border-radius: 10px;
+      background: rgba(14,39,71,0.88); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.18); color: var(--cream); white-space: normal;
+      font-size: 11px; font-weight: 500; line-height: 1.42; letter-spacing: 0; text-align: left;
+      box-shadow: 0 12px 30px rgba(14,39,71,0.35); opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.16,1,0.3,1), visibility 0.22s ease; z-index: 30;
+    }
+    .uiv-tip > .tip-body::after {
+      content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+      border: 5px solid transparent; border-top-color: rgba(14,39,71,0.88);
+    }
+    .uiv-tip:hover > .tip-body, .uiv-tip:focus-visible > .tip-body { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .grad-accent { animation: none !important; background-position: 50% 0 !important; }
+      .pulse-dot::before, .pulse-dot::after { animation: none !important; opacity: 0 !important; }
+      .dark-glow, .cert-shine::before, .feat-live { animation: none !important; }
+      .cert-shine::before { opacity: 0 !important; }
+      .seg-thumb { transition: none !important; }
+      .fld > label, .fld > input { transition: none !important; }
+      .wv-ring, .wv-dots i { animation: none !important; }
+      .wv-load { transition: none !important; }
+      .uiv-tip > .tip-body { transition: none !important; }
+      .qa-a { transition: none; }
+      .qa-sign::before, .qa-sign::after { transition: none; }
+      html { scroll-behavior: auto; }
+      .anim, .reveal, .seal-anim { opacity: 1 !important; transform: none !important; animation: none !important; transition: none !important; }
+      .seal-anim { transform: rotate(-9deg) !important; }
+      .bar { transform: scaleY(1) !important; animation: none !important; }
+      .float-slow, .hermes-launcher { animation: none !important; }
+      .beam-cta { animation: none !important; }
+      .cta-shine::after { animation: none !important; opacity: 0 !important; }
+      .hermes-panel { transition: none; }
+      .hero-aurora::before, .hero-aurora::after { animation: none !important; }
+      .aurora-blob { animation: none !important; }
+      .step-node::after { animation: none !important; }
+      .step-row, .spot-card::after, .spot-card::before { transition: none !important; }
+      .certificate { transition: none; }
+      .certificate:hover { transform: none; }
+    }
+  </style>
+</head>
+<body class="font-sans antialiased">
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- Masthead -->
+  <header class="fixed top-0 z-50 w-full glass-panel">
+    <div class="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <nav class="flex items-center justify-between gap-6 py-3.5">
+        <a href="#" class="flex items-center gap-2.5" aria-label="Honestly - a defensible value">
+          <img src="img/logo-icon.png" alt="" width="32" height="32" class="h-8 w-8 shrink-0" />
+          <img src="img/logo-wordmark-clean.png" alt="Honestly" width="94" height="22" class="h-[22px] w-auto" />
+        </a>
+        <div class="hidden items-center gap-8 md:flex">
+          <a href="#problem" class="link-u text-sm font-medium text-ink/80 hover:text-dark">The problem</a>
+          <a href="#method" class="link-u text-sm font-medium text-ink/80 hover:text-dark">How it works</a>
+          <a href="#engine" class="link-u text-sm font-medium text-ink/80 hover:text-dark">The engine</a>
+          <a href="#compare" class="link-u text-sm font-medium text-ink/80 hover:text-dark">Compare</a>
+          <a href="#answers" class="link-u text-sm font-medium text-ink/80 hover:text-dark">Straight answers</a>
+          <a href="#start" class="link-u text-sm font-medium text-ink/80 hover:text-dark">Get yours</a>
+        </div>
+        <a href="https://t.me/usehonestly_bot"
+           class="btn-lift beam-cta inline-flex h-10 items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold text-cream">
+          <iconify-icon icon="ic:baseline-telegram" class="text-lg"></iconify-icon>
+          Open in Telegram
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="relative z-10 pt-[4.6rem]">
+
+    <!-- Hero: an appraisal spread -->
+    <section class="relative overflow-hidden">
+      <div class="hero-aurora" aria-hidden="true">
+        <span class="aurora-blob b1"></span>
+        <span class="aurora-blob b2"></span>
+        <span class="aurora-blob b3"></span>
+      </div>
+      <div class="relative z-10 mx-auto max-w-7xl px-6 sm:px-8 lg:px-12">
+      <div class="grid gap-12 pb-14 pt-12 lg:grid-cols-[1fr_0.86fr] lg:gap-16 lg:pb-24 lg:pt-16">
+
+        <!-- Editorial column -->
+        <div class="flex flex-col">
+          <div class="anim d1 mb-7 flex items-center gap-4">
+            <span class="label text-[10px] text-gold">Sample report</span>
+            <span class="h-px w-10 hair"></span>
+            <span class="inline-flex items-center gap-2.5 text-[11px] font-semibold text-green">
+              <span class="pulse-dot"><i></i></span>
+              Live on Telegram
+            </span>
+          </div>
+
+          <h1 class="anim d2 font-display text-[3.4rem] font-normal leading-[0.92] tracking-[-0.02em] text-dark sm:text-7xl lg:text-[5.4rem]">
+            Know what it<br class="hidden sm:block" /> is really worth.<br />
+            <span class="grad-accent italic font-medium">And why.</span>
+          </h1>
+
+          <p class="anim d3 mt-8 max-w-lg text-[1.05rem] font-medium leading-relaxed text-ink/85">
+            Most online estimates come from a model you cannot see into. Honestly does what people always tell you to
+            do yourself - check what similar homes near you actually sold for - then adjusts for condition and today's
+            market, and shows you every figure and where it came from. Your first report is free, whether you are
+            buying, selling, or an agent.
+          </p>
+
+          <div class="anim d4 mt-9 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <a id="start" href="https://t.me/usehonestly_bot"
+               class="btn-lift beam-cta cta-shine group inline-flex h-14 items-center justify-center gap-3 rounded-lg px-7 text-base font-semibold text-cream">
+              <iconify-icon icon="ic:baseline-telegram" class="text-2xl"></iconify-icon>
+              Get your free valuation
+              <iconify-icon icon="solar:arrow-right-linear" class="arrow text-xl"></iconify-icon>
+            </a>
+            <span class="inline-flex items-center gap-1.5 text-sm font-semibold text-green">
+              <iconify-icon icon="solar:gift-linear" class="text-base"></iconify-icon>
+              First one free. No account, no card.
+            </span>
+          </div>
+
+          <!-- trust cues at the decision point -->
+          <div class="anim d5 mt-8 flex flex-wrap items-center gap-x-6 gap-y-2.5 text-[13px] font-medium text-ink/70">
+            <span class="inline-flex items-center gap-1.5"><iconify-icon icon="solar:diploma-verified-bold" class="text-base text-green"></iconify-icon> HM Land Registry sold data</span>
+            <span class="inline-flex items-center gap-1.5"><iconify-icon icon="solar:eye-bold" class="text-base text-green"></iconify-icon> Every figure shown and sourced</span>
+            <span class="inline-flex items-center gap-1.5"><iconify-icon icon="solar:clock-circle-bold" class="text-base text-green"></iconify-icon> Ready in about 60 seconds</span>
+          </div>
+        </div>
+
+        <!-- The certificate (the product, shown) -->
+        <div class="anim d4 relative flex items-start justify-center lg:justify-end">
+          <div class="float-slow absolute -right-6 -top-8 h-40 w-40 rounded-full bg-gold/14 blur-3xl"></div>
+          <div class="float-slow absolute -bottom-8 -left-6 h-52 w-52 rounded-full bg-green/15 blur-3xl"></div>
+
+          <div id="cert" class="certificate relative w-full max-w-md rounded-md">
+            <div class="cert-spot" aria-hidden="true"></div>
+            <div class="cert-shine" aria-hidden="true"></div>
+            <div class="cert-edge m-2 rounded-sm px-6 py-6 sm:px-7">
+              <!-- letterhead -->
+              <div class="flex items-center justify-between">
+                <span class="flex items-center gap-2">
+                  <img src="img/logo-icon.png" alt="" width="22" height="22" class="h-[22px] w-[22px]" />
+                  <img src="img/logo-wordmark-clean.png" alt="Honestly" width="64" height="15" class="h-[15px] w-auto" />
+                </span>
+                <span class="label text-[9px] text-gold">Sample</span>
+              </div>
+              <div class="rule-double mt-2.5"></div>
+
+              <div class="mt-4 flex items-baseline justify-between gap-3">
+                <div>
+                  <div class="font-display text-[0.95rem] font-medium text-dark">24 Wolves Lane, London N22</div>
+                  <div class="mt-0.5 text-[11px] font-medium text-muted">Ref. HN-024 &middot; vendor view</div>
+                </div>
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-green text-cream">
+                  <iconify-icon icon="solar:home-smile-bold" class="text-lg"></iconify-icon>
+                </span>
+              </div>
+
+              <!-- the figure -->
+              <div class="mt-6">
+                <div class="label text-[9px] text-green">Central value</div>
+                <div id="central-value" class="font-display text-[3.5rem] font-medium leading-[0.95] tracking-tight text-dark" style="font-variant-numeric:tabular-nums" data-target="640000">&pound;640,000</div>
+                <div class="mt-1.5 text-[13px] font-medium text-muted" style="font-variant-numeric:tabular-nums">Assessed range £615,000 to £660,000</div>
+              </div>
+
+              <!-- method / glass box -->
+              <div class="mt-5 border-t border-line pt-4">
+                <div class="label mb-2 text-[9px] text-muted">Method - every figure shown</div>
+                <div class="text-[13px] font-medium leading-relaxed text-ink" style="font-variant-numeric:tabular-nums">
+                  <span class="uiv-tip" tabindex="0">sold median £625,000<span class="tip-body">Midpoint of the five HM Land Registry sold prices below - the evidence floor, not an estimate.</span></span>
+                  <span class="text-gold">&rarr;</span>
+                  <span class="uiv-tip" tabindex="0">assessed value £631,000<span class="tip-body">Anchored to a full valuation model at this home's size, beds and condition, then cross-checked against the &pound;625,000 sold median and the &pound;/sqm of the comparables.</span></span>
+                  <span class="text-gold">&rarr;</span> live market
+                  <span class="uiv-tip font-semibold text-green" tabindex="0">+1.4%<span class="tip-body">How the live market is moving the figure: nearby homes' days on market, how many are already under offer, how many are stuck. Capped at +6% up, -5% down. Sold prices lag, so this brings it to today.</span></span>
+                  <span class="text-gold">=</span> <span class="font-semibold text-dark">£640,000</span>
+                </div>
+              </div>
+
+              <!-- comparables ledger -->
+              <div class="mt-5 border-t border-line pt-4">
+                <div class="mb-3 flex items-center justify-between">
+                  <span class="label text-[9px] text-muted">Sold comparables</span>
+                  <span class="text-[10px] font-medium text-muted">5 records, each verifiable</span>
+                </div>
+                <div class="relative flex h-24 w-full items-end justify-between gap-2 border-b border-line">
+                  <div class="bar data-bar-muted w-1/6 rounded-t-sm" style="height:42%; animation: grow 0.9s cubic-bezier(0.16,1,0.3,1) 0.55s forwards"></div>
+                  <div class="bar data-bar-muted w-1/6 rounded-t-sm" style="height:55%; animation: grow 0.9s cubic-bezier(0.16,1,0.3,1) 0.65s forwards"></div>
+                  <div class="bar data-bar relative w-1/6 rounded-t-sm" style="height:72%; animation: grow 0.9s cubic-bezier(0.16,1,0.3,1) 0.75s forwards">
+                    <div class="absolute -top-2.5 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-terra"></div>
+                  </div>
+                  <div class="bar data-bar-muted w-1/6 rounded-t-sm" style="height:48%; animation: grow 0.9s cubic-bezier(0.16,1,0.3,1) 0.85s forwards"></div>
+                  <div class="bar data-bar relative w-1/6 rounded-t-sm" style="height:80%; animation: grow 0.9s cubic-bezier(0.16,1,0.3,1) 0.95s forwards">
+                    <div class="absolute -top-2.5 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-terra"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- seal -->
+            <div class="seal seal-anim absolute -bottom-5 -right-4 flex h-[5.4rem] w-[5.4rem] flex-col items-center justify-center rounded-full bg-paper text-center">
+              <iconify-icon icon="solar:check-circle-bold" class="text-base"></iconify-icon>
+              <span class="label mt-0.5 text-[7px] leading-tight">Evidence<br/>backed</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      </div>
+    </section>
+
+    <!-- Evidence backbone: Magic UI Marquee of the real public sources every figure traces to -->
+    <section aria-label="The public data sources behind every figure" class="bg-cream border-y border-line/70">
+      <div class="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 py-7">
+        <p class="mb-4 text-center label text-[10px] text-muted">Every figure traces back to public evidence</p>
+        <div class="marquee">
+          <div class="marquee-track" aria-hidden="false">
+            <span class="src-pill"><iconify-icon icon="solar:shield-check-bold"></iconify-icon> HM Land Registry</span>
+            <span class="src-pill"><iconify-icon icon="solar:document-text-bold"></iconify-icon> Price Paid Data</span>
+            <span class="src-pill"><iconify-icon icon="solar:bolt-bold"></iconify-icon> EPC Register</span>
+            <span class="src-pill"><iconify-icon icon="solar:graph-up-bold"></iconify-icon> Land Registry HPI</span>
+            <span class="src-pill"><iconify-icon icon="solar:map-point-bold"></iconify-icon> Ordnance Survey</span>
+            <span class="src-pill"><iconify-icon icon="solar:letter-bold"></iconify-icon> Royal Mail PAF</span>
+            <span class="src-pill"><iconify-icon icon="solar:buildings-2-bold"></iconify-icon> Companies House</span>
+          </div>
+          <div class="marquee-track" aria-hidden="true">
+            <span class="src-pill"><iconify-icon icon="solar:shield-check-bold"></iconify-icon> HM Land Registry</span>
+            <span class="src-pill"><iconify-icon icon="solar:document-text-bold"></iconify-icon> Price Paid Data</span>
+            <span class="src-pill"><iconify-icon icon="solar:bolt-bold"></iconify-icon> EPC Register</span>
+            <span class="src-pill"><iconify-icon icon="solar:graph-up-bold"></iconify-icon> Land Registry HPI</span>
+            <span class="src-pill"><iconify-icon icon="solar:map-point-bold"></iconify-icon> Ordnance Survey</span>
+            <span class="src-pill"><iconify-icon icon="solar:letter-bold"></iconify-icon> Royal Mail PAF</span>
+            <span class="src-pill"><iconify-icon icon="solar:buildings-2-bold"></iconify-icon> Companies House</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- The problem: dark editorial spread -->
+    <section id="problem" class="relative overflow-hidden bg-dark">
+      <div class="uiv-dots" aria-hidden="true"></div>
+      <div class="dark-glow" aria-hidden="true" style="top:-6rem; right:-4rem; height:24rem; width:24rem;"></div>
+      <div class="relative z-10 mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 py-16 lg:py-24">
+        <div class="rule-double-light"></div>
+        <div class="grid gap-10 pt-8 lg:grid-cols-[0.42fr_0.58fr] lg:gap-16">
+          <div class="reveal">
+            <div class="label mb-5 text-[10px] text-gold">&sect; 01 &nbsp;-&nbsp; The problem</div>
+            <h2 class="font-display text-4xl font-normal leading-[1.02] tracking-tight text-cream sm:text-5xl">
+              Everyone gives you a price.
+              <span class="italic font-medium text-terra">Nobody proves it.</span>
+            </h2>
+            <p class="mt-6 max-w-sm text-[15px] font-medium leading-relaxed text-cream/65">
+              A valuation you cannot see inside is just an opinion with a pound sign. Whichever side of the
+              deal you are on, that leaves you guessing.
+            </p>
+          </div>
+
+          <!-- three clauses, ruled like a document -->
+          <div class="grid gap-px overflow-hidden rounded-lg bg-white/10 sm:grid-cols-3">
+            <div class="spot-card reveal rd-1 bg-dark p-6" data-spot>
+              <div class="marg text-5xl text-gold/50">01</div>
+              <div class="label mt-4 text-[9px] text-gold">If you are selling</div>
+              <h3 class="mt-2 font-display text-lg font-medium leading-snug text-cream">The highest number wins the instruction</h3>
+              <p class="mt-2 text-[13px] font-medium leading-relaxed text-cream/55">The agent who quotes the biggest figure often wins your business. That lands the listing - it does not mean a buyer or a lender will ever agree.</p>
+            </div>
+            <div class="spot-card reveal rd-2 bg-dark p-6" data-spot>
+              <div class="marg text-5xl text-gold/50">02</div>
+              <div class="label mt-4 text-[9px] text-gold">If you are buying</div>
+              <h3 class="mt-2 font-display text-lg font-medium leading-snug text-cream">The asking price is just a hope</h3>
+              <p class="mt-2 text-[13px] font-medium leading-relaxed text-cream/55">It is what the seller hopes for, not what the home is worth. With nothing showing you what nearby homes actually sold for, it is easy to overpay - and spend the next year wondering by how much.</p>
+            </div>
+            <div class="spot-card reveal rd-3 bg-dark p-6" data-spot>
+              <div class="marg text-5xl text-gold/50">03</div>
+              <div class="label mt-4 text-[9px] text-gold">If you are an agent</div>
+              <h3 class="mt-2 font-display text-lg font-medium leading-snug text-cream">The evidence tools are locked away</h3>
+              <p class="mt-2 text-[13px] font-medium leading-relaxed text-cream/55">Hometrack, Sprift, Acaboom - the data that wins and defends instructions, gated behind a pro account and hundreds of pounds a month.</p>
+            </div>
+          </div>
+        </div>
+        <p class="reveal mx-auto mt-14 max-w-2xl text-center font-display text-2xl font-normal italic leading-snug text-cream sm:text-3xl">
+          Honestly is the valuation that shows you why.
+        </p>
+      </div>
+    </section>
+
+    <!-- How it works: numbered clauses -->
+    <section id="method" class="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 py-16 lg:py-24">
+      <div class="rule-double"></div>
+      <div class="grid gap-10 pt-8 lg:grid-cols-[0.42fr_0.58fr] lg:gap-16">
+        <div class="reveal lg:sticky lg:top-28 lg:self-start">
+          <div class="label mb-5 text-[10px] text-gold">&sect; 02 &nbsp;-&nbsp; How it works</div>
+          <h2 class="font-display text-4xl font-normal leading-[1.02] tracking-tight text-dark sm:text-5xl">
+            Three taps to an <span class="italic font-medium text-green">honest</span> number.
+          </h2>
+          <p class="mt-6 max-w-sm text-[15px] font-medium leading-relaxed text-ink/70">
+            No forms, no callbacks, no sales pitch. A quick chat and a
+            full appraisal in the time it takes to type an address.
+          </p>
+          <a href="https://t.me/usehonestly_bot" class="btn-lift group mt-8 inline-flex items-center gap-2 text-sm font-semibold text-green">
+            Start now <iconify-icon icon="solar:arrow-right-linear" class="arrow text-base"></iconify-icon>
+          </a>
+        </div>
+
+        <ol class="steps flex flex-col">
+          <li class="reveal rd-1 step-row grid grid-cols-[auto_1fr] items-start gap-6 border-b border-line py-7">
+            <span class="step-node">01</span>
+            <div class="pt-1.5">
+              <h3 class="font-display text-xl font-medium tracking-tight text-dark">Send an address</h3>
+              <p class="mt-1.5 text-sm font-medium leading-relaxed text-muted">Any UK address or postcode, straight into the chat. That is the whole input.</p>
+            </div>
+          </li>
+          <li class="reveal rd-2 step-row grid grid-cols-[auto_1fr] items-start gap-6 border-b border-line py-7">
+            <span class="step-node">02</span>
+            <div class="pt-1.5">
+              <h3 class="font-display text-xl font-medium tracking-tight text-dark">Say who you are</h3>
+              <p class="mt-1.5 text-sm font-medium leading-relaxed text-muted">Vendor, buyer, or agent. The number is identical for everyone - only the framing and the next steps change to fit you.</p>
+            </div>
+          </li>
+          <li class="reveal rd-3 step-row grid grid-cols-[auto_1fr] items-start gap-6 py-7">
+            <span class="step-node">03</span>
+            <div class="pt-1.5">
+              <h3 class="font-display text-xl font-medium tracking-tight text-dark">Get the appraisal</h3>
+              <p class="mt-1.5 text-sm font-medium leading-relaxed text-muted">The range, the central value, every figure and where it came from, sold prices nearby you can check yourself, and a PDF report with a spoken walkthrough.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- The engine: pipeline schematic that kills "just a TG bot" -->
+    <section id="engine" class="relative overflow-hidden bg-dark">
+      <div class="uiv-dots" aria-hidden="true"></div>
+      <div class="dark-glow g2" aria-hidden="true" style="bottom:-8rem; left:-5rem; height:26rem; width:26rem;"></div>
+      <div class="relative z-10 mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 py-16 lg:py-24">
+        <div class="rule-double-light"></div>
+        <div class="grid gap-10 pt-8 lg:grid-cols-[0.42fr_0.58fr] lg:gap-16">
+
+          <div class="reveal lg:sticky lg:top-28 lg:self-start">
+            <div class="label mb-5 text-[10px] text-gold">&sect; 03 &nbsp;-&nbsp; Under the bonnet</div>
+            <h2 class="font-display text-4xl font-normal leading-[1.02] tracking-tight text-cream sm:text-5xl">
+              It looks like a chat.<br />
+              <span class="italic font-medium text-terra">It runs like an engine.</span>
+            </h2>
+            <p class="mt-6 max-w-sm text-[15px] font-medium leading-relaxed text-cream/65">
+              One message goes in. Behind it, six steps run the same evidence a chartered surveyor builds
+              by hand - sourced, adjusted, brought to today - in about a minute, with every figure kept and shown.
+            </p>
+            <div class="mt-7 flex flex-wrap gap-x-6 gap-y-2.5 text-[13px] font-medium text-cream/70">
+              <span class="inline-flex items-center gap-1.5"><iconify-icon icon="solar:cpu-bolt-bold" class="text-base text-terra"></iconify-icon> Same engine for every side of the deal</span>
+              <span class="inline-flex items-center gap-1.5"><iconify-icon icon="solar:link-bold" class="text-base text-terra"></iconify-icon> Every figure traceable to its source</span>
+            </div>
+            <p class="mt-6 max-w-sm text-[13px] font-medium leading-relaxed text-cream/45">
+              Worked on the sample report - 24 Wolves Lane, N22.
+            </p>
+          </div>
+
+          <!-- right column: where it pulls from, the machine running live, then the workflow it ran -->
+          <div class="reveal rd-1">
+
+            <!-- Magic UI Animated Beam + Orbiting Circles (ported) - public registers converge on the engine -->
+            <div class="abeam mb-9" id="engineBeam"
+                 role="img"
+                 aria-label="Five public registers - HM Land Registry, Price Paid Data, the EPC Register, Land Registry HPI and Companies House - flow into the Honestly engine, which produces a central value, an assessed range and a sourced report.">
+              <svg class="abeam-svg" aria-hidden="true">
+                <defs>
+                  <linearGradient id="abgrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#229ED9"></stop>
+                    <stop offset="50%" stop-color="#15807f"></stop>
+                    <stop offset="100%" stop-color="#2aa39a"></stop>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="abeam-grid">
+                <div class="abeam-sources">
+                  <div class="ab-node ab-src"><iconify-icon icon="solar:shield-check-bold"></iconify-icon><span class="ab-node-txt">HM Land Registry</span></div>
+                  <div class="ab-node ab-src"><iconify-icon icon="solar:tag-price-bold"></iconify-icon><span class="ab-node-txt">Price Paid Data</span></div>
+                  <div class="ab-node ab-src"><iconify-icon icon="solar:bolt-circle-bold"></iconify-icon><span class="ab-node-txt">EPC Register</span></div>
+                  <div class="ab-node ab-src"><iconify-icon icon="solar:graph-up-bold"></iconify-icon><span class="ab-node-txt">Land Registry HPI</span></div>
+                  <div class="ab-node ab-src"><iconify-icon icon="solar:buildings-2-bold"></iconify-icon><span class="ab-node-txt">Companies House</span></div>
+                </div>
+                <div class="abeam-core">
+                  <span class="ab-orbit-ring" style="width:150px; height:150px;"></span>
+                  <span class="ab-orbit-ring" style="width:214px; height:214px;"></span>
+                  <div class="ab-core-node" id="abCore">
+                    <iconify-icon icon="solar:cpu-bolt-bold"></iconify-icon>
+                    <span class="ab-core-label">Honestly<br>engine</span>
+                  </div>
+                  <span class="ab-orbit" style="--angle:0deg; --r:75px; --dur:19s;"><iconify-icon icon="solar:database-bold"></iconify-icon></span>
+                  <span class="ab-orbit" style="--angle:120deg; --r:75px; --dur:19s;"><iconify-icon icon="solar:map-point-bold"></iconify-icon></span>
+                  <span class="ab-orbit" style="--angle:240deg; --r:75px; --dur:19s;"><iconify-icon icon="solar:document-text-bold"></iconify-icon></span>
+                  <span class="ab-orbit rev" style="--angle:60deg; --r:107px; --dur:27s;"><iconify-icon icon="solar:chart-2-bold"></iconify-icon></span>
+                  <span class="ab-orbit rev" style="--angle:240deg; --r:107px; --dur:27s;"><iconify-icon icon="solar:ruler-bold"></iconify-icon></span>
+                </div>
+                <div class="abeam-outs">
+                  <div class="ab-node ab-out"><iconify-icon icon="solar:bill-check-bold"></iconify-icon><span class="ab-node-txt">Central value</span></div>
+                  <div class="ab-node ab-out"><iconify-icon icon="solar:ruler-cross-pen-bold"></iconify-icon><span class="ab-node-txt">Assessed range</span></div>
+                  <div class="ab-node ab-out"><iconify-icon icon="solar:document-add-bold"></iconify-icon><span class="ab-node-txt">Sourced report</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Magic UI Terminal (ported) - the engine running the appraisal -->
+            <div class="beam-frame mb-9">
+              <div class="mui-terminal" id="engineTerm">
+                <div class="mui-bar">
+                  <i class="r"></i><i class="y"></i><i class="g"></i>
+                  <span class="ttl">honestly-engine &middot; appraisal run</span>
+                </div>
+                <pre><code>
+<span class="t-line row in" data-t="cmd"><span class="t-arrow">$</span><span class="t-key"><span class="t-type"></span></span><span class="t-cursor"></span></span>
+<span class="t-line row" data-t="1"><span class="t-ok">&#10004;</span><span class="t-key">property resolved</span><span class="t-val">3-bed terrace &middot; ~92 m&sup2;</span></span>
+<span class="t-line row" data-t="2"><span class="t-ok">&#10004;</span><span class="t-key">comparables pulled</span><span class="t-val">5 sold &middot; HM Land Registry</span></span>
+<span class="t-line row" data-t="3"><span class="t-ok">&#10004;</span><span class="t-key">evidence floor</span><span class="t-val fig">median &pound;625,000</span></span>
+<span class="t-line row" data-t="4"><span class="t-ok">&#10004;</span><span class="t-key">assessed value</span><span class="t-val">AVM + condition &middot; <span class="fig">&pound;631,000</span></span></span>
+<span class="t-line row" data-t="5"><span class="t-ok">&#10004;</span><span class="t-key">live market</span><span class="t-val">+1.4% &middot; DOM, under-offer, stuck</span></span>
+<span class="t-line t-rule" data-t="6">&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;</span>
+<span class="t-line row" data-t="7"><span class="t-arrow">&#9658;</span><span class="t-key" style="font-weight:700;color:#eaf3ff">central value</span><span class="t-val fig" style="font-size:14px">&pound;640,000</span></span>
+<span class="t-line row" data-t="8"><span style="width:1ch"></span><span class="t-key">assessed range</span><span class="t-val">&pound;615,000 to &pound;660,000</span></span>
+<span class="t-line" data-t="9"><span class="t-ok">&#10004;</span> <span class="t-key" style="color:#9fb4c8">report ready in 58s &middot; every figure sourced</span></span>
+</code></pre>
+                <span class="border-beam"></span>
+                <span class="border-beam b2"></span>
+              </div>
+            </div>
+
+            <!-- the workflow the engine ran -->
+            <div class="engine-pipe">
+            <div class="engine-stage">
+              <div class="engine-node"><iconify-icon icon="solar:map-point-bold"></iconify-icon></div>
+              <div class="engine-card">
+                <h3 class="font-display text-base font-semibold text-cream">Resolve the property</h3>
+                <p class="mt-1 text-[13px] font-medium leading-relaxed text-cream/60">Pin the exact address and pull its attributes - type, size, age - so the comparison is like for like.</p>
+                <div class="mt-2.5 flex flex-wrap items-center gap-2.5">
+                  <span class="src-chip"><iconify-icon icon="solar:document-text-bold"></iconify-icon> EPC + listing history</span>
+                  <span class="text-[12px] font-medium text-cream/70 engine-readout">3-bed terrace, <span class="engine-fig">~92 sqm</span></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="engine-stage">
+              <div class="engine-node"><iconify-icon icon="solar:database-bold"></iconify-icon></div>
+              <div class="engine-card">
+                <h3 class="font-display text-base font-semibold text-cream">Gather sold evidence</h3>
+                <p class="mt-1 text-[13px] font-medium leading-relaxed text-cream/60">Pull genuine sold prices for nearby homes that actually compare - not asking prices, not guesses.</p>
+                <div class="mt-2.5 flex flex-wrap items-center gap-2.5">
+                  <span class="src-chip"><iconify-icon icon="solar:shield-check-bold"></iconify-icon> HM Land Registry sold data</span>
+                  <span class="text-[12px] font-medium text-cream/70 engine-readout"><span class="engine-fig">5</span> comparables &middot; within ~0.3 mi &middot; last 18 months</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="engine-stage">
+              <div class="engine-node"><iconify-icon icon="solar:chart-2-bold"></iconify-icon></div>
+              <div class="engine-card">
+                <h3 class="font-display text-base font-semibold text-cream">Set the evidence floor</h3>
+                <p class="mt-1 text-[13px] font-medium leading-relaxed text-cream/60">Take a robust median of those sales - the number reality already agreed on, before anyone&rsquo;s opinion.</p>
+                <div class="mt-2.5 flex flex-wrap items-center gap-2.5">
+                  <span class="src-chip"><iconify-icon icon="solar:ruler-bold"></iconify-icon> Robust median</span>
+                  <span class="text-[12px] font-medium text-cream/70 engine-readout">median <span class="engine-fig">&pound;625,000</span></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="engine-stage">
+              <div class="engine-node"><iconify-icon icon="solar:tuning-2-bold"></iconify-icon></div>
+              <div class="engine-card">
+                <h3 class="font-display text-base font-semibold text-cream">Value the home itself</h3>
+                <p class="mt-1 text-[13px] font-medium leading-relaxed text-cream/60">Run a full valuation model at this home's size, beds and condition, then cross-check it against the &pound;625,000 sold median and the &pound;/sqm of the comparables.</p>
+                <div class="mt-2.5 flex flex-wrap items-center gap-2.5">
+                  <span class="src-chip"><iconify-icon icon="solar:layers-bold"></iconify-icon> AVM + condition, cross-checked</span>
+                  <span class="text-[12px] font-medium text-cream/70 engine-readout">assessed <span class="engine-fig">&pound;631,000</span></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="engine-stage">
+              <div class="engine-node"><iconify-icon icon="solar:graph-up-bold"></iconify-icon></div>
+              <div class="engine-card">
+                <h3 class="font-display text-base font-semibold text-cream">Bring it to today</h3>
+                <p class="mt-1 text-[13px] font-medium leading-relaxed text-cream/60">Read the live market - how long nearby homes sit, how many are already under offer, how many are stuck - and steer the figure to match. Capped at +6% up, -5% down. Sold prices lag; this catches up.</p>
+                <div class="mt-2.5 flex flex-wrap items-center gap-2.5">
+                  <span class="src-chip"><iconify-icon icon="solar:graph-new-up-bold"></iconify-icon> Live market signal</span>
+                  <span class="text-[12px] font-medium text-cream/70 engine-readout"><span class="engine-fig">+1.4%</span> steer</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="engine-stage engine-out">
+              <div class="engine-node"><iconify-icon icon="solar:diploma-verified-bold"></iconify-icon></div>
+              <div class="engine-card">
+                <div class="label text-[9px] text-gold">Evidence-backed value</div>
+                <div class="mt-1 font-display text-3xl font-medium text-cream" style="font-variant-numeric:tabular-nums">&pound;640,000 <span class="text-base font-normal text-cream/55">&middot; range &pound;615k to &pound;660k</span></div>
+                <p class="mt-1.5 text-[13px] font-medium leading-relaxed text-cream/60">The central value, the full evidence trail, sold prices you can check yourself, and a PDF with a spoken walkthrough.</p>
+                <div class="mt-2.5 flex flex-wrap items-center gap-2.5">
+                  <span class="src-chip" style="color:#f0d49a; background:rgba(216,154,50,0.14); border-color:rgba(216,154,50,0.32);"><iconify-icon icon="solar:clock-circle-bold"></iconify-icon> Yours in about 60 seconds</span>
+                </div>
+              </div>
+            </div>
+            </div><!-- /engine-pipe -->
+          </div><!-- /right column -->
+        </div>
+      </div>
+    </section>
+
+    <!-- What you get: Magic UI Bento Grid + Magic Card spotlight + Border Beam -->
+    <section id="capabilities" class="bg-cream">
+      <div class="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 py-16 lg:py-24">
+        <div class="rule-double"></div>
+        <div class="reveal pt-8 max-w-2xl">
+          <div class="label mb-5 text-[10px] text-gold">&sect; 04 &nbsp;-&nbsp; What you get</div>
+          <h2 class="font-display text-4xl font-normal leading-[1.04] tracking-tight text-ink sm:text-5xl">
+            A number you can stand behind,<br />
+            <span class="italic font-medium text-green">and the evidence behind it.</span>
+          </h2>
+          <p class="mt-6 text-[15px] font-medium leading-relaxed text-muted">
+            Not a guess dressed up as a figure. Every Honestly report is built from public sold
+            records, adjusted for the home, and brought to today - and you can check every step.
+          </p>
+        </div>
+
+        <div class="bento reveal rd-1 mt-12">
+          <div class="bento-card bento-2 spot-card" data-spot>
+            <iconify-icon class="bento-deco" icon="solar:shield-check-bold"></iconify-icon>
+            <span class="bento-icon"><iconify-icon icon="solar:shield-check-bold"></iconify-icon></span>
+            <h3 class="bento-h">Every figure traceable to HM Land Registry</h3>
+            <p class="bento-p">No opinion in the loop. Follow any number in your report back to the sold record it came from - the same evidence a surveyor would cite.</p>
+            <span class="border-beam"></span><span class="border-beam b2"></span>
+          </div>
+
+          <div class="bento-card spot-card" data-spot>
+            <iconify-icon class="bento-deco" icon="solar:tag-price-bold"></iconify-icon>
+            <span class="bento-icon"><iconify-icon icon="solar:tag-price-bold"></iconify-icon></span>
+            <h3 class="bento-h">Sold prices, not asking prices</h3>
+            <p class="bento-p">Asking prices are hopes. We value on what genuinely changed hands nearby.</p>
+            <span class="border-beam"></span><span class="border-beam b2"></span>
+          </div>
+
+          <div class="bento-card spot-card" data-spot>
+            <iconify-icon class="bento-deco" icon="solar:tuning-2-bold"></iconify-icon>
+            <span class="bento-icon"><iconify-icon icon="solar:tuning-2-bold"></iconify-icon></span>
+            <h3 class="bento-h">Adjusted for this home</h3>
+            <p class="bento-p">Condition, size and finish, then today's local movement. Like for like, brought to now.</p>
+            <span class="border-beam"></span><span class="border-beam b2"></span>
+          </div>
+
+          <div class="bento-card bento-2 bento-out spot-card" data-spot>
+            <iconify-icon class="bento-deco" icon="solar:diploma-verified-bold"></iconify-icon>
+            <span class="bento-icon"><iconify-icon icon="solar:diploma-verified-bold"></iconify-icon></span>
+            <div class="bento-fig">&pound;640,000 <span class="text-base font-normal text-muted">&middot; &pound;615k to &pound;660k</span></div>
+            <h3 class="bento-h">One number, with an honest range</h3>
+            <p class="bento-p">A central value you can act on, and the range it honestly sits in - never a single false-precise figure.</p>
+            <span class="border-beam"></span><span class="border-beam b2"></span>
+          </div>
+
+          <div class="bento-card bento-2 spot-card" data-spot>
+            <iconify-icon class="bento-deco" icon="solar:clock-circle-bold"></iconify-icon>
+            <span class="bento-icon"><iconify-icon icon="solar:clock-circle-bold"></iconify-icon></span>
+            <h3 class="bento-h">Ready in under a minute</h3>
+            <p class="bento-p">Send an address. Get the full evidence trail and a PDF with a spoken walkthrough in about 60 seconds - the sample report ran in 58.</p>
+            <span class="border-beam"></span><span class="border-beam b2"></span>
+          </div>
+
+          <a href="https://t.me/usehonestly_bot" class="bento-card bento-out spot-card group" data-spot>
+            <iconify-icon class="bento-deco" icon="solar:plain-bold"></iconify-icon>
+            <span class="bento-icon"><iconify-icon icon="solar:plain-bold"></iconify-icon></span>
+            <h3 class="bento-h">Free first valuation</h3>
+            <p class="bento-p">Your first report costs nothing. Run it on Telegram now.</p>
+            <span class="mt-1 inline-flex items-center gap-1.5 text-[13px] font-semibold text-green">Start on Telegram <iconify-icon icon="solar:arrow-right-linear" class="transition-transform group-hover:translate-x-1"></iconify-icon></span>
+            <span class="border-beam"></span><span class="border-beam b2"></span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Honest comparison: the truth table -->
+    <section id="compare" class="bg-pale">
+      <div class="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 py-16 lg:py-24">
+        <div class="rule-double"></div>
+        <div class="reveal pt-8 max-w-2xl">
+          <div class="label mb-5 text-[10px] text-gold">&sect; 05 &nbsp;-&nbsp; The honest comparison</div>
+          <h2 class="font-display text-4xl font-normal leading-[1.02] tracking-tight text-dark sm:text-5xl">
+            See the evidence, <span class="italic font-medium text-green">not just the number.</span>
+          </h2>
+          <p class="mt-6 text-[15px] font-medium leading-relaxed text-ink/70">
+            Every way to value a home has a catch - a model you cannot question, a salesperson who wants
+            the instruction, or a price tag built for professionals. Here is where each one stands, side by side.
+          </p>
+        </div>
+
+        <div class="reveal rd-1 cmp-wrap mt-12">
+          <table class="cmp">
+            <thead>
+              <tr>
+                <th scope="col" class="label text-[10px] text-muted">&nbsp;</th>
+                <th scope="col" class="feat feat-live">
+                  <span class="cmp-badge">For you</span>
+                  <span class="block font-display text-xl font-semibold tracking-tight text-dark">Honestly</span>
+                  <span class="block mt-0.5 text-[11px] font-medium text-muted">on Telegram</span>
+                </th>
+                <th scope="col">
+                  <span class="block font-display text-lg font-medium tracking-tight text-dark">Online estimate</span>
+                  <span class="block mt-0.5 text-[11px] font-medium text-muted">Zoopla, Rightmove</span>
+                </th>
+                <th scope="col">
+                  <span class="block font-display text-lg font-medium tracking-tight text-dark">Estate agent</span>
+                  <span class="block mt-0.5 text-[11px] font-medium text-muted">free valuation</span>
+                </th>
+                <th scope="col">
+                  <span class="block font-display text-lg font-medium tracking-tight text-dark">Pro tools</span>
+                  <span class="block mt-0.5 text-[11px] font-medium text-muted">Hometrack, Sprift</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="text-[14px] font-medium text-ink/80">
+              <tr>
+                <td>Built on real HM Land Registry sold prices</td>
+                <td class="feat"><iconify-icon icon="solar:check-circle-bold" class="cmp-yes text-2xl" role="img" aria-label="Yes"></iconify-icon></td>
+                <td><iconify-icon icon="solar:check-circle-bold" class="cmp-yes text-2xl" role="img" aria-label="Yes"></iconify-icon></td>
+                <td><span class="inline-flex flex-col items-center gap-0.5"><iconify-icon icon="solar:minus-circle-linear" class="cmp-part text-2xl" role="img" aria-label="Partly"></iconify-icon><span class="text-[10px] text-muted">Partly</span></span></td>
+                <td><iconify-icon icon="solar:check-circle-bold" class="cmp-yes text-2xl" role="img" aria-label="Yes"></iconify-icon></td>
+              </tr>
+              <tr>
+                <td>You see the evidence behind the number</td>
+                <td class="feat"><iconify-icon icon="solar:check-circle-bold" class="cmp-yes text-2xl" role="img" aria-label="Yes"></iconify-icon></td>
+                <td><iconify-icon icon="solar:close-circle-linear" class="cmp-no text-2xl" role="img" aria-label="No"></iconify-icon></td>
+                <td><iconify-icon icon="solar:close-circle-linear" class="cmp-no text-2xl" role="img" aria-label="No"></iconify-icon></td>
+                <td><iconify-icon icon="solar:check-circle-bold" class="cmp-yes text-2xl" role="img" aria-label="Yes"></iconify-icon></td>
+              </tr>
+              <tr>
+                <td>No incentive to inflate the figure</td>
+                <td class="feat"><iconify-icon icon="solar:check-circle-bold" class="cmp-yes text-2xl" role="img" aria-label="Yes"></iconify-icon></td>
+                <td><iconify-icon icon="solar:check-circle-bold" class="cmp-yes text-2xl" role="img" aria-label="Yes"></iconify-icon></td>
+                <td><iconify-icon icon="solar:close-circle-linear" class="cmp-no text-2xl" role="img" aria-label="No"></iconify-icon></td>
+                <td><iconify-icon icon="solar:check-circle-bold" class="cmp-yes text-2xl" role="img" aria-label="Yes"></iconify-icon></td>
+              </tr>
+              <tr>
+                <td>First report free</td>
+                <td class="feat"><iconify-icon icon="solar:check-circle-bold" class="cmp-yes text-2xl" role="img" aria-label="Yes"></iconify-icon></td>
+                <td><iconify-icon icon="solar:check-circle-bold" class="cmp-yes text-2xl" role="img" aria-label="Yes"></iconify-icon></td>
+                <td><iconify-icon icon="solar:check-circle-bold" class="cmp-yes text-2xl" role="img" aria-label="Yes"></iconify-icon></td>
+                <td><iconify-icon icon="solar:close-circle-linear" class="cmp-no text-2xl" role="img" aria-label="No"></iconify-icon></td>
+              </tr>
+              <tr>
+                <td>Ready in about 60 seconds</td>
+                <td class="feat"><iconify-icon icon="solar:check-circle-bold" class="cmp-yes text-2xl" role="img" aria-label="Yes"></iconify-icon></td>
+                <td><iconify-icon icon="solar:check-circle-bold" class="cmp-yes text-2xl" role="img" aria-label="Yes"></iconify-icon></td>
+                <td><iconify-icon icon="solar:close-circle-linear" class="cmp-no text-2xl" role="img" aria-label="No"></iconify-icon></td>
+                <td><iconify-icon icon="solar:check-circle-bold" class="cmp-yes text-2xl" role="img" aria-label="Yes"></iconify-icon></td>
+              </tr>
+              <tr>
+                <td>No account, no card, no sales call</td>
+                <td class="feat"><iconify-icon icon="solar:check-circle-bold" class="cmp-yes text-2xl" role="img" aria-label="Yes"></iconify-icon></td>
+                <td><span class="inline-flex flex-col items-center gap-0.5"><iconify-icon icon="solar:minus-circle-linear" class="cmp-part text-2xl" role="img" aria-label="Partly"></iconify-icon><span class="text-[10px] text-muted">Sign-up</span></span></td>
+                <td><iconify-icon icon="solar:close-circle-linear" class="cmp-no text-2xl" role="img" aria-label="No"></iconify-icon></td>
+                <td><iconify-icon icon="solar:close-circle-linear" class="cmp-no text-2xl" role="img" aria-label="No"></iconify-icon></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="reveal rd-2 mt-6 text-[12px] font-medium leading-relaxed text-muted">
+          Comparison reflects the standard, publicly available version of each option. Sold-price data throughout is HM Land Registry.
+        </p>
+      </div>
+    </section>
+
+    <!-- Straight answers: objection handling -->
+    <section id="answers" class="relative overflow-hidden bg-dark">
+      <div class="uiv-dots" aria-hidden="true"></div>
+      <div class="dark-glow g2" aria-hidden="true" style="bottom:-8rem; left:-5rem; height:28rem; width:28rem;"></div>
+      <div class="relative z-10 mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 py-16 lg:py-24">
+        <div class="rule-double-light"></div>
+        <div class="grid gap-10 pt-8 lg:grid-cols-[0.42fr_0.58fr] lg:gap-16">
+          <div class="reveal lg:sticky lg:top-28 lg:self-start">
+            <div class="label mb-5 text-[10px] text-gold">&sect; 06 &nbsp;-&nbsp; Straight answers</div>
+            <h2 class="font-display text-4xl font-normal leading-[1.02] tracking-tight text-cream sm:text-5xl">
+              Before you <span class="italic font-medium text-terra">ask.</span>
+            </h2>
+            <p class="mt-6 max-w-sm text-[15px] font-medium leading-relaxed text-cream/65">
+              The honest questions people have before they trust a valuation. No spin - if there
+              is a catch, you would have found it here.
+            </p>
+            <a href="https://t.me/usehonestly_bot" class="btn-lift group mt-8 inline-flex items-center gap-2 text-sm font-semibold text-cream">
+              Still not sure? Try one free <iconify-icon icon="solar:arrow-right-linear" class="arrow text-base"></iconify-icon>
+            </a>
+          </div>
+
+          <div id="qa-list" class="border-t border-dashed border-cream/20">
+            <!-- 1 -->
+            <div class="qa reveal rd-1 text-cream">
+              <button class="qa-q" aria-expanded="false" aria-controls="qa1">
+                <span>
+                  <span class="qa-tag label block text-[9px] text-cream/45 mb-1.5">Buyers &amp; sellers</span>
+                  <span class="font-display text-lg font-medium tracking-tight text-cream sm:text-xl">Isn't this just another Zoopla estimate?</span>
+                </span>
+                <span class="qa-sign text-cream/50" aria-hidden="true"></span>
+              </button>
+              <div id="qa1" class="qa-a"><div class="qa-a-inner"><p class="max-w-xl pb-6 text-[14.5px] font-medium leading-relaxed text-cream/70">
+                No. Zoopla and Rightmove give you one number from a model you cannot see into, and ask any room full of
+                buyers and sellers how much they trust it. Honestly shows you exactly how it reached the figure: the real
+                homes that sold nearby, each linked to its official HM Land Registry record so you can check it yourself,
+                the adjustment for the property's condition, and how today's market moved it. Every figure is yours to
+                challenge. That is the whole point.
+              </p></div></div>
+            </div>
+            <!-- 2 -->
+            <div class="qa reveal rd-1 text-cream">
+              <button class="qa-q" aria-expanded="false" aria-controls="qa2">
+                <span>
+                  <span class="qa-tag label block text-[9px] text-cream/45 mb-1.5">If you are selling</span>
+                  <span class="font-display text-lg font-medium tracking-tight text-cream sm:text-xl">Why trust this over an estate agent's valuation?</span>
+                </span>
+                <span class="qa-sign text-cream/50" aria-hidden="true"></span>
+              </button>
+              <div id="qa2" class="qa-a"><div class="qa-a-inner"><p class="max-w-xl pb-6 text-[14.5px] font-medium leading-relaxed text-cream/70">
+                An agent's free valuation is a pitch to win your instruction - often the highest number in the room, because the
+                highest number lands the listing. That is sales talk, not a value you can defend to a buyer or a lender. Honestly
+                has no instruction to win and nothing to sell you on the back of it. The number is whatever the sold evidence
+                supports, and you see the evidence, not just the figure.
+              </p></div></div>
+            </div>
+            <!-- 3 -->
+            <div class="qa reveal rd-2 text-cream">
+              <button class="qa-q" aria-expanded="false" aria-controls="qa3">
+                <span>
+                  <span class="qa-tag label block text-[9px] text-cream/45 mb-1.5">For agents</span>
+                  <span class="font-display text-lg font-medium tracking-tight text-cream sm:text-xl">I'm an estate agent. Can I actually use this?</span>
+                </span>
+                <span class="qa-sign text-cream/50" aria-hidden="true"></span>
+              </button>
+              <div id="qa3" class="qa-a"><div class="qa-a-inner"><p class="max-w-xl pb-6 text-[14.5px] font-medium leading-relaxed text-cream/70">
+                Yes - it is built for you too. The evidence tools that win and defend instructions (Hometrack, Sprift, Acaboom)
+                sit behind pro accounts at hundreds of pounds a month. Honestly hands you the same sold-evidence appraisal -
+                branded, defensible, ready to put in front of a vendor on the doorstep. Run your first one free and see if it
+                earns its place in your pitch.
+              </p></div></div>
+            </div>
+            <!-- 4 -->
+            <div class="qa reveal rd-2 text-cream">
+              <button class="qa-q" aria-expanded="false" aria-controls="qa4">
+                <span>
+                  <span class="qa-tag label block text-[9px] text-cream/45 mb-1.5">The format</span>
+                  <span class="font-display text-lg font-medium tracking-tight text-cream sm:text-xl">Why Telegram? Why not a website or an app?</span>
+                </span>
+                <span class="qa-sign text-cream/50" aria-hidden="true"></span>
+              </button>
+              <div id="qa4" class="qa-a"><div class="qa-a-inner"><p class="max-w-xl pb-6 text-[14.5px] font-medium leading-relaxed text-cream/70">
+                Because a valuation is a conversation, not a form. No account, no password, nothing to download - you almost
+                certainly already have Telegram, or it takes thirty seconds. The whole appraisal - the number, the proof
+                behind it, the PDF, the spoken walkthrough, the map - lands in a chat you keep forever and can reopen any time. It also means
+                payment runs through Telegram itself, so your card details never touch us.
+              </p></div></div>
+            </div>
+            <!-- 5 -->
+            <div class="qa reveal rd-3 text-cream">
+              <button class="qa-q" aria-expanded="false" aria-controls="qa5">
+                <span>
+                  <span class="qa-tag label block text-[9px] text-cream/45 mb-1.5">The cost</span>
+                  <span class="font-display text-lg font-medium tracking-tight text-cream sm:text-xl">Do I have to pay? Do you want my card?</span>
+                </span>
+                <span class="qa-sign text-cream/50" aria-hidden="true"></span>
+              </button>
+              <div id="qa5" class="qa-a"><div class="qa-a-inner"><p class="max-w-xl pb-6 text-[14.5px] font-medium leading-relaxed text-cream/70">
+                Your first valuation is free - the entire report, not a teaser. No card, no account, nothing to cancel. If you
+                want more later you pay in Telegram Stars and Telegram handles it; we never see a card number.
+              </p></div></div>
+            </div>
+            <!-- 6 -->
+            <div class="qa reveal rd-3 text-cream">
+              <button class="qa-q" aria-expanded="false" aria-controls="qa6">
+                <span>
+                  <span class="qa-tag label block text-[9px] text-cream/45 mb-1.5">The method</span>
+                  <span class="font-display text-lg font-medium tracking-tight text-cream sm:text-xl">How accurate is it? Who built the number?</span>
+                </span>
+                <span class="qa-sign text-cream/50" aria-hidden="true"></span>
+              </button>
+              <div id="qa6" class="qa-a"><div class="qa-a-inner"><p class="max-w-xl pb-6 text-[14.5px] font-medium leading-relaxed text-cream/70">
+                It is built the way a careful surveyor reasons: HM Land Registry sold prices as the floor, condition-adjusted
+                against a market anchor, then steered by what is live right now. No one can name one exact price for a home -
+                anyone who pretends otherwise is guessing. So we give you a defensible central figure and an honest range, and we
+                show every step that got us there.
+              </p></div></div>
+            </div>
+            <!-- 7 -->
+            <div class="qa reveal rd-3 text-cream">
+              <button class="qa-q" aria-expanded="false" aria-controls="qa7">
+                <span>
+                  <span class="qa-tag label block text-[9px] text-cream/45 mb-1.5">Your data &amp; the catch</span>
+                  <span class="font-display text-lg font-medium tracking-tight text-cream sm:text-xl">Is my address safe? What's the catch?</span>
+                </span>
+                <span class="qa-sign text-cream/50" aria-hidden="true"></span>
+              </button>
+              <div id="qa7" class="qa-a"><div class="qa-a-inner"><p class="max-w-xl pb-6 text-[14.5px] font-medium leading-relaxed text-cream/70">
+                We use the address only to pull public sold-price data and build your report. We do not sell your details, we do
+                not pass them to agents, and there is no "a local expert will call you" waiting on the other side. No spam, no
+                funnel. The catch is that there isn't one - the free valuation is the product working, not bait. If it is useful
+                you might pay for the deeper reports or the agent tools. If not, you keep the free appraisal and have lost nothing.
+              </p></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA: colophon -->
+    <section class="mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 pt-20 pb-20 lg:pt-28 lg:pb-28">
+      <div class="reveal relative overflow-hidden rounded-2xl bg-dark px-6 py-16 text-center shadow-doc lg:px-16 lg:py-20">
+        <div class="pointer-events-none absolute -right-12 -top-12 h-56 w-56 rounded-full bg-green/30 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-16 -left-10 h-64 w-64 rounded-full bg-terra/20 blur-3xl"></div>
+        <div class="relative mx-auto max-w-2xl">
+          <div class="label mb-6 text-[10px] text-cream/50">One address in &middot; one defensible value out</div>
+          <h2 class="font-display text-4xl font-normal leading-[1.04] tracking-tight text-cream sm:text-6xl">
+            Stop guessing. <span class="italic font-medium text-terra">See the evidence.</span>
+          </h2>
+          <p class="mx-auto mt-6 max-w-md text-[15px] font-medium leading-relaxed text-cream/70">
+            Real sold prices, read against today's market. No black box, no flattery. Your first valuation is free.
+          </p>
+          <a href="https://t.me/usehonestly_bot"
+             class="btn-lift beam-cta group mt-9 inline-flex h-14 items-center justify-center gap-3 rounded-lg px-8 text-base font-semibold text-cream">
+            <iconify-icon icon="ic:baseline-telegram" class="text-2xl text-cream"></iconify-icon>
+            Get my free valuation
+            <iconify-icon icon="solar:arrow-right-linear" class="arrow text-xl"></iconify-icon>
+          </a>
+          <p class="mt-4 flex items-center justify-center gap-1.5 text-[12px] font-medium text-cream/55">
+            <iconify-icon icon="solar:shield-check-linear" class="text-sm"></iconify-icon>
+            No account, no card - and we never see your card details.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer / document colophon -->
+  <footer class="relative z-10 mx-auto max-w-7xl px-6 sm:px-8 lg:px-12 pb-10">
+    <div class="rule-double"></div>
+    <div class="flex flex-col items-start justify-between gap-5 pt-6 sm:flex-row sm:items-center">
+      <div>
+        <a href="#" class="inline-block"><img src="img/logo-lockup-compact.png" alt="Honestly - a defensible value" width="190" class="h-auto w-[180px]" /></a>
+        <p class="mt-3 max-w-xs text-xs font-medium leading-relaxed text-muted">
+          Anchored in HM Land Registry sold evidence. A comparative market appraisal, not a RICS Red Book valuation.
+        </p>
+      </div>
+      <div class="flex items-center gap-6 text-xs font-medium text-muted">
+        <a href="https://t.me/usehonestly_bot" class="link-u hover:text-green">Telegram</a>
+        <span>&copy; 2026 Honestly</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- valuation widget (front of house) -->
+  <div class="fixed bottom-5 right-5 z-[60] flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
+    <div id="hermes-panel" class="hermes-panel w-[calc(100vw-2.5rem)] max-w-sm overflow-hidden rounded-2xl border border-line bg-cream shadow-[0_30px_70px_rgba(14,39,71,0.30)]">
+      <div class="flex items-center gap-3 bg-dark px-5 py-4">
+        <div class="relative flex h-10 w-10 items-center justify-center rounded-xl bg-green text-cream">
+          <iconify-icon icon="solar:chat-round-line-bold" class="text-xl"></iconify-icon>
+          <span class="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-dark bg-terra"></span>
+        </div>
+        <div class="flex-1">
+          <div class="font-logo text-base font-medium tracking-wide text-cream">Honestly</div>
+          <div class="text-[11px] font-medium text-cream/60">Evidence-led property valuations</div>
+        </div>
+        <button id="hermes-close" aria-label="Close" class="text-cream/60 transition hover:text-cream">
+          <iconify-icon icon="solar:close-circle-linear" class="text-2xl"></iconify-icon>
+        </button>
+      </div>
+      <div class="relative px-5 py-5">
+        <div class="mb-4 rounded-2xl rounded-tl-sm border border-line bg-white px-4 py-3 text-sm font-medium leading-relaxed text-ink">
+          Give me an address and tell me who you are. I'll run it through the sold evidence and show you exactly how I got there - your first valuation is free.
+        </div>
+        <div class="fld mb-4">
+          <input id="hermes-address" type="text" autocomplete="off" placeholder="e.g. 24 Wolves Lane, London N22" />
+          <label for="hermes-address">Property address</label>
+        </div>
+        <div class="label mb-1.5 text-[9px] text-green">I am a</div>
+        <div id="hermes-audience" class="seg mb-5" role="group" aria-label="Who are you">
+          <span class="seg-thumb" aria-hidden="true"></span>
+          <button type="button" data-aud="vendor" data-idx="0" aria-pressed="true" class="seg-btn">Vendor</button>
+          <button type="button" data-aud="buyer" data-idx="1" aria-pressed="false" class="seg-btn">Buyer</button>
+          <button type="button" data-aud="agent" data-idx="2" aria-pressed="false" class="seg-btn">Agent</button>
+        </div>
+        <a id="hermes-go" href="https://t.me/usehonestly_bot"
+           class="wv-go btn-lift beam-cta flex h-12 w-full items-center justify-center gap-2.5 rounded-lg text-sm font-semibold text-cream">
+          <iconify-icon icon="ic:baseline-telegram" class="text-xl"></iconify-icon>
+          Start my free valuation
+        </a>
+        <p class="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-medium text-muted">
+          <iconify-icon icon="solar:lock-keyhole-minimalistic-linear"></iconify-icon>
+          Runs in Telegram. No account, no card.
+        </p>
+
+        <!-- handoff loader: shown on submit while the bot opens (uiverse bright-firefox-37) -->
+        <div id="hermes-load" class="wv-load" aria-hidden="true">
+          <div class="wv-ring"></div>
+          <div class="wv-load-txt">Reading the sold evidence</div>
+          <div class="wv-dots"><i></i><i></i><i></i></div>
+        </div>
+      </div>
+    </div>
+
+    <button id="hermes-launcher" aria-label="Get your free property valuation"
+            class="hermes-launcher beam-cta group inline-flex h-14 items-center gap-3 rounded-full pl-4 pr-6 text-left text-cream">
+      <span class="flex h-9 w-9 items-center justify-center rounded-full bg-cream/15">
+        <iconify-icon icon="solar:home-smile-angle-bold" class="text-xl"></iconify-icon>
+      </span>
+      <span class="flex flex-col leading-none">
+        <span class="text-[9px] font-semibold uppercase tracking-[0.18em] text-cream/65">Free in 60 seconds</span>
+        <span class="mt-1 text-sm font-semibold">What is it worth?</span>
+      </span>
+    </button>
+  </div>
+
+  <!-- valuation widget logic: front of house only. It never computes a value;
+       it captures intent and hands off to the bot, where the engine runs. -->
+  <script>
+    (function () {
+      var panel = document.getElementById("hermes-panel");
+      var launcher = document.getElementById("hermes-launcher");
+      var closeBtn = document.getElementById("hermes-close");
+      var addr = document.getElementById("hermes-address");
+      var go = document.getElementById("hermes-go");
+      var auds = document.getElementById("hermes-audience");
+      var audience = "vendor";
+      var BOT = "https://t.me/usehonestly_bot";
+
+      function open() { panel.classList.add("open"); launcher.style.display = "none"; setTimeout(function(){ addr.focus(); }, 120); }
+      function close() { panel.classList.remove("open"); launcher.style.display = ""; }
+      launcher.addEventListener("click", open);
+      closeBtn.addEventListener("click", close);
+
+      var thumb = auds.querySelector(".seg-thumb");
+      auds.addEventListener("click", function (e) {
+        var b = e.target.closest("[data-aud]"); if (!b) return;
+        audience = b.getAttribute("data-aud");
+        var idx = parseInt(b.getAttribute("data-idx"), 10) || 0;
+        if (thumb) thumb.style.transform = "translateX(" + (idx * 100) + "%)";
+        Array.prototype.forEach.call(auds.querySelectorAll("[data-aud]"), function (x) {
+          x.setAttribute("aria-pressed", x === b ? "true" : "false");
+        });
+      });
+
+      // brief handoff loader while the Telegram tab opens (the anchor still navigates)
+      var loader = document.getElementById("hermes-load");
+      var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      function showLoader() {
+        if (!loader || reduceMotion) return;
+        loader.classList.add("show");
+        setTimeout(function () { loader.classList.remove("show"); }, 2600);
+      }
+
+      // base64url so the bot can decode a single ?start= payload: v1|audience|address
+      function b64url(s) {
+        var b = btoa(unescape(encodeURIComponent(s)));
+        return b.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+      }
+      function buildLink() {
+        var a = (addr.value || "").trim();
+        var payload = b64url("v1|" + audience + "|" + a);
+        if (payload.length > 64) payload = b64url("v1|" + audience + "|");
+        return BOT + "?start=" + payload;
+      }
+      function sync() { go.setAttribute("href", buildLink()); }
+      addr.addEventListener("input", sync);
+      go.addEventListener("click", function () { sync(); showLoader(); });
+      sync();
+      addr.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { sync(); showLoader(); window.open(go.getAttribute("href"), "_blank", "noopener"); }
+      });
+    })();
+  </script>
+
+  <!-- Open every Telegram handoff in a new tab so the funnel page is never lost -->
+  <script>
+    (function () {
+      document.querySelectorAll('a[href*="t.me/"]').forEach(function (a) {
+        a.setAttribute("target", "_blank");
+        a.setAttribute("rel", "noopener noreferrer");
+      });
+    })();
+  </script>
+
+  <!-- Number Ticker (ported from magicuidesign/magicui) - real spring physics,
+       not an easing curve: motionValue -> useSpring{ stiffness:100, damping:60, mass:1 }
+       integrated numerically so the value settles exactly like the React component. -->
+  <script>
+    (function () {
+      var el = document.getElementById("central-value");
+      if (!el) return;
+      var target = parseInt(el.getAttribute("data-target"), 10) || 0;
+      var fmt = function (n) { return "£" + Math.round(n).toLocaleString("en-GB"); };
+      var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce) { el.textContent = fmt(target); return; }
+      var ran = false;
+      function run() {
+        if (ran) return; ran = true;
+        // Integrate the UNIT step response (0 -> 1) of the spring, then scale by target.
+        // A linear spring's trajectory scales with the target, so this matches framer-motion
+        // exactly while staying numerically stable. Fixed sub-steps like framer's solver.
+        var k = 100, c = 60, m = 1;        // stiffness, damping, mass - Magic UI useSpring config
+        var h = 1 / 240;                   // fixed sub-step (s) for a stable integration
+        var p = 0, v = 0, last = null;
+        function tick(t) {
+          if (last === null) last = t;
+          var frame = Math.min((t - last) / 1000, 0.064); last = t;
+          for (var acc = frame; acc > 0; acc -= h) {
+            var dt = acc < h ? acc : h;
+            var a = (-k * (p - 1) - c * v) / m;
+            v += a * dt; p += v * dt;
+          }
+          if (Math.abs(1 - p) < 1e-4 && Math.abs(v) < 1e-3) { el.textContent = fmt(target); return; }
+          el.textContent = fmt(target * p);
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+      var co = new IntersectionObserver(function (es, obs) {
+        es.forEach(function (e) { if (e.isIntersecting) { run(); obs.disconnect(); } });
+      }, { threshold: 0.5 });
+      co.observe(el);
+    })();
+  </script>
+
+  <!-- Straight-answers accordion: single-open, accessible (aria-expanded), smooth grid-rows -->
+  <script>
+    (function () {
+      var list = document.getElementById("qa-list");
+      if (!list) return;
+      var items = Array.prototype.slice.call(list.querySelectorAll(".qa"));
+      items.forEach(function (item) {
+        var btn = item.querySelector(".qa-q");
+        btn.addEventListener("click", function () {
+          var isOpen = item.classList.contains("open");
+          items.forEach(function (o) {
+            o.classList.remove("open");
+            o.querySelector(".qa-q").setAttribute("aria-expanded", "false");
+          });
+          if (!isOpen) {
+            item.classList.add("open");
+            btn.setAttribute("aria-expanded", "true");
+          }
+        });
+      });
+    })();
+  </script>
+
+  <!-- Scroll reveal -->
+  <script>
+    (function () {
+      var io = new IntersectionObserver(function (entries, obs) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { e.target.classList.add("in"); obs.unobserve(e.target); }
+        });
+      }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+      document.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
+    })();
+  </script>
+
+  <script>
+    /* Cursor spotlight on the certificate - the light follows the pointer */
+    (function () {
+      var cert = document.getElementById("cert");
+      if (!cert || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      cert.addEventListener("pointermove", function (e) {
+        var r = cert.getBoundingClientRect();
+        cert.style.setProperty("--mx", ((e.clientX - r.left) / r.width * 100) + "%");
+        cert.style.setProperty("--my", ((e.clientY - r.top) / r.height * 100) + "%");
+      });
+    })();
+  </script>
+
+  <script>
+    /* Spotlight glow cards - the radial glow tracks the pointer across each card */
+    (function () {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      document.querySelectorAll("[data-spot]").forEach(function (card) {
+        card.addEventListener("pointermove", function (e) {
+          var r = card.getBoundingClientRect();
+          card.style.setProperty("--gx", ((e.clientX - r.left) / r.width * 100) + "%");
+          card.style.setProperty("--gy", ((e.clientY - r.top) / r.height * 100) + "%");
+        });
+        card.addEventListener("pointerleave", function () {
+          card.style.removeProperty("--gx");
+          card.style.removeProperty("--gy");
+        });
+      });
+    })();
+  </script>
+  <script>
+    /* Magic UI Terminal - run the appraisal on view: type the command, then
+       reveal each result line in sequence (reduced-motion shows it all at once). */
+    (function () {
+      var term = document.getElementById("engineTerm");
+      if (!term) return;
+      var cmd = 'honestly appraise "24 Wolves Lane, N22"';
+      var typeEl = term.querySelector(".t-type");
+      var lines = Array.prototype.slice.call(term.querySelectorAll(".t-line[data-t]"))
+        .filter(function (l) { return l.getAttribute("data-t") !== "cmd"; });
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      function revealAll() {
+        if (typeEl) typeEl.textContent = cmd;
+        lines.forEach(function (l) { l.classList.add("in"); });
+        var c = term.querySelector(".t-cursor");
+        if (c) c.classList.remove("t-cursor");
+      }
+      function run() {
+        if (reduce) { revealAll(); return; }
+        var i = 0;
+        (function type() {
+          if (i <= cmd.length) {
+            typeEl.textContent = cmd.slice(0, i);
+            i++;
+            setTimeout(type, 26 + (i % 3) * 8);
+          } else {
+            lines.forEach(function (l, n) {
+              setTimeout(function () { l.classList.add("in"); }, 180 + n * 230);
+            });
+          }
+        })();
+      }
+
+      if (reduce) { revealAll(); return; }
+      var io = new IntersectionObserver(function (entries, obs) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { run(); obs.disconnect(); }
+        });
+      }, { threshold: 0.4 });
+      io.observe(term);
+    })();
+  </script>
+
+  <script>
+    /* Magic UI Animated Beam (ported) - measure node centres and draw curved
+       beams from each register into the engine core, then out to each result.
+       Recomputes on resize/font-load. The travelling pulse is pure CSS. */
+    (function () {
+      var wrap = document.getElementById("engineBeam");
+      if (!wrap) return;
+      var svg = wrap.querySelector(".abeam-svg");
+      var core = document.getElementById("abCore");
+      var srcs = Array.prototype.slice.call(wrap.querySelectorAll(".ab-src"));
+      var outs = Array.prototype.slice.call(wrap.querySelectorAll(".ab-out"));
+      var NS = "http://www.w3.org/2000/svg";
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      function centre(el, cr) {
+        var r = el.getBoundingClientRect();
+        return { x: r.left - cr.left + r.width / 2, y: r.top - cr.top + r.height / 2 };
+      }
+      function curve(ax, ay, bx, by) {
+        var mx = (ax + bx) / 2;
+        return "M " + ax + "," + ay + " C " + mx + "," + ay + " " + mx + "," + by + " " + bx + "," + by;
+      }
+      function addPair(d, delay) {
+        var w = document.createElementNS(NS, "path");
+        w.setAttribute("d", d); w.setAttribute("class", "ab-wire");
+        svg.appendChild(w);
+        var f = document.createElementNS(NS, "path");
+        f.setAttribute("d", d); f.setAttribute("class", "ab-flow");
+        f.setAttribute("pathLength", "100");
+        if (reduce) { f.style.animation = "none"; f.style.strokeDashoffset = "58"; }
+        else { f.style.animationDelay = delay + "s"; }
+        svg.appendChild(f);
+      }
+      function draw() {
+        Array.prototype.slice.call(svg.querySelectorAll("path")).forEach(function (p) { p.remove(); });
+        var cr = wrap.getBoundingClientRect();
+        if (!cr.width) return;
+        svg.setAttribute("viewBox", "0 0 " + cr.width + " " + cr.height);
+        var c = centre(core, cr);
+        var edge = (core.getBoundingClientRect().width / 2) - 3;
+        srcs.forEach(function (s, i) {
+          var p = centre(s, cr);
+          addPair(curve(p.x, p.y, c.x - edge, c.y), i * 0.42);
+        });
+        outs.forEach(function (o, i) {
+          var p = centre(o, cr);
+          addPair(curve(c.x + edge, c.y, p.x, p.y), 1.5 + i * 0.42);
+        });
+      }
+
+      var raf;
+      function schedule() { cancelAnimationFrame(raf); raf = requestAnimationFrame(draw); }
+      if (document.readyState === "complete") schedule();
+      else window.addEventListener("load", schedule);
+      schedule();
+      window.addEventListener("resize", schedule);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+    })();
+  </script>
+</body>
+</html>

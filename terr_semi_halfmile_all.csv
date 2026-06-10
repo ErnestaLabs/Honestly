@@ -1,0 +1,54 @@
+address,sold_date,price_gbp,bedrooms,prop_type,floor_sqm,price_per_sqm,dist_mi
+"15, Maryland Road, N22 5AR",2024-06-11,585000,,semi-detached_house,124,4718,0.285
+"4, Sylvan Avenue, Wood Green, N22 5HX",2024-07-31,575000,,semi-detached_house,70,8214,0.378
+"3, The Mews, N22 8EL",2024-08-02,325000,,terraced_house,,,0.485
+"2, Park View Gardens, N22 5SH",2024-08-02,560000,,terraced_house,113,4956,0.425
+"51, Lascotts Road, N22 8JL",2024-08-09,912000,4,terraced_house,108,8444,0.469
+"28, Leith Road, N22 5QA",2024-08-27,690000,4,terraced_house,110,6273,0.494
+"39, Parkhurst Road, N22 8JQ",2024-08-29,712500,3,terraced_house,129,5523,0.418
+"16, Stirling Road, N22 5BU",2024-08-30,600000,3,terraced_house,114,5263,0.464
+"33, Cheshire Road, N22 8JJ",2024-09-04,650000,,terraced_house,122,5328,0.47
+"71, Dunbar Road, N22 5BG",2024-09-05,590000,,terraced_house,91,6484,0.481
+"87, Woodside Road, N22 5HR",2024-10-04,1150000,5,terraced_house,127,9055,0.227
+"88, Dunbar Road, N22 5BJ",2024-10-25,650000,,semi-detached_house,116,5603,0.449
+"30, Berwick Road, N22 5QB",2024-10-30,685000,,terraced_house,101,6782,0.455
+"5, Woodside Road, N22 5HP",2024-11-22,630000,,terraced_house,126,5000,0.349
+"22, Lascotts Road, N22 8JN",2024-12-06,315000,,terraced_house,43,7326,0.383
+"3, Croxford Gardens, N22 5QU",2024-12-13,511500,,terraced_house,90,5683,0.467
+"137, Lyndhurst Road, N22 5AY",2024-12-18,375000,,terraced_house,90,4167,0.126
+"107, Maryland Road, N22 5AR",2025-01-20,565000,,terraced_house,107,5280,0.13
+"47, Lascotts Road, N22 8JL",2025-01-22,675000,,terraced_house,103,6553,0.463
+"91, Sylvan Avenue, Wood Green, N22 5JA",2025-01-24,970000,,terraced_house,139,6978,0.187
+"45, Wolves Lane, N22 5JD",2025-01-31,640000,,terraced_house,146,4384,0.026
+"89, Woodside Road, N22 5HR",2025-01-31,940000,,terraced_house,111,8468,0.225
+"105, Sylvan Avenue, Wood Green, N22 5JB",2025-02-14,630000,,terraced_house,117,5385,0.168
+"138, Perth Road, N22 5QP",2025-02-17,505000,,terraced_house,87,5805,0.377
+"58, Stirling Road, N22 5BP",2025-03-05,745000,,terraced_house,124,6008,0.438
+"42, Lascotts Road, N22 8JN",2025-03-10,440000,,terraced_house,,,0.417
+"59, Lyndhurst Road, N22 5AX",2025-03-25,613000,,terraced_house,79,7759,0.205
+"73, Maryland Road, N22 5AR",2025-03-25,850000,,terraced_house,144,5903,0.188
+"22a, Woodside Road, N22 5HU",2025-03-28,600000,,semi-detached_house,74,8108,0.352
+"17, Stirling Road, N22 5BL",2025-03-28,800000,,terraced_house,89,8989,0.45
+"42, Arcadian Gardens, N22 5AD",2025-03-28,860000,,terraced_house,168,5119,0.271
+"46, Arcadian Gardens, N22 5AD",2025-03-31,530000,,semi-detached_house,119,4454,0.262
+"67, Wolves Lane, N22 5JD",2025-05-15,672000,3,terraced_house,103,6524,0.026
+"100, Sylvan Avenue, Wood Green, N22 5HY",2025-05-22,765000,3,semi-detached_house,163,4693,0.207
+"25, Maryland Road, N22 5AR",2025-05-30,685000,4,terraced_house,127,5394,0.268
+"95, Maryland Road, N22 5AR",2025-07-11,235000,3,terraced_house,,,0.152
+"28, Maryland Road, N22 5AN",2025-07-14,493000,,terraced_house,92,5359,0.254
+"64, Stirling Road, N22 5BP",2025-07-24,635000,4,terraced_house,109,5826,0.451
+"54, White Hart Lane, Wood Green, N22 5RL",2025-07-25,435000,3,terraced_house,87,5000,0.496
+"37, Berwick Road, N22 5QB",2025-07-25,840000,,terraced_house,168,5000,0.464
+"22, Stirling Road, N22 5BU",2025-08-15,600000,3,terraced_house,180,3333,0.459
+"99, Stirling Road, N22 5BN",2025-09-08,635000,3,terraced_house,96,6615,0.432
+"36, Lascotts Road, N22 8JN",2025-09-19,580000,,terraced_house,136,4265,0.405
+"19, Lyndhurst Road, N22 5AX",2025-09-19,585000,3,terraced_house,86,6802,0.273
+"4, Stirling Road, N22 5BU",2025-10-30,620000,2,terraced_house,88,7045,0.481
+"2, Omega Terrace, N22 8AA",2025-10-31,495000,,terraced_house,,,0.455
+"6, Forfar Road, N22 5QE",2025-12-09,725000,4,terraced_house,121,5992,0.485
+"5, The Mews, N22 8EL",2025-12-12,610000,,terraced_house,,,0.477
+"46, Solway Road, N22 5BX",2025-12-16,625000,2,terraced_house,80,7812,0.488
+"40, Myddleton Road, N22 8NR",2026-01-26,1100000,,semi-detached_house,,,0.487
+"9, Earlham Grove, N22 5HJ",2026-01-30,783000,4,semi-detached_house,161,4863,0.466
+"65, Perth Road, N22 5QD",2026-02-20,650000,,terraced_house,110,5909,0.5
+"70, White Hart Lane, Wood Green, N22 5RL",2026-04-07,478000,,terraced_house,85,5624,0.489

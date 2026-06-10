@@ -1,0 +1,1 @@
+{"price_gbp":{"min":300000,"max":1500000},"bedrooms":{"allowed":[3]},"floor_sqm":{"min":40,"max":300},"price_per_sqm":{"min":3000,"max":9000},"dist_mi":{"min":0,"max":0.5}}

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Honestly - what it's really worth</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{ --green:#1f6f5c; --greend:#143f33; --terra:#b9623a; --ink:#1c1a16; --mut:#6b6557;
+         --line:#e7e1d4; --bg:#f6f3ec; --card:#fff; }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{font:16px/1.5 -apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg);
+       -webkit-font-smoothing:antialiased}
+  .wrap{max-width:620px;margin:0 auto;padding:20px 16px 64px}
+  header{display:flex;align-items:baseline;gap:10px;margin:6px 0 2px}
+  .logo{font:700 26px/1 Georgia,serif;color:var(--greend);letter-spacing:-.5px}
+  .logo b{color:var(--green)}
+  .tag{color:var(--mut);font-size:13px;margin:0 0 20px}
+  .seg{display:flex;background:#ece6d9;border-radius:12px;padding:4px;gap:4px;margin-bottom:14px}
+  .seg button{flex:1;border:0;background:transparent;padding:10px 6px;border-radius:9px;font-size:14px;
+              font-weight:600;color:var(--mut);cursor:pointer}
+  .seg button.on{background:#fff;color:var(--greend);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  label{display:block;font-size:12px;font-weight:600;color:var(--mut);margin:12px 0 5px;text-transform:uppercase;letter-spacing:.4px}
+  input{width:100%;border:1px solid var(--line);background:#fff;border-radius:10px;padding:13px 14px;font-size:16px;color:var(--ink)}
+  input:focus{outline:0;border-color:var(--green)}
+  .go{width:100%;margin-top:16px;border:0;background:var(--green);color:#fff;font-size:16px;font-weight:700;
+      padding:15px;border-radius:11px;cursor:pointer}
+  .go:disabled{opacity:.5}
+  .row2{display:flex;gap:10px;margin-top:0}.row2>div{flex:1}
+  .row3{display:flex;gap:8px;margin-top:0}.row3>div{flex:1;min-width:0}
+  select{width:100%;border:1px solid var(--line);background:#fff;border-radius:10px;padding:13px 14px;font-size:16px;color:var(--ink);appearance:none}
+  select:focus{outline:0;border-color:var(--green)}
+  .opt{font-weight:400;text-transform:none;letter-spacing:0;color:#a8a294}
+  .check{display:flex;align-items:center;gap:9px;margin:14px 0 0;font-size:14px;font-weight:500;color:var(--ink);text-transform:none;letter-spacing:0}
+  .check input{width:auto;margin:0}
+  .hint{font-size:12px;color:var(--mut);margin-top:6px}
+  .loading{text-align:center;color:var(--mut);padding:40px 0;display:none}
+  .spin{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--green);border-radius:50%;
+        margin:0 auto 12px;animation:s 1s linear infinite}@keyframes s{to{transform:rotate(360deg)}}
+  #out{display:none;margin-top:22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+  .h{font-size:13px;color:var(--mut);margin:0 0 4px}
+  .range{font:700 30px/1.1 Georgia,serif;color:var(--greend);margin:2px 0}
+  .sub{color:var(--mut);font-size:14px}
+  .guide{margin-top:12px;font-size:15px}.guide b{color:var(--green);font-size:18px}
+  .meta{font-size:13px;color:var(--mut);margin-top:4px}
+  .verdict{border-radius:11px;padding:13px 14px;font-size:14px;margin-bottom:14px;font-weight:500}
+  .warn{background:#fbeee7;color:#8a3c1d;border:1px solid #ecc7b6}
+  .ok{background:#e8f1ee;color:var(--greend);border:1px solid #cfe3dc}
+  .frame{width:100%;border-radius:12px;display:block;border:1px solid var(--line)}
+  .cap{font-size:12px;color:var(--mut);margin:6px 2px 0}
+  .evrow{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px}
+  .evrow:last-child{border:0}
+  .evrow .a{color:var(--ink)} .evrow .a small{color:var(--mut)}
+  .evrow .p{font-weight:700;white-space:nowrap;text-align:right}
+  .evrow .p a{display:block;font-weight:400;font-size:12px;color:var(--green);text-decoration:none}
+  .pos{background:#f3ede0;border-radius:11px;padding:13px 14px;font-size:14px;color:#5a5340;margin-top:6px}
+  .err{background:#fbeee7;color:#8a3c1d;border-radius:11px;padding:14px;font-size:14px;display:none}
+  footer{font-size:11px;color:var(--mut);text-align:center;margin-top:18px;line-height:1.6}
+  footer a{color:var(--mut)}
+  .buy{margin-top:18px}
+  .buy h3{font:700 17px/1.2 Georgia,serif;color:var(--greend);margin:0 0 3px}
+  .buy .lede{font-size:13px;color:var(--mut);margin:0 0 12px}
+  .pack{border:1px solid var(--line);border-radius:13px;padding:14px;margin-bottom:10px;background:#fff}
+  .pack.best{border-color:var(--green);box-shadow:0 2px 10px rgba(31,111,92,.10)}
+  .pack .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .pack .nm{font-weight:700;color:var(--ink);font-size:15px}
+  .pack .pr{font:700 17px/1 Georgia,serif;color:var(--green);white-space:nowrap}
+  .pack ul{margin:9px 0 0;padding:0 0 0 18px;font-size:13px;color:var(--mut)}
+  .pack ul li{margin:3px 0}
+  .pack button{width:100%;margin-top:12px;border:0;background:var(--green);color:#fff;font-size:15px;
+               font-weight:700;padding:12px;border-radius:10px;cursor:pointer}
+  .pack button:disabled{opacity:.55}
+  .pack.best button{background:var(--greend)}
+  .intro{background:#fef6ed;color:#8a5a2b;border:1px solid #f0d9bf;border-radius:9px;
+         padding:9px 12px;font-size:13px;font-weight:600;margin-bottom:12px}
+  .pro{font-size:13px;color:var(--mut);text-align:center;margin-top:4px}
+  .pro a{color:var(--green);font-weight:600;text-decoration:none;cursor:pointer}
+  .tgonly{background:#e8f1ee;color:var(--greend);border:1px solid #cfe3dc;border-radius:11px;
+          padding:14px;font-size:14px;text-align:center;margin-top:18px}
+  .tgonly a{color:var(--green);font-weight:700}
+  .tochat{width:100%;margin-top:16px;border:0;background:var(--greend);color:#fff;font-size:15px;
+          font-weight:700;padding:14px;border-radius:11px;cursor:pointer}
+  .tochat:disabled{opacity:.55}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><div class="logo">Honest<b>ly</b></div></header>
+  <p class="tag">What your property is <i>really</i> worth - backed by real sold prices, not a guess.</p>
+
+  <div class="seg" id="seg">
+    <button data-a="vendor">🏠 Vendor</button>
+    <button data-a="buyer">🔍 Buyer</button>
+    <button data-a="agent" class="on">📋 Agent</button>
+  </div>
+
+  <label>Property address</label>
+  <input id="addr" placeholder="58 Cronin Street, London SE15 6JH" autocomplete="off">
+
+  <div class="row2">
+    <div>
+      <label>Bedrooms <span class="opt">optional</span></label>
+      <input id="beds" inputmode="numeric" placeholder="e.g. 4">
+    </div>
+    <div>
+      <label>Overall condition</label>
+      <select id="c_state">
+        <option value="0">Needs full renovation</option>
+        <option value="1">Dated, needs work</option>
+        <option value="2" selected>Average, liveable</option>
+        <option value="3">Well presented</option>
+        <option value="4">Refurbished throughout</option>
+      </select>
+    </div>
+  </div>
+
+  <label>Finish detail <span class="opt">two same-size homes are not worth the same</span></label>
+  <div class="row3">
+    <div>
+      <select id="c_kitchen" aria-label="Kitchen">
+        <option value="0">Kitchen: basic</option>
+        <option value="1" selected>Kitchen: modern</option>
+        <option value="2">Kitchen: high-end</option>
+      </select>
+    </div>
+    <div>
+      <select id="c_bath" aria-label="Bathrooms">
+        <option value="0">Baths: dated</option>
+        <option value="1" selected>Baths: modern</option>
+        <option value="2">Baths: marble / stone</option>
+      </select>
+    </div>
+    <div>
+      <select id="c_premium" aria-label="Premium materials">
+        <option value="0" selected>Materials: standard</option>
+        <option value="1">Materials: some premium</option>
+        <option value="2">Materials: premium</option>
+      </select>
+    </div>
+  </div>
+
+  <label class="check"><input type="checkbox" id="invest"> <span>Investment / buy-to-let - show CGT on a sale</span></label>
+
+  <div id="extra"></div>
+
+  <button class="go" id="go">Value it</button>
+  <div class="hint">Every figure links to its HM Land Registry record. Asking prices are never used to value.</div>
+
+  <div class="err" id="err"></div>
+  <div class="loading" id="load"><div class="spin"></div>Pulling sold comparables...</div>
+
+  <div id="out"></div>
+
+  <footer>
+    HM Land Registry Price Paid Data via PropertyData · imagery © Google.<br>
+    A comparative market appraisal, not a RICS Red Book valuation.
+  </footer>
+</div>
+
+<script>
+const TG = window.Telegram && window.Telegram.WebApp;
+let audience = "agent";
+let lastReq = null;   // the inputs behind the figure on screen, reused to raise an invoice
+const BOT = "https://t.me/usehonestly_bot";
+
+if (TG) { TG.ready(); TG.expand(); }
+
+const seg = document.getElementById("seg");
+const extra = document.getElementById("extra");
+seg.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  [...seg.children].forEach(x => x.classList.remove("on"));
+  b.classList.add("on"); audience = b.dataset.a; renderExtra();
+});
+function renderExtra(){
+  if (audience === "buyer")
+    extra.innerHTML = '<label>Asking price (optional)</label><input id="num" inputmode="numeric" placeholder="e.g. 650000">';
+  else if (audience === "vendor")
+    extra.innerHTML = '<label>Price an agent quoted you (optional)</label><input id="num" inputmode="numeric" placeholder="e.g. 600000">';
+  else extra.innerHTML = "";
+}
+renderExtra();
+
+const $ = id => document.getElementById(id);
+function money(n){ return "£" + Math.round(n).toLocaleString("en-GB"); }
+
+async function valueIt(){
+  const address = $("addr").value.trim();
+  if (address.length < 6){ showErr("Enter a full UK address."); return; }
+  const num = $("num") ? $("num").value.replace(/[^0-9]/g,"") : "";
+  $("err").style.display = "none"; $("out").style.display = "none";
+  $("load").style.display = "block"; $("go").disabled = true;
+  const beds = $("beds").value.replace(/[^0-9]/g,"");
+  // condition sub-survey: send the raw signals; the SERVER derives the finish tier with the
+  // same bot.derive_finish the chat wizard uses, so the web and the bot never disagree.
+  const cond = { c_state: Number($("c_state").value), c_kitchen: Number($("c_kitchen").value),
+                 c_bath: Number($("c_bath").value), c_premium: Number($("c_premium").value) };
+  lastReq = Object.assign({ address, as: audience,
+              investment: $("invest").checked ? 1 : 0,
+              beds: beds ? Number(beds) : null,
+              asking: (num && audience === "buyer")  ? Number(num) : null,
+              quoted: (num && audience === "vendor") ? Number(num) : null }, cond);
+  let url = `/api/value?address=${encodeURIComponent(address)}&as=${audience}`;
+  url += `&c_state=${cond.c_state}&c_kitchen=${cond.c_kitchen}&c_bath=${cond.c_bath}&c_premium=${cond.c_premium}`;
+  if ($("invest").checked) url += `&investment=1`;
+  if (beds) url += `&beds=${beds}`;
+  if (num && audience === "buyer")  url += `&asking=${num}`;
+  if (num && audience === "vendor") url += `&quoted=${num}`;
+  try {
+    const res = await fetch(url);
+    const d = await res.json();
+    if (d.error){ showErr(d.error); }
+    else render(d);
+  } catch(e){ showErr("Couldn't reach the valuation engine."); }
+  $("load").style.display = "none"; $("go").disabled = false;
+}
+function showErr(m){ const e=$("err"); e.textContent = m; e.style.display="block"; }
+
+function render(d){
+  const titles = {vendor:"What your home is really worth", buyer:"What this home is really worth", agent:"Instant appraisal"};
+  let h = "";
+  h += `<div class="card">
+    <p class="h">${titles[d.audience]}</p>
+    <div class="range">${d.range_str}</div>
+    <div class="sub">most likely ~${money(d.central)}</div>
+    <div class="guide">${d.audience==="agent" ? "" : d.guide_label + ": "}<b>${d.guide_value_str}</b></div>
+    ${d.audience==="agent" ? `<div class="meta">${d.sqm} sqm · ${d.beds||"?"} bed · EPC ${d.epc||"?"} · £${(d.psm||0).toLocaleString("en-GB")}/sqm</div>` : ""}
+  </div>`;
+
+  if (d.verdict)
+    h += `<div class="verdict ${d.verdict.tone}">${d.verdict.tone==="warn"?"⚠️ ":"✓ "}${d.verdict.text}</div>`;
+
+  if (d.finish_note)
+    h += `<div class="pos">${d.finish_note}</div>`;
+
+  if (d.images && d.images.frontage)
+    h += `<img class="frame" src="${d.images.frontage}" alt="frontage"><div class="cap">Street View frontage${d.frontage_date?" - captured "+d.frontage_date:""}</div>`;
+
+  h += `<div class="card"><p class="h">Evidence - comparable homes, sold</p>`;
+  d.evidence.forEach(c => {
+    h += `<div class="evrow"><div class="a">${c.address} <small>· ${c.sqm} sqm · ${c.date}</small></div>
+          <div class="p">${c.price_str}<a href="${c.verify}" target="_blank" rel="noopener">verify ↗</a></div></div>`;
+  });
+  h += `</div>`;
+
+  if (d.positioning)
+    h += `<div class="pos">📉 ${d.positioning.note}</div>`;
+
+  if (d.images && d.images.map){
+    const r = d.route || {};
+    h += `<img class="frame" style="margin-top:14px" src="${d.images.map}" alt="map">
+          <div class="cap">${d.audience==="agent" && r.doors ? `Door-knock route - ${r.doors} doors, ${r.km}km, ~${r.mins}min` : "Comparable locations"}</div>`;
+  }
+
+  h += `<div class="buy" id="buy"></div>`;
+  $("out").innerHTML = h; $("out").style.display = "block";
+  $("out").scrollIntoView({behavior:"smooth", block:"start"});
+  buildBuy();
+}
+
+// ---- the paywall: the figure above is free; the documents are the products ----
+async function buildBuy(){
+  const box = $("buy"); if (!box) return;
+  if (!TG || !TG.initData){
+    // public browser link - Stars only work inside Telegram, so send them to the bot
+    box.innerHTML = `<div class="tgonly">Want the full appraisal - the branded PDF, the
+      interactive report${audience==="agent"?", the door-knock map and script":""}? <br>
+      <a href="${BOT}" target="_blank" rel="noopener">Open Honestly in Telegram ↗</a></div>`;
+    return;
+  }
+  let data;
+  try { data = await (await fetch(`/api/packs?as=${audience}`)).json(); }
+  catch(e){ return; }
+  let h = `<h3>Take it further</h3>
+    <p class="lede">The figure above is yours, free. These turn it into something you can send, knock on, or act on.</p>`;
+  if (data.intro) h += `<div class="intro">✨ Introductory price - 50% off while we launch.</div>`;
+  data.packs.forEach((p, i) => {
+    const best = i === data.packs.length - 1;
+    h += `<div class="pack${best?" best":""}">
+      <div class="top"><span class="nm">${p.name}</span><span class="pr">${p.gbp} · ⭐${p.stars}</span></div>
+      <ul>${p.includes.map(x => `<li>${x}</li>`).join("")}${p.plus_above?`<li><i>plus everything above</i></li>`:""}</ul>
+      <button data-pack="${p.id}">Get the ${p.name.toLowerCase()}</button>
+    </div>`;
+  });
+  h += `<p class="pro">Run lots? <a id="gopro">Honestly Pro - ${data.pro.gbp}/mo for ${data.pro.packs_per_month} full packs ↗</a></p>`;
+  h += `<button id="tochat" class="tochat">📲 Get the full report in your chat</button>
+        <p class="lede" style="text-align:center">We carry everything you entered over - no need to re-type a thing.</p>`;
+  box.innerHTML = h;
+  box.querySelectorAll("button[data-pack]").forEach(b =>
+    b.addEventListener("click", () => buy(b.dataset.pack, b)));
+  const pro = $("gopro"); if (pro) pro.addEventListener("click", () => buy("pro"));
+  const tc = $("tochat"); if (tc) tc.addEventListener("click", () => handoff(tc));
+}
+
+// hand the whole intake (address + answers) to the bot, so the chat picks up mid-flow
+// and delivers with everything pre-filled - the user never starts from nothing.
+async function handoff(btn){
+  if (!TG || !TG.initData){ window.open(BOT, "_blank"); return; }
+  if (btn){ btn.disabled = true; btn.textContent = "Opening your chat..."; }
+  try {
+    const payload = Object.assign({ initData: TG.initData }, lastReq || {});
+    const res = await fetch("/api/handoff", {
+      method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)
+    });
+    const d = await res.json();
+    if (d.link){
+      if (TG.openTelegramLink) TG.openTelegramLink(d.link); else window.open(d.link, "_blank");
+      if (TG.close) TG.close();
+    } else {
+      showErr(d.error || "Couldn't hand off to the chat.");
+      if (btn){ btn.disabled = false; btn.textContent = "📲 Get the full report in your chat"; }
+    }
+  } catch(e){
+    showErr("Couldn't reach the chat hand-off.");
+    if (btn){ btn.disabled = false; btn.textContent = "📲 Get the full report in your chat"; }
+  }
+}
+
+async function buy(packId, btn){
+  if (!TG || !TG.initData){ window.open(BOT, "_blank"); return; }
+  if (btn){ btn.disabled = true; btn.textContent = "Opening payment..."; }
+  try {
+    const payload = Object.assign({ initData: TG.initData, pack: packId }, lastReq || {});
+    const res = await fetch("/api/invoice", {
+      method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)
+    });
+    const d = await res.json();
+    if (d.link){
+      TG.openInvoice(d.link, status => {
+        if (status === "paid" && TG.showPopup)
+          TG.showPopup({title:"Thank you", message:"Your report is on its way in the chat.", buttons:[{type:"ok"}]});
+        if (btn){ btn.disabled = false; btn.textContent = "Get it"; }
+      });
+    } else {
+      showErr(d.error || "Couldn't start the payment.");
+      if (btn){ btn.disabled = false; btn.textContent = "Try again"; }
+    }
+  } catch(e){
+    showErr("Couldn't reach the payment service.");
+    if (btn){ btn.disabled = false; btn.textContent = "Try again"; }
+  }
+}
+
+$("go").addEventListener("click", valueIt);
+$("addr").addEventListener("keydown", e => { if (e.key === "Enter") valueIt(); });
+</script>
+</body>
+</html>

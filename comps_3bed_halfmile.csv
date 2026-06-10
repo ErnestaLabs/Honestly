@@ -1,0 +1,10 @@
+address,sold_date,window,price_gbp,bedrooms,prop_type,floor_sqm,price_per_sqm,dist_mi
+"39, Parkhurst Road, N22 8JQ",2024-08-29,12-24mo,712500,3,terraced_house,129,5523,0.418
+"16, Stirling Road, N22 5BU",2024-08-30,12-24mo,600000,3,terraced_house,114,5263,0.464
+"67, Wolves Lane, N22 5JD",2025-05-15,12-24mo,672000,3,terraced_house,103,6524,0.026
+"100, Sylvan Avenue, Wood Green, N22 5HY",2025-05-22,12-24mo,765000,3,semi-detached_house,163,4693,0.207
+"95, Maryland Road, N22 5AR",2025-07-11,0-12mo,235000,3,terraced_house,,,0.152
+"54, White Hart Lane, Wood Green, N22 5RL",2025-07-25,0-12mo,435000,3,terraced_house,87,5000,0.496
+"22, Stirling Road, N22 5BU",2025-08-15,0-12mo,600000,3,terraced_house,180,3333,0.459
+"99, Stirling Road, N22 5BN",2025-09-08,0-12mo,635000,3,terraced_house,96,6615,0.432
+"19, Lyndhurst Road, N22 5AX",2025-09-19,0-12mo,585000,3,terraced_house,86,6802,0.273

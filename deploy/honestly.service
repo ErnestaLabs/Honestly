@@ -1,0 +1,18 @@
+[Unit]
+Description=Honestly valuation Telegram bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/honestly
+EnvironmentFile=/opt/honestly/.env
+ExecStart=/usr/bin/python3 /opt/honestly/bot.py
+Restart=always
+RestartSec=5
+# systemd runs exactly one copy of this unit, so the bot can never double-poll.
+StandardOutput=append:/var/log/honestly.log
+StandardError=append:/var/log/honestly.log
+
+[Install]
+WantedBy=multi-user.target

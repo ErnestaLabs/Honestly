@@ -1,0 +1,52 @@
+{
+  "saved": 1780791276.3205712,
+  "payload": {
+    "as_of": "2026-06-07",
+    "fetched_utc": "2026-06-07T00:14:36Z",
+    "score": -0.79,
+    "lean": "soft",
+    "headline": "Live macro momentum is leaning soft for prices (score -0.79 on a -2 to +2 scale).",
+    "drivers": [
+      {
+        "key": "mortgage",
+        "label": "2-year fixed mortgage rate",
+        "value": 4.84,
+        "avg": 4.76,
+        "z": 0.14,
+        "sign": -1,
+        "unit": "%"
+      },
+      {
+        "key": "realpay",
+        "label": "real pay growth (pay minus inflation)",
+        "value": 0.93,
+        "avg": 1.77,
+        "z": -0.69,
+        "sign": 1,
+        "unit": "%"
+      },
+      {
+        "key": "unemp",
+        "label": "unemployment rate",
+        "value": 5.03,
+        "avg": 4.45,
+        "z": 1.55,
+        "sign": -1,
+        "unit": "%"
+      }
+    ],
+    "lines": [
+      "Live macro momentum is leaning soft for prices (score -0.79 on a -2 to +2 scale).",
+      "2-year fixed mortgage rate is 4.84%, above its 3-year average of 4.76% - a drag on affordability.",
+      "Real pay growth is about +0.9% (pay 4.1% against 2.8% inflation); rising real incomes lift buyer budgets.",
+      "Unemployment is 5.0%, above its 3-year average of 4.5% - softening labour market underpins less of housing demand.",
+      "These are demand conditions over the next 6 to 12 months. They sit beside the figure, not inside it - the number is built from sold evidence."
+    ],
+    "sources": {
+      "mortgage": "Bank of England IADB IUMBV34",
+      "cpi": "ONS D7G7",
+      "awe": "ONS KAC3",
+      "unemployment": "ONS MGSX"
+    }
+  }
+}
