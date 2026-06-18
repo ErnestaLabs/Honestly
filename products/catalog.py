@@ -94,7 +94,7 @@ class ProductTemplate:
 # ──────────────────────────────────────────────────────── the 10 launch products
 
 def _lowball_counter_email(subject: dict, params: dict) -> dict:
-    """The Lowball Counter-Email (£1.50) - Trigger: Anger.
+    """The Lowball Counter-Email (£1.49) - Trigger: Anger.
 
     Buyer gets a lowball offer. We ingest the AVM PDF, the 3 strict comps,
     and the user's EPC. Generate a fiercely worded, data-backed counter-offer
@@ -159,7 +159,7 @@ def _lowball_counter_email(subject: dict, params: dict) -> dict:
 
 
 def _neighbor_extension_blueprint(subject: dict, params: dict) -> dict:
-    """The Neighbor's Extension Blueprint (£2.00) - Trigger: FOMO/Greed.
+    """The Neighbor's Extension Blueprint (£1.99) - Trigger: FOMO/Greed.
 
     Find the exact planning application of a similar house on the street
     that got approved. Parse the architectural drawings PDF to extract
@@ -223,7 +223,7 @@ def _neighbor_extension_blueprint(subject: dict, params: dict) -> dict:
 
 
 def _stealth_listing_sniper(subject: dict, params: dict) -> dict:
-    """The Stealth Listing Sniper (£4.00) - Trigger: FOMO.
+    """The Stealth Listing Sniper (£3.99) - Trigger: FOMO.
 
     Find properties on the street bought 15+ years ago by LLCs.
     Generate a scraped list and a mail-merge letter template.
@@ -275,7 +275,7 @@ def _stealth_listing_sniper(subject: dict, params: dict) -> dict:
 
 
 def _council_tax_challenger(subject: dict, params: dict) -> dict:
-    """The Council Tax Banding Challenger (£3.00) - Trigger: Anger.
+    """The Council Tax Banding Challenger (£2.99) - Trigger: Anger.
 
     Find the exact sqm of the property. Compare to VOA banding rules.
     Generate the official VOA challenge letter.
@@ -336,7 +336,7 @@ def _council_tax_challenger(subject: dict, params: dict) -> dict:
 
 
 def _leasehold_trap_xray(subject: dict, params: dict) -> dict:
-    """The Leasehold Trap X-Ray (£5.00) - Trigger: Fear.
+    """The Leasehold Trap X-Ray (£4.99) - Trigger: Fear.
 
     User uploads the listing PDF. Extract lease length and ground rent.
     Calculate the Section 42 extension cost using the Marriage Act formula.
@@ -421,7 +421,7 @@ def _leasehold_trap_xray(subject: dict, params: dict) -> dict:
 
 
 def _gentrification_radar(subject: dict, params: dict) -> dict:
-    """The Gentrification Radar (£3.00) - Trigger: Greed.
+    """The Gentrification Radar (£2.99) - Trigger: Greed.
 
     Forecast 5-year crime and pricing trends. Cross-reference local
     chatter about new cafes/transport.
@@ -496,7 +496,7 @@ def _gentrification_radar(subject: dict, params: dict) -> dict:
 
 
 def _architects_vision(subject: dict, params: dict) -> dict:
-    """The Architect's Vision (£4.00) - Trigger: Greed/FOMO.
+    """The Architect's Vision (£3.99) - Trigger: Greed/FOMO.
 
     Render photorealistic future state of the house with extensions
     and solar panels using Stable Diffusion / ControlNet on the
@@ -561,7 +561,7 @@ def _architects_vision(subject: dict, params: dict) -> dict:
 
 
 def _deal_autopsy(subject: dict, params: dict) -> dict:
-    """The Deal Autopsy (£20.00) - Trigger: Fear.
+    """The Deal Autopsy (£19.99) - Trigger: Fear.
 
     Parse the conveyancing pack, extract lease clauses, flag Hidden Traps.
     Generate a cinematic audio briefing.
@@ -638,7 +638,7 @@ def _deal_autopsy(subject: dict, params: dict) -> dict:
 
 
 def _syndicate_street_map(subject: dict, params: dict) -> dict:
-    """The Syndicate Street Map (£15.00) - Trigger: Greed.
+    """The Syndicate Street Map (£14.99) - Trigger: Greed.
 
     Find hidden power players on a street. Intersect HMLR with Companies House.
     Generate a map highlighting "Equity Hoarders" and "LLC Blocks".
@@ -697,7 +697,7 @@ def _syndicate_street_map(subject: dict, params: dict) -> dict:
 
 
 def _planning_permission_oracle(subject: dict, params: dict) -> dict:
-    """The Planning Permission Oracle (£2.50) - Trigger: Laziness.
+    """The Planning Permission Oracle (£2.49) - Trigger: Laziness.
 
     Analyze roof shape from Street View. Check distance to boundary.
     Output a 90% confidence "Permitted Development: Yes/No" verdict in 3 seconds.
@@ -784,131 +784,131 @@ CATALOG: list[ProductTemplate] = [
         id="lowball_counter_email",
         name="The Lowball Counter-Email",
         description="A fiercely worded, data-backed counter-offer email using your AVM and sold comps.",
-        gbp_price=1.50,
+        gbp_price=1.49,
         emotion_trigger=EmotionTrigger.ANGER,
         required_repos=["langchain-ai/langchain"],
         required_modules=["engine", "epc"],
         execution_function=_lowball_counter_email,
         tier_access="all",
         delivery_format="text",
-        credit_cost_gbp=1.50,
+        credit_cost_gbp=1.49,
     ),
     ProductTemplate(
         id="neighbor_extension_blueprint",
         name="The Neighbor's Extension Blueprint",
         description="Find approved planning applications on your street and extract the square footage added.",
-        gbp_price=2.00,
+        gbp_price=1.99,
         emotion_trigger=EmotionTrigger.FOMO,
         required_repos=["Unstructured-IO/unstructured"],
         required_modules=["planning", "engine"],
         execution_function=_neighbor_extension_blueprint,
         tier_access="all",
         delivery_format="html",
-        credit_cost_gbp=2.00,
+        credit_cost_gbp=1.99,
     ),
     ProductTemplate(
         id="stealth_listing_sniper",
         name="The Stealth Listing Sniper",
         description="Find long-held LLC-owned properties on your street and generate unsolicited offer letters.",
-        gbp_price=4.00,
+        gbp_price=3.99,
         emotion_trigger=EmotionTrigger.FOMO,
         required_repos=[],
         required_modules=["graph_db", "companies_house"],
         execution_function=_stealth_listing_sniper,
         tier_access="plus",
         delivery_format="html",
-        credit_cost_gbp=4.00,
+        credit_cost_gbp=3.99,
     ),
     ProductTemplate(
         id="council_tax_challenger",
         name="The Council Tax Banding Challenger",
         description="Compare your property's sqm to VOA banding rules. Generate the official challenge letter.",
-        gbp_price=3.00,
+        gbp_price=2.99,
         emotion_trigger=EmotionTrigger.ANGER,
         required_repos=["langchain-ai/langchain"],
         required_modules=["engine", "graph_db"],
         execution_function=_council_tax_challenger,
         tier_access="all",
         delivery_format="text",
-        credit_cost_gbp=3.00,
+        credit_cost_gbp=2.99,
     ),
     ProductTemplate(
         id="leasehold_trap_xray",
         name="The Leasehold Trap X-Ray",
         description="Upload the listing PDF. We extract lease terms and calculate the Section 42 extension cost.",
-        gbp_price=5.00,
+        gbp_price=4.99,
         emotion_trigger=EmotionTrigger.FEAR,
         required_repos=["Unstructured-IO/unstructured"],
         required_modules=["engine"],
         execution_function=_leasehold_trap_xray,
         tier_access="all",
         delivery_format="html",
-        credit_cost_gbp=5.00,
+        credit_cost_gbp=4.99,
     ),
     ProductTemplate(
         id="gentrification_radar",
         name="The Gentrification Radar",
         description="5-year price and crime forecasts cross-referenced with local Reddit chatter about new openings.",
-        gbp_price=3.00,
+        gbp_price=2.99,
         emotion_trigger=EmotionTrigger.GREED,
         required_repos=["unit8co/darts"],
         required_modules=["graph_db", "reddit_intel"],
         execution_function=_gentrification_radar,
         tier_access="all",
         delivery_format="html",
-        credit_cost_gbp=3.00,
+        credit_cost_gbp=2.99,
     ),
     ProductTemplate(
         id="architects_vision",
         name="The Architect's Vision",
         description="AI-rendered photorealistic future state of your house with extensions and solar panels.",
-        gbp_price=4.00,
+        gbp_price=3.99,
         emotion_trigger=EmotionTrigger.GREED,
         required_repos=["AUTOMATIC1111/stable-diffusion-webui"],
         required_modules=["vision"],
         execution_function=_architects_vision,
         tier_access="plus",
         delivery_format="html",
-        credit_cost_gbp=4.00,
+        credit_cost_gbp=3.99,
     ),
     ProductTemplate(
         id="deal_autopsy",
         name="The Deal Autopsy",
         description="Parse the conveyancing pack, flag Hidden Traps, generate a cinematic audio briefing.",
-        gbp_price=20.00,
+        gbp_price=19.99,
         emotion_trigger=EmotionTrigger.FEAR,
         required_repos=["Unstructured-IO/unstructured", "openai/whisper"],
         required_modules=[],
         execution_function=_deal_autopsy,
         tier_access="pro",
         delivery_format="html",
-        credit_cost_gbp=15.00,
+        credit_cost_gbp=14.99,
     ),
     ProductTemplate(
         id="syndicate_street_map",
         name="The Syndicate Street Map",
         description="Find hidden power players on a street. Map equity hoarders and LLC blocks.",
-        gbp_price=15.00,
+        gbp_price=14.99,
         emotion_trigger=EmotionTrigger.GREED,
         required_repos=["geopandas", "scikit-learn"],
         required_modules=["graph_db", "companies_house"],
         execution_function=_syndicate_street_map,
         tier_access="pro",
         delivery_format="html",
-        credit_cost_gbp=10.00,
+        credit_cost_gbp=9.99,
     ),
     ProductTemplate(
         id="planning_permission_oracle",
         name="The Planning Permission Oracle",
         description="Analyze your roof from Street View. Get a 90% confidence Permitted Development verdict in 3 seconds.",
-        gbp_price=2.50,
+        gbp_price=2.49,
         emotion_trigger=EmotionTrigger.LAZINESS,
         required_repos=[],
         required_modules=["vision", "overpass", "planning"],
         execution_function=_planning_permission_oracle,
         tier_access="all",
         delivery_format="html",
-        credit_cost_gbp=2.50,
+        credit_cost_gbp=2.49,
     ),
 ]
 
