@@ -90,7 +90,7 @@ services:
       retries: 3
       start_period: 15s
     ports:
-      - "8000:8000"
+      - "8001:8000"
 
   # ── React Frontend (Nginx) ────────────────────────────
   frontend:
