@@ -1,0 +1,20 @@
+[Unit]
+Description=HM Land Registry Price Paid read-only query service (token-gated, OGL open data)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/honestly
+Environment=HMLR_DB_PATH=/opt/honestly/data/hmlr_ppd.db
+Environment=HMLR_QUERY_BIND=127.0.0.1
+Environment=HMLR_QUERY_PORT=8091
+Environment=HMLR_QUERY_TOKEN_FILE=/opt/honestly/.hmlr_query_token
+ExecStart=/usr/bin/python3 /opt/honestly/hmlr_query.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/hmlr-query.log
+StandardError=append:/var/log/hmlr-query.log
+
+[Install]
+WantedBy=multi-user.target

@@ -26,15 +26,18 @@ import os, sys, json, urllib.parse, urllib.request, urllib.error
 GEO = "https://maps.googleapis.com/maps/api"
 ROUTES = "https://routes.googleapis.com/directions/v2:computeRoutes"
 PLACES = "https://places.googleapis.com/v1/places:searchText"
+ADDR_VALIDATE = "https://addressvalidation.googleapis.com/v1:validateAddress"
+_MARK = "0x15807f"   # brand green for map markers/route lines
 
 def _load_env():
     here = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
     if os.path.exists(here):
-        for line in open(here, encoding="utf-8"):
-            line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
-                k, v = line.split("=", 1)
-                os.environ.setdefault(k.strip(), v.strip())
+        with open(here, encoding="utf-8") as fh:
+            for line in fh:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    os.environ.setdefault(k.strip(), v.strip())
 
 def key():
     _load_env()
@@ -81,24 +84,40 @@ def geocode(address):
             "status": st}
 
 # ---------------------------------------------------------------- Street View
-def street_view_available(location):
+def street_view_available(location, source="outdoor"):
     """FREE metadata check - does Street View imagery exist for this address? Implements
-    the 'no photograph available -> say so' rule without paying for an image."""
-    d = _get_json(f"{GEO}/streetview/metadata?" + urllib.parse.urlencode({"location": location, "key": key()}))
+    the 'no photograph available -> say so' rule without paying for an image.
+
+    source defaults to 'outdoor', which restricts to the official Google Street View car
+    collection and EXCLUDES user/business-contributed indoor photo spheres - so a request at
+    a commercial centroid can never come back as the inside of a furniture showroom. We also
+    surface the pano's copyright so the caller can reject anything that is not Google's."""
+    q = {"location": location, "key": key()}
+    if source:
+        q["source"] = source
+    d = _get_json(f"{GEO}/streetview/metadata?" + urllib.parse.urlencode(q))
     st = d.get("status")
     if st == "OK":
-        return {"ok": True, "available": True, "date": d.get("date"), "pano_id": d.get("pano_id")}
+        return {"ok": True, "available": True, "date": d.get("date"),
+                "pano_id": d.get("pano_id"), "copyright": d.get("copyright", "")}
     if st == "ZERO_RESULTS":
         return {"ok": True, "available": False}
     return {"ok": False, "reason": "Street View Static API not enabled" if _not_activated(d) else st, "status": st}
 
-def street_view(location, out, size="640x400", fov=80, heading=None, pitch=10):
-    meta = street_view_available(location)
+def street_view(location, out, size="640x400", fov=80, heading=None, pitch=10, source="outdoor"):
+    meta = street_view_available(location, source=source)
     if not meta.get("ok"):
         return {"ok": False, "reason": meta["reason"]}
     if not meta["available"]:
         return {"ok": True, "available": False, "note": "No Street View imagery for this address"}
+    # belt-and-braces: even with source=outdoor, refuse any panorama not attributed to Google
+    # (a third-party credit means a contributed photo sphere, not the roadside car).
+    cr = (meta.get("copyright") or "")
+    if cr and "google" not in cr.lower():
+        return {"ok": True, "available": False,
+                "note": f"nearest panorama is third-party imagery ({cr.strip()}), not roadside Street View"}
     p = {"location": location, "size": size, "fov": fov, "pitch": pitch, "key": key()}
+    if source: p["source"] = source
     if heading is not None: p["heading"] = heading
     url = f"{GEO}/streetview?" + urllib.parse.urlencode(p)
     try:
@@ -117,9 +136,9 @@ def static_map(out, center=None, zoom=15, size="640x400", markers=None, path=Non
     if center: p.append(("center", center)); p.append(("zoom", str(zoom)))
     for i, m in enumerate(markers or []):
         label = chr(65 + i) if i < 26 else ""
-        p.append(("markers", f"color:0x1f6f5c|label:{label}|{m}"))
+        p.append(("markers", f"color:{_MARK}|label:{label}|{m}"))
     if path:  # encoded or pipe-joined lat,lng list -> a route line
-        p.append(("path", f"weight:4|color:0x1f6f5cff|{path}"))
+        p.append(("path", f"weight:4|color:{_MARK}ff|{path}"))
     url = f"{GEO}/staticmap?" + urllib.parse.urlencode(p)
     try:
         with urllib.request.urlopen(url, timeout=25) as r:
@@ -201,6 +220,67 @@ def places_search(query):
          "lat": p.get("location", {}).get("latitude"), "lng": p.get("location", {}).get("longitude"),
          "place_id": p.get("id")} for p in d["places"][:5]]}
 
+# ---------------------------------------------------------------- Distance Matrix (LIVE)
+def distance_matrix(origin, destinations, mode="transit"):
+    """Travel time + distance from one origin to each destination. origin and each
+    destination is a 'lat,lng' string or an address. mode is transit|walking|driving|
+    bicycling. Returns {ok, mode, legs:[{to, text, seconds, metres}, ...]} or
+    {ok: False, reason}. Context only - never an input to the figure. Never raises."""
+    if not origin or not destinations:
+        return {"ok": False, "reason": "need an origin and >=1 destination"}
+    dests = destinations if isinstance(destinations, (list, tuple)) else [destinations]
+    p = {"origins": origin, "destinations": "|".join(str(x) for x in dests),
+         "mode": mode, "units": "metric", "key": key()}
+    d = _get_json(f"{GEO}/distancematrix/json?" + urllib.parse.urlencode(p))
+    st = d.get("status")
+    if st != "OK":
+        return {"ok": False, "reason": "Distance Matrix API not enabled" if _not_activated(d)
+                else (d.get("error_message") or st), "status": st}
+    row = (d.get("rows") or [{}])[0].get("elements", [])
+    legs = []
+    for to, el in zip(dests, row):
+        if el.get("status") != "OK":
+            legs.append({"to": str(to), "text": None, "seconds": None, "metres": None,
+                         "status": el.get("status")})
+            continue
+        legs.append({"to": str(to),
+                     "text": el.get("duration", {}).get("text"),
+                     "seconds": el.get("duration", {}).get("value"),
+                     "metres": el.get("distance", {}).get("value"),
+                     "dist_text": el.get("distance", {}).get("text")})
+    return {"ok": True, "mode": mode, "legs": legs,
+            "source": "Google Distance Matrix API"}
+
+# ---------------------------------------------------------------- Address Validation (LIVE)
+def validate_address(address, region="GB"):
+    """Verify and normalise a subject address before paid provider calls. Returns
+    {ok, formatted, complete, has_unconfirmed, postcode, components_note, source} or
+    {ok: False, reason}. Context/provenance only. Never raises."""
+    if not address:
+        return {"ok": False, "reason": "no address"}
+    lines = address if isinstance(address, (list, tuple)) else [address]
+    body = {"address": {"regionCode": region, "addressLines": list(lines)}}
+    d = _post_json(f"{ADDR_VALIDATE}?key={urllib.parse.quote(key())}", body, {})
+    if "result" not in d:
+        msg = d.get("error", {}).get("message", "")
+        return {"ok": False, "reason": "Address Validation API not enabled"
+                if ("not" in msg and "enabl" in msg) or "PERMISSION" in json.dumps(d)
+                else (msg or "no result")[:140]}
+    res = d["result"]
+    addr = res.get("address", {})
+    verdict = res.get("verdict", {})
+    postal = (res.get("address", {}).get("postalAddress", {}) or {})
+    return {"ok": True,
+            "formatted": addr.get("formattedAddress"),
+            "complete": bool(verdict.get("addressComplete")),
+            "has_unconfirmed": bool(verdict.get("hasUnconfirmedComponents")),
+            "has_inferred": bool(verdict.get("hasInferredComponents")),
+            "postcode": postal.get("postalCode"),
+            "components_note": ("Some components were unconfirmed"
+                                if verdict.get("hasUnconfirmedComponents")
+                                else "All components confirmed"),
+            "source": "Google Address Validation API"}
+
 # ---------------------------------------------------------------- CLI
 def main():
     if len(sys.argv) < 2:
@@ -218,12 +298,18 @@ def main():
         print(json.dumps(route(sys.argv[2:]), indent=2))
     elif cmd == "places":
         print(json.dumps(places_search(sys.argv[2]), indent=2))
+    elif cmd == "distance":
+        print(json.dumps(distance_matrix(sys.argv[2], sys.argv[3:]), indent=2))
+    elif cmd == "validate":
+        print(json.dumps(validate_address(sys.argv[2]), indent=2))
     elif cmd == "selftest":
         print("Geocoding   :", geocode("SE15 6JH"))
         print("StreetViewMD:", street_view_available("58 Cronin Street, London SE15 6JH"))
         print("StaticMap   :", static_map("_selftest_map.png", center="51.4732,-0.0712"))
         print("Route       :", route(["SE15 6JH", "SE15 5LE", "SE15 6HB", "SE15 5FA"]))
         print("Places      :", places_search("Cronin Street Peckham"))
+        print("Distance    :", distance_matrix("51.5194,-0.0935", ["51.5074,-0.1278"], mode="transit"))
+        print("Validate    :", validate_address("Defoe House, Barbican, London EC2Y 8DN"))
     else:
         print("unknown command:", cmd); print(__doc__)
 

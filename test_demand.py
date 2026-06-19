@@ -56,11 +56,29 @@ class TestCutoff(unittest.TestCase):
         self.assertLess(c, datetime.date.today().isoformat())
 
 
+_SECTOR_OK = {"ok": True, "count": 47, "n_postcodes": 4,
+              "source": "HM Land Registry Price Paid Data (SPARQL count, OGL)"}
+_SECTOR_DOWN = {"ok": False, "reason": "HMLR SPARQL HTTP 503"}
+
+
+class TestSectorOf(unittest.TestCase):
+    def test_sector_extraction(self):
+        self.assertEqual(demand._sector_of("SE15 6JH"), "SE15 6")
+        self.assertEqual(demand._sector_of("se15 6jh"), "SE15 6")
+        self.assertEqual(demand._sector_of("N1 9GU"), "N1 9")
+
+    def test_no_inward_part_returns_none(self):
+        self.assertIsNone(demand._sector_of("SE15"))
+        self.assertIsNone(demand._sector_of(""))
+        self.assertIsNone(demand._sector_of(None))
+
+
 class TestForPostcode(unittest.TestCase):
     def test_busier_area_with_sentiment(self):
         counts = {"SE15 6JH": 6, "SE15 6JG": 2, "SE15 6JF": 2, "SE15 6JE": 2}
         with mock.patch.object(demand.geo, "nearest", return_value=_NEAREST), \
              mock.patch.object(demand.lr, "ppd_postcode", side_effect=_ppd_factory(counts)), \
+             mock.patch.object(demand.lr, "ppd_count", return_value=_SECTOR_OK), \
              mock.patch.object(demand.reddit_intel, "for_area",
                                return_value={"sentiment": "positive", "signal_count": 7}):
             d = demand.for_postcode("SE15 6JH")
@@ -68,8 +86,12 @@ class TestForPostcode(unittest.TestCase):
         self.assertEqual(d["subject_count"], 6)
         self.assertEqual(d["relative"], "busier than nearby streets")
         self.assertEqual(d["area_total"], 12)
+        self.assertEqual(d["sector"]["count"], 47)
+        self.assertEqual(d["sector"]["sector"], "SE15 6")
+        self.assertEqual(d["confidence"], "good")        # sector volume drives confidence
         self.assertEqual(d["sentiment"]["read"], "positive")
         self.assertIn("does not move the valuation", d["note"])
+        self.assertIn("SE15 6 sector", d["note"])
 
     def test_geo_failure_degrades(self):
         with mock.patch.object(demand.geo, "nearest",
@@ -89,20 +111,46 @@ class TestForPostcode(unittest.TestCase):
         counts = {"SE15 6JH": 3, "SE15 6JG": 3, "SE15 6JF": 3, "SE15 6JE": 3}
         with mock.patch.object(demand.geo, "nearest", return_value=_NEAREST), \
              mock.patch.object(demand.lr, "ppd_postcode", side_effect=_ppd_factory(counts)), \
+             mock.patch.object(demand.lr, "ppd_count", return_value=_SECTOR_OK), \
              mock.patch.object(demand.reddit_intel, "for_area", side_effect=Exception("mcp down")):
             d = demand.for_postcode("SE15 6JH")
         self.assertTrue(d["ok"])                 # never raises on a down MCP
         self.assertNotIn("sentiment", d)
         self.assertEqual(d["relative"], "in line with nearby streets")
 
-    def test_low_confidence_flagged_on_thin_sample(self):
+    def test_low_confidence_flagged_on_thin_sector(self):
         counts = {"SE15 6JH": 1, "SE15 6JG": 1, "SE15 6JF": 0, "SE15 6JE": 0}
+        thin = {"ok": True, "count": 6, "n_postcodes": 4}      # sector volume still thin
         with mock.patch.object(demand.geo, "nearest", return_value=_NEAREST), \
              mock.patch.object(demand.lr, "ppd_postcode", side_effect=_ppd_factory(counts)), \
+             mock.patch.object(demand.lr, "ppd_count", return_value=thin), \
              mock.patch.object(demand.reddit_intel, "for_area", return_value={}):
             d = demand.for_postcode("SE15 6JH")
         self.assertEqual(d["confidence"], "low")
         self.assertIn("directional", d["note"])
+
+    def test_sector_down_falls_back_to_ring(self):
+        counts = {"SE15 6JH": 3, "SE15 6JG": 3, "SE15 6JF": 3, "SE15 6JE": 3}
+        with mock.patch.object(demand.geo, "nearest", return_value=_NEAREST), \
+             mock.patch.object(demand.lr, "ppd_postcode", side_effect=_ppd_factory(counts)), \
+             mock.patch.object(demand.lr, "ppd_count", return_value=_SECTOR_DOWN), \
+             mock.patch.object(demand.reddit_intel, "for_area", return_value={}):
+            d = demand.for_postcode("SE15 6JH")
+        self.assertTrue(d["ok"])                 # sector down never breaks the read
+        self.assertIsNone(d["sector"])
+        self.assertNotIn("sector since", d["note"])   # no sector lead when unavailable
+        # confidence falls back to the ring total (12 -> medium)
+        self.assertEqual(d["confidence"], "medium")
+
+    def test_sector_count_raising_is_swallowed(self):
+        counts = {"SE15 6JH": 3, "SE15 6JG": 3, "SE15 6JF": 3, "SE15 6JE": 3}
+        with mock.patch.object(demand.geo, "nearest", return_value=_NEAREST), \
+             mock.patch.object(demand.lr, "ppd_postcode", side_effect=_ppd_factory(counts)), \
+             mock.patch.object(demand.lr, "ppd_count", side_effect=Exception("sparql down")), \
+             mock.patch.object(demand.reddit_intel, "for_area", return_value={}):
+            d = demand.for_postcode("SE15 6JH")
+        self.assertTrue(d["ok"])
+        self.assertIsNone(d["sector"])
 
 
 class TestBrief(unittest.TestCase):

@@ -137,3 +137,30 @@ should be able to tag a quote → export → drop into a brief without re-readin
 
 **Net:** no new feature classes — this session is corroborating evidence for the existing P0 (JSON
 export) and P1 (SSR calibration) build order. The ranking holds.
+
+---
+
+## Session log — 2026-06-13 (usehonestly.co.uk comparables + funnel review)
+
+**Operator note:** The free valuation was still too noisy. The product should not feel like a compromise; it should feel like the start of a serious appraisal.
+
+### What I needed
+- Stop mixing stale sold records into the lite range.
+- Make the lite version feel premium enough that the paid version feels like a clear step up, not a rescue.
+- Keep the landing/blog intact. The product work was the issue, not the marketing shell.
+- Re-use the current evidence engine rather than redoing the funnel.
+
+### What the code was doing wrong
+- The lite range was widening on old sales instead of prioritising the newest same-type evidence.
+- The free surface showed confidence, but the range still looked like an old archive dump.
+- The current plain-English layer was fine, but not aspirational.
+
+### What should happen next
+- Select the newest comparable sales first, then widen only when the evidence is genuinely thin.
+- Keep the free range honest, but make it look like a serious valuer built it.
+- Add a subtle Pro tease that makes the upgrade feel obvious: floor area, stronger cross-checks, full report pack.
+- If the free number is not making people think "what does paid do then?", it is not finished.
+
+### Product verdict
+The funnel is not the problem. The comparables logic is.
+The free product has to feel like a premium answer with a gated second layer, not like a rough draft.

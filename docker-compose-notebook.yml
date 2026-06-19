@@ -1,0 +1,42 @@
+# Open Notebook research service — runs on the VPS alongside server.py.
+# server.py calls it at http://127.0.0.1:5055 (internal only, not exposed to internet).
+#
+# First-time setup on the VPS:
+#   cd /opt/honestly
+#   mkdir -p surreal_data notebook_data
+#   docker compose -f docker-compose-notebook.yml up -d
+#
+# Then configure your Anthropic API key:
+#   ssh -L 8502:localhost:8502 root@<vps-ip>
+#   Open http://localhost:8502 in your browser -> Settings -> Models
+
+services:
+  surrealdb:
+    image: surrealdb/surrealdb:v2
+    command: start --log info --user root --pass root rocksdb:/mydata/mydatabase.db
+    user: root
+    volumes:
+      - /opt/honestly/surreal_data:/mydata
+    environment:
+      - SURREAL_EXPERIMENTAL_GRAPHQL=true
+    restart: always
+    pull_policy: always
+
+  open_notebook:
+    image: lfnovo/open_notebook:v1-latest
+    ports:
+      - "127.0.0.1:5055:5055"
+      - "127.0.0.1:8502:8502"
+    environment:
+      - OPEN_NOTEBOOK_ENCRYPTION_KEY=hn-nb-enc-key-2026-xK9mPqR7wZ3v
+      - SURREAL_URL=ws://surrealdb:8000/rpc
+      - SURREAL_USER=root
+      - SURREAL_PASSWORD=root
+      - SURREAL_NAMESPACE=open_notebook
+      - SURREAL_DATABASE=open_notebook
+    volumes:
+      - /opt/honestly/notebook_data:/app/data
+    depends_on:
+      - surrealdb
+    restart: always
+    pull_policy: always

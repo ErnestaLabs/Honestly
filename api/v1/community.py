@@ -20,26 +20,30 @@ router = APIRouter(prefix="/v1", tags=["community"])
 # ──────────────────────────────────────────────────────────── auth helper
 
 def _get_tier(authorization: str | None) -> str:
-    """Extract user tier from the Authorization header.
+    """Extract user tier SERVER-SIDE via Redis.
 
-    In production, this would validate a JWT or session token.
-    For now, the header format is: Bearer {user_id}:{tier}
+    The frontend never passes the tier. We look it up from Redis
+    (set by the successful_payment webhook) or default to 'free'.
+    Format: Bearer {user_id}
     """
-    if not authorization:
-        return "free"
+    user_id = _get_user_id(authorization)
     try:
-        token = authorization.replace("Bearer ", "").strip()
-        # Format: user_id:tier or just user_id
-        parts = token.split(":")
-        if len(parts) == 2:
-            return parts[1].lower()
-        return "free"
+        import redis
+        r = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+        tier = r.get(f"honestly:tier:{user_id}")
+        if tier in ("plus", "pro"):
+            return tier
     except Exception:
-        return "free"
+        pass
+    return "free"
 
 
 def _get_user_id(authorization: str | None) -> str:
-    """Extract user_id from the Authorization header."""
+    """Extract user_id from Authorization header.
+
+    Format: Bearer {user_id}
+    Only user_id is trusted. No tier is passed by the frontend.
+    """
     if not authorization:
         return "anonymous"
     try:

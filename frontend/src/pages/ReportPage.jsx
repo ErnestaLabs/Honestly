@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ConfidenceGauge from '../components/ConfidenceGauge';
 import ProductSheet from '../components/ProductSheet';
+import { saveLastAvm, loadLastAvm, saveCreditBalance } from '../utils/tgStorage';
 
 const EMOTION_STYLES = {
   anger: { bg: 'rgba(255,69,58,0.08)', accent: '#ff453a', icon: '😤', label: 'Anger' },
@@ -24,13 +25,24 @@ export default function ReportPage() {
 
   useEffect(() => {
     window.Telegram?.WebApp?.expand?.();
-    // Try state first, then sessionStorage
-    const data = location.state?.avmResult || (() => {
-      try {
-        return JSON.parse(sessionStorage.getItem('honestly_last_avm'));
-      } catch { return null; }
-    })();
-    if (data) setAvmResult(data);
+
+    // Load from: React Router state → CloudStorage (persists TG restarts)
+    const loadData = async () => {
+      const stateData = location.state?.avmResult;
+      if (stateData) {
+        setAvmResult(stateData);
+        await saveLastAvm(stateData); // persist for next load
+        return;
+      }
+
+      // Fallback: CloudStorage survives TG background kills
+      const stored = await loadLastAvm();
+      if (stored) {
+        setAvmResult(stored);
+      }
+    };
+
+    loadData();
   }, []);
 
   if (!avmResult) {
@@ -44,14 +56,9 @@ export default function ReportPage() {
         <button
           onClick={() => navigate('/')}
           style={{
-            padding: '14px 32px',
-            borderRadius: 12,
-            background: 'var(--tg-button)',
-            color: 'var(--tg-button-text)',
-            border: 'none',
-            fontSize: 16,
-            fontWeight: 600,
-            cursor: 'pointer',
+            padding: '14px 32px', borderRadius: 12,
+            background: 'var(--tg-button)', color: 'var(--tg-button-text)',
+            border: 'none', fontSize: 16, fontWeight: 600, cursor: 'pointer',
           }}
         >
           Value a Property
@@ -63,7 +70,6 @@ export default function ReportPage() {
   const avm = avmResult.avm || {};
   const triggers = avmResult.product_triggers || [];
 
-  // Build valuation context for product purchases
   const valuationContext = {
     address: avm.address,
     postcode: avm.postcode,
@@ -83,8 +89,7 @@ export default function ReportPage() {
       {/* ── Hero value ──────────────────────────────────── */}
       <div style={{
         background: 'linear-gradient(180deg, var(--tg-secondary-bg) 0%, var(--tg-bg) 100%)',
-        padding: '32px 20px 24px',
-        textAlign: 'center',
+        padding: '32px 20px 24px', textAlign: 'center',
       }}>
         <p style={{ fontSize: 13, color: 'var(--tg-hint)', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: 1 }}>
           Assessed Value
@@ -96,27 +101,18 @@ export default function ReportPage() {
           Range: {formatPrice(avm.low)} - {formatPrice(avm.high)}
         </p>
 
-        {/* Confidence gauge */}
         <div style={{ maxWidth: 300, margin: '0 auto' }}>
           <ConfidenceGauge score={avm.confidence_score} label={avm.confidence_grade} />
         </div>
         <p style={{ fontSize: 13, color: 'var(--tg-hint)', margin: '4px 0 0' }}>
           Confidence: {avm.confidence_grade} ({avm.confidence_score}/100)
         </p>
-
-        {/* Address */}
-        <p style={{ fontSize: 14, margin: '12px 0 0' }}>
-          📍 {avm.address}
-        </p>
+        <p style={{ fontSize: 14, margin: '12px 0 0' }}>📍 {avm.address}</p>
       </div>
 
       {/* ── Property details ────────────────────────────── */}
       <div style={{ padding: '16px 20px' }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 12,
-        }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           {[
             { label: 'Floor Area', value: avm.sqm ? `${avm.sqm} sqm` : '—' },
             { label: 'EPC Rating', value: avm.epc || '—' },
@@ -124,10 +120,8 @@ export default function ReportPage() {
             { label: 'Comparables', value: avm.n_comps ? `${avm.n_comps} sold` : '—' },
           ].map((d) => (
             <div key={d.label} style={{
-              background: 'var(--tg-secondary-bg)',
-              borderRadius: 12,
-              padding: '12px',
-              textAlign: 'center',
+              background: 'var(--tg-secondary-bg)', borderRadius: 12,
+              padding: '12px', textAlign: 'center',
             }}>
               <div style={{ fontSize: 11, color: 'var(--tg-hint)', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                 {d.label}
@@ -147,13 +141,9 @@ export default function ReportPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {avm.evidence.slice(0, 5).map((e, i) => (
               <div key={i} style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                background: 'var(--tg-secondary-bg)',
-                borderRadius: 10,
-                padding: '10px 12px',
-                fontSize: 13,
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                background: 'var(--tg-secondary-bg)', borderRadius: 10,
+                padding: '10px 12px', fontSize: 13,
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -182,17 +172,14 @@ export default function ReportPage() {
             {triggers.map((t, i) => {
               const style = EMOTION_STYLES[t.emotion_trigger] || EMOTION_STYLES.anger;
               const priceLabel = t.effective_gbp_price
-                ? `£${t.effective_gbp_price.toFixed(2)}`
-                : '';
-
+                ? `£${t.effective_gbp_price.toFixed(2)}` : '';
               return (
                 <div
                   key={t.product_id}
                   className="product-card"
                   onClick={() => setSelectedProduct(t)}
                   style={{
-                    background: style.bg,
-                    borderColor: style.accent + '40',
+                    background: style.bg, borderColor: style.accent + '40',
                     padding: '12px 14px',
                   }}
                 >
@@ -200,7 +187,9 @@ export default function ReportPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ fontSize: 20 }}>{style.icon}</span>
                       <div>
-                        <div style={{ fontWeight: 600, fontSize: 14 }}>{t.name || t.product_id?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</div>
+                        <div style={{ fontWeight: 600, fontSize: 14 }}>
+                          {t.name || t.product_id?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                        </div>
                         <div style={{ fontSize: 11, color: style.accent, textTransform: 'uppercase', fontWeight: 500 }}>
                           {style.label} · {t.relevance_score}% match
                         </div>
@@ -218,7 +207,7 @@ export default function ReportPage() {
         </div>
       )}
 
-      {/* ── Bottom sheet for purchase ───────────────────── */}
+      {/* ── Bottom sheet ────────────────────────────────── */}
       {selectedProduct && (
         <ProductSheet
           product={selectedProduct}
@@ -227,10 +216,14 @@ export default function ReportPage() {
             setSelectedProduct(null);
             if (action === 'navigate_store') navigate('/store');
           }}
-          onComplete={(res) => {
-            // Update the stored AVM result with any new data
-            const current = JSON.parse(sessionStorage.getItem('honestly_last_avm') || '{}');
-            sessionStorage.setItem('honestly_last_avm', JSON.stringify({ ...current, last_purchase: res }));
+          onComplete={async (res) => {
+            // Persist purchase result to CloudStorage
+            const current = await loadLastAvm() || {};
+            current.last_purchase = res;
+            await saveLastAvm(current);
+            if (res.remaining_credits_gbp !== undefined && typeof res.remaining_credits_gbp === 'number') {
+              await saveCreditBalance(res.remaining_credits_gbp);
+            }
           }}
         />
       )}

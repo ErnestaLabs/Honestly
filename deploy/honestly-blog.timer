@@ -1,0 +1,11 @@
+[Unit]
+Description=Run the Honestly daily blog publish every morning
+
+[Timer]
+# 07:07 local every day (off the :00 mark so it doesn't stampede shared APIs at once).
+OnCalendar=*-*-* 07:07:00
+# If the box was off at 07:07, run as soon as it next boots so a day is never skipped.
+Persistent=true
+
+[Install]
+WantedBy=timers.target

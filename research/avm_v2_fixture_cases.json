@@ -1,0 +1,106 @@
+{
+  "notes": "Small deterministic research fixture for harness validation. Target prices are fixture labels, not promotion-grade ground truth. Promotion requires leakage-safe historical train/calibration/test data.",
+  "cases": [
+    {
+      "case_id": "cronin_58",
+      "address": "58 Cronin Street, London SE15 6JH",
+      "finish": "high",
+      "target_price": 540000,
+      "time_on_market_days": 28,
+      "baseline": {"low": 500000, "central": 530000, "high": 565000, "confidence_score": 70},
+      "sentiment": {"posts": [
+        {"date": "2026-06-01", "title": "Peckham SE15 demand", "text": "Peckham feels popular and walkable with good transport", "entities": ["transport", "amenity"], "sentiment": 0.6},
+        {"date": "2026-05-28", "title": "SE15 safety", "text": "Some traffic noise but generally safe near the park", "entities": ["safety", "noise"], "sentiment": 0.1},
+        {"date": "2026-05-20", "title": "Nunhead and Peckham", "text": "Great cafes and improving streets", "entities": ["gentrification", "amenity"], "sentiment": 0.5},
+        {"date": "2026-05-18", "title": "Peckham station", "text": "Convenient station links make the area desirable", "entities": ["station"], "sentiment": 0.7},
+        {"date": "2026-05-14", "title": "SE15 viewings", "text": "Competitive demand for good flats", "entities": ["demand"], "sentiment": 0.5},
+        {"date": "2026-05-10", "title": "Peckham Road", "text": "Traffic can be noisy", "entities": ["noise"], "sentiment": -0.3},
+        {"date": "2026-05-05", "title": "Local schools", "text": "Good local school options are a plus", "entities": ["school"], "sentiment": 0.4},
+        {"date": "2026-04-28", "title": "SE15 regeneration", "text": "Regeneration is making the area more desirable", "entities": ["regeneration"], "sentiment": 0.7},
+        {"date": "2026-04-20", "title": "Peckham night noise", "text": "Some anti-social noise late at night", "entities": ["safety", "noise"], "sentiment": -0.2},
+        {"date": "2026-04-10", "title": "Peckham buyers", "text": "Buyers say it is improving and convenient", "entities": ["transport"], "sentiment": 0.5}
+      ]}
+    },
+    {
+      "case_id": "cronin_41",
+      "address": "41 Cronin Street, London SE15 6JH",
+      "finish": "average",
+      "target_price": 320000,
+      "time_on_market_days": 22,
+      "baseline": {"low": 290000, "central": 325000, "high": 330000, "confidence_score": 78},
+      "sentiment": {"posts": []}
+    },
+    {
+      "case_id": "cronin_55",
+      "address": "55 Cronin Street, London SE15 6JH",
+      "finish": "average",
+      "target_price": 335000,
+      "time_on_market_days": 34,
+      "baseline": {"low": 315000, "central": 330000, "high": 360000, "confidence_score": 73},
+      "sentiment": {"posts": []}
+    },
+    {
+      "case_id": "chandler_86",
+      "address": "86 Chandler Way, London SE15 6DT",
+      "finish": "average",
+      "target_price": 380000,
+      "time_on_market_days": 41,
+      "baseline": {"low": 350000, "central": 380000, "high": 420000, "confidence_score": 55},
+      "sentiment": {"posts": []}
+    },
+    {
+      "case_id": "peckham_105",
+      "address": "105 Peckham Road, London SE15 5LJ",
+      "finish": "average",
+      "target_price": 330000,
+      "time_on_market_days": 49,
+      "baseline": {"low": 300000, "central": 330000, "high": 360000, "confidence_score": 55},
+      "sentiment": {"posts": []}
+    },
+    {
+      "case_id": "peckham_41_se5",
+      "address": "41 Peckham Road, London SE5 8UH",
+      "finish": "average",
+      "target_price": 3520000,
+      "time_on_market_days": 120,
+      "baseline": {"low": 3170000, "central": 3520000, "high": 3875000, "confidence_score": 58},
+      "sentiment": {"posts": []}
+    },
+    {
+      "case_id": "stanswood_72",
+      "address": "72 Stanswood Gardens, London SE5 7SR",
+      "finish": "average",
+      "target_price": 495000,
+      "time_on_market_days": 66,
+      "baseline": {"low": 445000, "central": 495000, "high": 545000, "confidence_score": 56},
+      "sentiment": {"posts": []}
+    },
+    {
+      "case_id": "east_surrey_57",
+      "address": "57 East Surrey Grove, London SE15 6EB",
+      "finish": "average",
+      "target_price": 330000,
+      "time_on_market_days": 31,
+      "baseline": {"low": 325000, "central": 330000, "high": 380000, "confidence_score": 67},
+      "sentiment": {"posts": []}
+    },
+    {
+      "case_id": "pentridge_43",
+      "address": "43 Pentridge Street, London SE15 6JE",
+      "finish": "average",
+      "target_price": 370000,
+      "time_on_market_days": 36,
+      "baseline": {"low": 330000, "central": 370000, "high": 415000, "confidence_score": 73},
+      "sentiment": {"posts": []}
+    },
+    {
+      "case_id": "cronin_61",
+      "address": "61 Cronin Street, London SE15 6JH",
+      "finish": "average",
+      "target_price": 540000,
+      "time_on_market_days": 82,
+      "baseline": {"low": 485000, "central": 540000, "high": 595000, "confidence_score": 64},
+      "sentiment": {"posts": []}
+    }
+  ]
+}

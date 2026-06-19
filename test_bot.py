@@ -11,6 +11,12 @@ offline and deterministically. No real .env, token or API calls are touched.
 Run:  python -m unittest test_bot -v   (or: python test_bot.py)
 """
 import os, sys, json, base64, tempfile, unittest
+from unittest import mock
+
+# Isolate the whole suite from the real persistence DB BEFORE store.py is imported
+# (directly or via bot/server) - tests that exercise delivery write through store.py,
+# and must never touch the production honestly.db. A throwaway path keeps them clean.
+os.environ.setdefault("HONESTLY_DB", os.path.join(tempfile.gettempdir(), "honestly_test.db"))
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bot
@@ -48,11 +54,14 @@ def make_summary(*_a, **_k):
                                          "Unemployment is 5.0%, above its 3-year average of 4.5%."],
                                "sources": {"mortgage": "Bank of England IADB IUMBV34"}}},
         "guide_label": "Guide", "guide_value_str": "Offers over £500,000",
-        "psm": 6176,
+        "psm": 6176, "n_comps": 7,
+        "evidence_purity": {"pct": 88, "adjustment_pct": 12},
+        "confidence": {"grade": "Good", "score": 72},
+        "plain_english": {"headline": "A defensible two-bed flat valuation.", "bullets": []},
         "verdict": {"tone": "ok", "text": "Priced fairly versus the evidence"},
         "evidence": [{"address": "60 Cronin Street", "sqm": 82,
                       "price_str": "£520,000", "date": "2024-03",
-                      "verify": "https://propertydata.co.uk/transaction/ABC123"}],
+                      "verify": "https://landregistry.data.gov.uk/data/ppi/transaction/ABC123/current"}],
         "positioning": {"note": "Below the local average for the street"},
     }
 
@@ -123,6 +132,12 @@ class BotTestBase(unittest.TestCase):
         import audio as _audio_mod
         self._saved["audio_walk"] = (_audio_mod, _audio_mod.save_walkthrough)
         _audio_mod.save_walkthrough = lambda d, path, key=None, fmt="mp3": None
+        # area context is gathered on the report path (bot delivers PDF+HTML with the
+        # Area/Safety/Environment/Planning sections). Stub it off so the suite is offline
+        # and deterministic and never reaches Overpass / Police / Flood / Gemini.
+        import area_context as _ctx_mod
+        self._saved["area_ctx"] = (_ctx_mod, _ctx_mod.gather)
+        _ctx_mod.gather = lambda subject, summary=None, anchors=None: None
         # deliver_* are reassigned by some tests to simulate failure; snapshot them
         # so every test starts from the real implementation.
         self._saved["deliver_full"] = bot.deliver_full
@@ -143,6 +158,8 @@ class BotTestBase(unittest.TestCase):
             elif name == "pl_schools": bot.products.nearby_schools = fn
             elif name == "audio_walk":
                 mod, orig = fn; mod.save_walkthrough = orig
+            elif name == "area_ctx":
+                mod, orig = fn; mod.gather = orig
             else: setattr(bot, name, fn)
         bot.STATE = self._orig_state
         try: os.unlink(self._tmp.name)
@@ -173,10 +190,12 @@ class BotTestBase(unittest.TestCase):
         bot.handle(self.cb(f"q:c_premium:{p}", uid, chat))
     def run_wizard(self, aud, uid=1, chat=1, beds="2", baths="1",
                    finish="average", investment="0", money="skip"):
-        """Pick the audience and tap through the whole intake to the valuation."""
+        """Pick the audience and tap through the whole intake to the valuation.
+
+        `beds`/`baths` stay accepted for older tests/callers but are no longer asked before
+        first value; public facts are fetched/inferred, not used as conversion gates.
+        """
         bot.handle(self.cb(f"aud:{aud}", uid, chat))
-        bot.handle(self.cb(f"q:beds:{beds}", uid, chat))
-        bot.handle(self.cb(f"q:baths:{baths}", uid, chat))
         self.tap_condition(finish, uid, chat)
         if aud in ("vendor", "agent"):
             bot.handle(self.cb(f"q:investment:{investment}", uid, chat))
@@ -413,16 +432,22 @@ class TestAudienceFlow(BotTestBase):
         bot.handle(self.cb("aud:vendor"))
         self.assertIn("address first", self.last_say())
 
-    def test_first_valuation_is_the_full_kit_free(self):
-        # a brand-new, non-subscribed user's FIRST valuation is the whole kit, no charge
+    def test_first_valuation_is_free_lite_then_pro_offer(self):
+        # a brand-new, non-subscribed user's FIRST valuation is the FREE Lite report - the
+        # figure + sold evidence, delivered - and the Pro offer is presented AFTER it. We
+        # never give the full Decision pack away; Lite is the hook, Pro is the upgrade.
         bot.PENDING[1] = {"address": "58 Cronin Street SE15 6JH"}
         self.run_wizard("vendor")
         docpaths = [p[1] for p in self.docs]
-        self.assertIn("report.pdf", docpaths)               # real PDF, not a teaser image
-        self.assertIn("Evidence", self.all_say_text())       # figures delivered
-        self.assertTrue(bot.had_first(1))                    # the free taste is now spent
-        self.assertIn("That one was on us", self.all_say_text())   # the packs explained
+        self.assertIn("report.pdf", docpaths)               # the Lite report is delivered
+        self.assertIn("evidence-based", self.all_say_text())       # the figure/evidence reached them
+        self.assertTrue(bot.had_first(1))                    # first valuation recorded
         self.assertIn(1, bot.AWAIT_TESTI)                    # testimonial invited
+        # the Pro offer is presented AFTER the free Lite - a buy CTA appears (not before)
+        buys = [b.get("callback_data", "") for _, _, kb in self.says if kb for row in kb for b in row
+                if b.get("callback_data", "").startswith("buy:")]
+        self.assertTrue(buys, "Pro offer (buy CTA) must follow the free Lite valuation")
+        self.assertNotIn("That one was on us", self.all_say_text())  # no full-kit giveaway
 
     def test_no_teaser_image_is_ever_sent(self):
         # the rendered locked/clear teaser pic is gone for good - products, not pictures
@@ -449,7 +474,7 @@ class TestAudienceFlow(BotTestBase):
         bot.PENDING[1] = {"address": "58 Cronin Street SE15 6JH"}
         self.run_wizard("vendor")
         t = self.all_say_text()
-        self.assertIn("Valuation pack", t)               # the packs are offered directly
+        self.assertIn("Evidence pack", t)                # the packs are offered directly
         self.assertNotIn("membership-based", t)          # no mandatory membership wall
         buys = [b["callback_data"] for _, _, kb in self.says if kb for row in kb for b in row
                 if b["callback_data"].startswith("buy:")]
@@ -464,7 +489,7 @@ class TestAudienceFlow(BotTestBase):
         docpaths = [p[1] for p in self.docs]
         self.assertIn("report.pdf", docpaths)
         self.assertIn("report_interactive.html", docpaths)
-        self.assertIn("Evidence", self.all_say_text())
+        self.assertIn("evidence-based", self.all_say_text())
 
     def test_comp_gets_full_kit_every_time(self):
         # the owner (PROPHET) is the only one who gets the full kit free on every valuation
@@ -493,18 +518,14 @@ class TestWizard(BotTestBase):
         seen = self.capture_run_value()
         bot.PENDING[1] = {"address": "58 Cronin Street SE15 6JH"}
         bot.handle(self.cb("aud:vendor"))
-        # the first thing they see is a question, not a valuation
+        # the first thing they see is high-leverage context, not a valuation or public-data gate
         self.assertIn("Question 1 of", self.last_say())
-        self.assertIn("bedrooms", self.last_say())
+        self.assertIn("condition", self.last_say())
         self.assertNotIn("answers", seen)                    # engine not called yet
 
     def test_questions_asked_in_order(self):
         bot.PENDING[1] = {"address": "x"}
         bot.handle(self.cb("aud:agent"))
-        self.assertIn("bedrooms", self.last_say())
-        bot.handle(self.cb("q:beds:2"))
-        self.assertIn("bathrooms", self.last_say())
-        bot.handle(self.cb("q:baths:1"))
         self.assertIn("condition", self.last_say())      # condition sub-survey starts
         bot.handle(self.cb("q:c_state:2"))
         self.assertIn("kitchen", self.last_say())
@@ -519,8 +540,8 @@ class TestWizard(BotTestBase):
         seen = self.capture_run_value()
         bot.PENDING[1] = {"address": "58 Cronin Street SE15 6JH"}
         self.run_wizard("agent", beds="3", baths="2", finish="high", investment="1")
-        self.assertEqual(seen["answers"]["beds"], 3)
-        self.assertEqual(seen["answers"]["baths"], 2)
+        self.assertNotIn("beds", seen["answers"])
+        self.assertNotIn("baths", seen["answers"])
         self.assertEqual(seen["answers"]["finish"], "high")
         self.assertIs(seen["answers"]["investment"], True)
 
@@ -533,8 +554,6 @@ class TestWizard(BotTestBase):
         bot.PENDING[1] = {"address": "58 Cronin Street SE15 6JH"}
         # buyer is asked the asking price as a typed figure; send it as a message mid-intake
         bot.handle(self.cb("aud:buyer"))
-        bot.handle(self.cb("q:beds:2"))
-        bot.handle(self.cb("q:baths:1"))
         self.tap_condition("average")
         self.assertIn("asking price", self.last_say())       # now awaiting a typed figure
         bot.handle(self.msg("£610,000"))                     # typed, not a button
@@ -554,12 +573,23 @@ class TestWizard(BotTestBase):
     def test_garbage_figure_reprompts(self):
         bot.PENDING[1] = {"address": "x"}
         bot.handle(self.cb("aud:buyer"))
-        bot.handle(self.cb("q:beds:2"))
-        bot.handle(self.cb("q:baths:1"))
         self.tap_condition("average")
         bot.handle(self.msg("dunno"))                        # not a figure
         self.assertIn("525000", self.last_say())             # gentle reprompt with an example
         self.assertIn(1, bot.PENDING)                        # still mid-intake, not abandoned
+
+    def test_no_public_data_or_finance_gates_before_first_value(self):
+        seen = self.capture_run_value()
+        bot.PENDING[1] = {"address": "58 Cronin Street SE15 6JH"}
+        bot.handle(self.cb("aud:buyer"))
+        self.tap_condition("average")
+        self.assertIn("asking price", self.last_say())
+        bot.handle(self.cb("q:asking:skip"))
+        all_text = self.all_say_text().lower()
+        self.assertNotIn("floor area", all_text)
+        self.assertNotIn("deposit", all_text)
+        self.assertNotIn("household income", all_text)
+        self.assertIn("answers", seen)
 
     def test_wizard_without_pending_asks_for_address(self):
         bot.handle(self.cb("q:beds:2"))
@@ -655,14 +685,14 @@ class TestPayPaths(BotTestBase):
         bot.PENDING[1] = {"address": "x", "r": make_r()}
         bot.handle(self.cb("pay:vendor"))
         self.assertNotIn("sendInvoice", self.tg_methods())   # no auto-charge
-        self.assertIn("Valuation pack", self.all_say_text()) # the packs are offered instead
+        self.assertIn("Evidence pack", self.all_say_text())  # the packs are offered instead
 
     def test_pay_with_credit_unlocks_full_kit_and_spends(self):
         bot.redeem_code(1, "TAUK")
         bot.PENDING[1] = {"address": "x", "r": make_r()}
         bot.handle(self.cb("pay:vendor"))
         self.assertEqual(bot.free_credits(1), 0)             # credit spent
-        self.assertIn("Evidence", self.all_say_text())       # figures delivered
+        self.assertIn("evidence-based", self.all_say_text())       # figures delivered
         self.assertIn("report.pdf", [p[1] for p in self.docs])   # full kit, real PDF
 
     def test_credit_refunded_when_delivery_fails(self):
@@ -698,7 +728,7 @@ class TestPayments(BotTestBase):
         # the consumer pack is PDF + HTML: the report goes out, the email template does not
         bot.PENDING[1] = {"address": "x", "r": make_r()}
         bot.handle(self._payment("buy:vendor:consumer"))
-        self.assertIn("Evidence", self.all_say_text())       # figures + report delivered
+        self.assertIn("evidence-based", self.all_say_text())       # figures + report delivered
         self.assertIn("report.pdf", [p[1] for p in self.docs])
         self.assertNotIn("Subject line", self.all_say_text())   # email is in the full pack only
 
@@ -707,6 +737,24 @@ class TestPayments(BotTestBase):
         bot.handle(self._payment("buy:agent:full"))
         self.assertIn("Subject line", self.all_say_text())   # the email template is included
         self.assertIn("Action plan", self.all_say_text())    # and the plan
+
+    def test_report_path_threads_area_context_into_build(self):
+        # the bot must gather area context and hand it to report.build, so the PDF and the
+        # HTML render the Area/Safety/Environment/Planning sections identically. Without this
+        # the two surfaces drift: the HTML panels light up but the PDF sections are blank.
+        import area_context as _ctx, report as _report
+        sentinel = {"sections": {}, "present": {"overpass": True}}
+        orig_gather = _ctx.gather
+        _ctx.gather = lambda subject, summary=None, anchors=None: sentinel
+        self.addCleanup(setattr, _ctx, "gather", orig_gather)
+        captured = {}
+        orig_build = _report.build
+        _report.build = lambda r, audience, **k: (
+            captured.update(k) or ("report.pdf", "report_interactive.html"))
+        self.addCleanup(setattr, _report, "build", orig_build)
+        bot.PENDING[1] = {"address": "x", "r": make_r()}
+        bot.handle(self._payment("buy:vendor:consumer"))
+        self.assertIs(captured.get("context"), sentinel)   # gathered context reached the builder
 
     def test_paid_pack_failure_grants_retry_credit(self):
         bot.PENDING[1] = {"address": "x", "r": make_r()}
@@ -742,7 +790,7 @@ class TestPayments(BotTestBase):
         txt = self.all_say_text()
         self.assertNotIn("Who are you?", txt)
         self.assertNotIn("Question 1 of", txt)
-        self.assertIn("Evidence", txt)                      # the valuation actually delivered
+        self.assertIn("evidence-based", txt)                      # the valuation actually delivered
 
     def test_widget_handoff_passes_real_inputs_to_engine(self):
         captured = {}
@@ -828,14 +876,14 @@ class TestDeliverFull(BotTestBase):
         bot.maps_tools.street_view = lambda a, o: (_ for _ in ()).throw(RuntimeError("maps down"))
         # core report must still succeed and return True
         self.assertTrue(bot.deliver_full(1, make_r(), "vendor"))
-        self.assertIn("Evidence", self.all_say_text())
+        self.assertIn("evidence-based", self.all_say_text())
 
     def test_products_failure_does_not_break_core_report(self):
         # a personalised product (plan / targets / email) throwing must never sink the report
         bot.products.plan_of_action = lambda *a, **k: (_ for _ in ()).throw(RuntimeError("boom"))
         bot.products.target_listings = lambda *a, **k: (_ for _ in ()).throw(RuntimeError("api down"))
         self.assertTrue(bot.deliver_full(1, make_r(), "vendor"))
-        self.assertIn("Evidence", self.all_say_text())
+        self.assertIn("evidence-based", self.all_say_text())
 
     def test_components_subset_delivers_only_what_was_bought(self):
         # a report-only delivery sends the PDF but not the plan/email of the full pack
@@ -859,7 +907,7 @@ class TestDeliverFull(BotTestBase):
         import report as _report
         _report.build = lambda *a, **k: (_ for _ in ()).throw(RuntimeError("fpdf2 missing"))
         self.assertTrue(bot.deliver_full(1, make_r(), "vendor"))
-        self.assertIn("Evidence", self.all_say_text())
+        self.assertIn("evidence-based", self.all_say_text())
         self.assertEqual(self.docs, [])                      # no document went out
 
     def test_full_report_sends_pdf_and_interactive(self):
@@ -867,6 +915,74 @@ class TestDeliverFull(BotTestBase):
         mimes = [d[3] for d in self.docs]
         self.assertIn("application/pdf", mimes)
         self.assertIn("text/html", mimes)
+
+    def test_interactive_delivery_mints_and_sends_hosted_link(self):
+        # the hosted /r/<token> link must be minted, threaded INTO report.build (so the PDF
+        # can print a clickable link, not a 'open the attached file' dead-end), AND shown in
+        # the HTML caption. This is the bug the user hit: a report that promised a link, then
+        # had none.
+        import report as _report
+        captured = {}
+        orig = _report.build
+        def _spy(r, audience, **k):
+            captured["link"] = k.get("link")
+            return orig(r, audience, **k)
+        _report.build = _spy
+        # a hosted link is only emitted when a server is actually configured as reachable;
+        # set HONESTLY_PUBLIC_URL to stand in for the deployed /r/ server.
+        prev = os.environ.get("HONESTLY_PUBLIC_URL")
+        os.environ["HONESTLY_PUBLIC_URL"] = "https://share.example.com"
+        try:
+            bot.deliver_components(1, make_r(), "agent", ["report", "html"])
+        finally:
+            if prev is None: os.environ.pop("HONESTLY_PUBLIC_URL", None)
+            else: os.environ["HONESTLY_PUBLIC_URL"] = prev
+        self.assertTrue(captured.get("link"), "no link passed into report.build")
+        self.assertIn("/r/", captured["link"])
+        # and the same link rides in the interactive HTML caption that goes to the user
+        html_caps = [c for _, _, c, mime in self.docs if mime == "text/html"]
+        self.assertTrue(html_caps and captured["link"] in html_caps[0],
+                        f"link not in caption: {html_caps}")
+
+    def test_no_hosted_link_when_no_server_configured(self):
+        # the honesty fix: with no HONESTLY_PUBLIC_URL and no Mini App origin, we must NOT
+        # invent a usehonestly.co.uk link that has no DNS / no running server behind it.
+        # public_base() returns "" and the delivery falls back to the offline-file message.
+        prev = {k: os.environ.pop(k, None) for k in ("HONESTLY_PUBLIC_URL", "HONESTLY_WEBAPP_URL")}
+        try:
+            self.assertEqual(bot.public_base(), "")
+            import report as _report
+            captured = {}
+            orig = _report.build
+            def _spy(r, audience, **k):
+                captured["link"] = k.get("link")
+                return orig(r, audience, **k)
+            _report.build = _spy
+            bot.deliver_components(1, make_r(), "agent", ["report", "html"])
+            self.assertIsNone(captured.get("link"), "emitted a link with no server configured")
+            # no caption claims a hosted URL
+            html_caps = [c for _, _, c, mime in self.docs if mime == "text/html"]
+            self.assertFalse(any("/r/" in c for c in html_caps), html_caps)
+        finally:
+            for k, v in prev.items():
+                if v is None: os.environ.pop(k, None)
+                else: os.environ[k] = v
+
+    def test_public_base_only_when_server_configured(self):
+        prev = {k: os.environ.pop(k, None) for k in ("HONESTLY_PUBLIC_URL", "HONESTLY_WEBAPP_URL")}
+        try:
+            # nothing configured -> no link, never a guessed domain
+            self.assertEqual(bot.public_base(), "")
+            # a live Mini App origin is a real deployed server.py (serves /r/ too)
+            os.environ["HONESTLY_WEBAPP_URL"] = "https://app.usehonestly.co.uk/webapp?x=1"
+            self.assertEqual(bot.public_base(), "https://app.usehonestly.co.uk")
+            # explicit override wins
+            os.environ["HONESTLY_PUBLIC_URL"] = "https://share.example.com/"
+            self.assertEqual(bot.public_base(), "https://share.example.com")
+        finally:
+            for k, v in prev.items():
+                if v is None: os.environ.pop(k, None)
+                else: os.environ[k] = v
 
     def test_delivery_includes_schools_brief(self):
         # every audience gets the honest schools context, with an Ofsted link
@@ -880,51 +996,38 @@ class TestDeliverFull(BotTestBase):
 
 # ----------------------------------------------------------------- card rendering
 class TestCard(BotTestBase):
+    # The chat card is now a CLEAN HEADLINE - the number, the trust signal, a pointer to the
+    # full report. The detail (formula, market steer, macro, momentum, every comparable) lives
+    # in the attached PDF/interactive report (covered by the report tests), NOT dumped in chat.
     def test_card_quotes_the_figures(self):
         out = bot.card(make_r(), "vendor")
         self.assertIn("£500,000 - £550,000", out)
-        self.assertIn("Evidence", out)
-        self.assertIn("verify", out)
+        self.assertIn("525,000", out)            # central
+        self.assertIn("Offers over £500,000", out)  # guide
 
-    def test_card_has_honesty_footer(self):
+    def test_card_shows_trust_signal(self):
+        out = bot.card(make_r(), "vendor")
+        self.assertIn("88% evidence-based", out)
+        self.assertIn("7 sold comparable", out)
+
+    def test_card_points_to_the_full_report(self):
         out = bot.card(make_r(), "buyer")
-        self.assertIn("sold evidence", out)
-        self.assertIn("market will pay", out)
+        self.assertIn("full report", out.lower())
 
-    def test_card_agent_shows_psm(self):
+    def test_card_agent_shows_attributes(self):
         out = bot.card(make_r(), "agent")
-        self.assertIn("/sqm", out)
+        self.assertIn("sqm", out)
+        self.assertIn("bed", out)
 
-    def test_card_shows_the_glass_box_working(self):
-        # the exact arithmetic chain is on the card, not just in the PDF
+    def test_card_is_clean_not_a_wall(self):
+        # the detail belongs in the PDF - the chat headline must NOT dump the macro backdrop,
+        # the momentum read or the raw comparable rows.
         out = bot.card(make_r(), "vendor")
-        self.assertIn("How we got here", out)
-        self.assertIn("£530,000", out)       # sold median
-        self.assertIn("£540,000", out)       # condition-adjusted anchor
-        self.assertIn("-2.8%", out)          # live-market steer
-        self.assertIn("£525,000", out)       # assessed central
-
-    def test_card_shows_market_steer(self):
-        # the value is not anchored on sold data alone - the live-market steer is shown
-        out = bot.card(make_r(), "vendor")
-        self.assertIn("Softening market", out)
-        self.assertIn("live conditions", out)
-        self.assertIn("£540,000", out)          # the pre-adjustment sold anchor
-
-    def test_card_shows_macro_backdrop(self):
-        # upcoming rates + stamp duty sit beside the figure as forward context
-        out = bot.card(make_r(), "buyer")
-        self.assertIn("Market backdrop", out)
-        self.assertIn("Bank Rate 3.75%", out)
-        self.assertIn("next call 18 Jun", out)
-        self.assertIn("£16,250", out)           # property-specific stamp duty
-
-    def test_card_shows_live_momentum(self):
-        # the live BoE+ONS momentum read renders beside the figure, clearly not in it
-        out = bot.card(make_r(), "buyer")
-        self.assertIn("Momentum", out)
-        self.assertIn("leaning soft", out)
-        self.assertIn("Beside the figure, not in it", out)
+        self.assertNotIn("Bank Rate", out)
+        self.assertNotIn("Momentum", out)
+        self.assertNotIn("Market backdrop", out)
+        # short and scannable: a headline, not a thesis
+        self.assertLess(len(out.splitlines()), 12)
 
 
 # ----------------------------------------------------------------- engine pure helpers
@@ -944,8 +1047,10 @@ class TestEngineHelpers(unittest.TestCase):
     def test_tuid_and_txn_link(self):
         url = "https://x/transaction/AB12CD34"
         self.assertEqual(appraise.tuid_of(url), "AB12CD34")
+        self.assertEqual(appraise.txn_link({"hmlr_uri": "http://landregistry.data.gov.uk/data/ppi/transaction/AB12/current"}),
+                         "https://landregistry.data.gov.uk/data/ppi/transaction/AB12/current")
         self.assertEqual(appraise.txn_link({"url": url}),
-                         "https://propertydata.co.uk/transaction/AB12CD34")
+                         "https://www.gov.uk/search-house-prices")
 
 
 # ----------------------------------------------------------------- subject resolution
@@ -1025,6 +1130,51 @@ class TestSubjectResolution(unittest.TestCase):
         self.assertEqual(appraise._unit_token("Apartment 4B, X Road, E1 2QG", "E1 2QG"), "4B")
 
 
+class TestCommercialAggregatorDisabled(unittest.TestCase):
+    """Commercial same-data aggregators must not be valuation fallbacks.
+
+    Paid value is decision intelligence over our direct public spine, not paying another
+    provider for HMLR/EPC-derived facts.
+    """
+
+    SD_RECORDS = [{"attributes": {
+        "address": {"simplified_format": {"house_number": "58", "street": "Cronin Street",
+                                          "town": "London", "postcode": "SE15 6JH"},
+                    "royal_mail_format": {"building_number": "58"}},
+        "identities": {"ordnance_survey": {"uprn": "100022"}},
+        "location": {"coordinates": {"latitude": 51.473, "longitude": -0.066}},
+        "internal_area_square_metres": 103, "property_type": {"value": "Terraced"},
+        "number_of_bedrooms": {"value": 3}, "number_of_bathrooms": {"value": 1},
+        "energy_performance": {"energy_efficiency": {"current_efficiency": 64,
+                               "current_rating": "D", "potential_rating": "B"}},
+        "council_tax": {"band": "B", "current_annual_charge": 1611.0},
+        "tenure": {"tenure_type": "Freehold", "lease_details": {}},
+        "transactions": [{"price": 525000, "date": "2021-09-15", "is_new_build": False}],
+    }}]
+
+    def test_enrich_off_never_calls_streetdata(self):
+        called = {"n": 0}
+        def boom(*a, **k):
+            called["n"] += 1
+            raise AssertionError("street_postcode must not fire when enrich is off")
+        with mock.patch.object(appraise, "street_postcode", boom), \
+             mock.patch.object(appraise, "_resolve_uprn", side_effect=RuntimeError("PD quota X14")):
+            with self.assertRaises(RuntimeError):
+                appraise.find_subject("58 Cronin Street, SE15 6JH", "K", enrich=False)
+        self.assertEqual(called["n"], 0)
+
+    def test_pd_down_does_not_fall_back_to_streetdata_subject(self):
+        called = {"n": 0}
+        def boom(*a, **k):
+            called["n"] += 1
+            raise AssertionError("street_postcode must not fire")
+        with mock.patch.object(appraise, "_resolve_uprn", side_effect=RuntimeError("PD quota X14")), \
+             mock.patch.object(appraise, "street_postcode", boom):
+            with self.assertRaises(RuntimeError):
+                appraise.find_subject("58 Cronin Street, SE15 6JH", "K", enrich=True)
+        self.assertEqual(called["n"], 0)
+
+
 class TestCompBanding(unittest.TestCase):
     """candidate_comps must not divide-by / multiply a None subject size."""
     SOLD = [{"price": 400000 + i*1000, "sqm": 50 + i, "dist": 0.1 + i*0.01,
@@ -1043,6 +1193,310 @@ class TestCompBanding(unittest.TestCase):
     def test_proxy_sqm_from_nearest(self):
         self.assertIsNotNone(appraise._proxy_sqm(self.SOLD, {"sqm": None}))
         self.assertIsNone(appraise._proxy_sqm([], {"sqm": None}))
+
+
+# ----------------------------------------------------------- comparability scoring
+class TestComparabilityScore(unittest.TestCase):
+    """score_comp / weighted_median / sold_median: the glass-box similarity matrix.
+    A score penalises only what the record actually carries; missing fields are neutral."""
+
+    def test_perfect_comp_scores_near_one(self):
+        subj = {"sqm": 84, "tenure": "leasehold", "class": "flat"}
+        r = {"dist": 0.0, "sqm": 84, "psm": 10000, "price": 840000,
+             "date": str(appraise.TODAY), "tenure": "leasehold", "class": "flat"}
+        score, parts = appraise.score_comp(r, subj, 10000)
+        self.assertGreater(score, 0.95)
+        self.assertAlmostEqual(sum(abs(x) for x in parts.values()), 0.0, places=1)
+
+    def test_penalties_accumulate_and_clamp(self):
+        # far, wrong size, wrong gbp/sqm, ancient, wrong tenure -> very weak, never below floor
+        subj = {"sqm": 84, "tenure": "leasehold", "class": "flat"}
+        r = {"dist": 2.0, "sqm": 200, "psm": 30000, "price": 6000000,
+             "date": "2010-01-01", "tenure": "freehold", "class": "flat"}
+        score, parts = appraise.score_comp(r, subj, 10000)
+        self.assertGreaterEqual(score, 0.05)
+        self.assertLess(score, appraise.COMP_WEAK)
+        self.assertIn("location", parts)
+        self.assertIn("recency", parts)
+        self.assertEqual(parts["tenure"], -12)
+
+    def test_missing_fields_are_neutral(self):
+        # a bare record (no date/tenure/class) must not be punished for absent data
+        subj = {"sqm": 84}
+        r = {"dist": 0.0, "sqm": 84, "psm": 10000, "price": 840000}
+        score, parts = appraise.score_comp(r, subj, 10000)
+        self.assertGreater(score, 0.95)
+        self.assertNotIn("recency", parts)
+        self.assertNotIn("tenure", parts)
+
+    def test_weighted_median_pulls_toward_heavy_weight(self):
+        # equal spread, heavier weight on the top value -> midpoint lands on it
+        pairs = [(100, 1), (200, 1), (300, 9)]
+        self.assertEqual(appraise.weighted_median(pairs), 300)
+
+    def test_weighted_median_falls_back_to_plain_median(self):
+        self.assertEqual(appraise.weighted_median([(100, 0), (200, 0), (300, 0)]), 200)
+        self.assertIsNone(appraise.weighted_median([]))
+
+    def test_sold_median_rounds_to_thousand(self):
+        comps = [{"price": 401234, "score": 1.0}, {"price": 399876, "score": 1.0}]
+        m = appraise.sold_median(comps)
+        self.assertEqual(m % 1000, 0)
+
+
+# ----------------------------------------------------------------- persistence (store.py)
+import store as _store_mod
+
+class _StoreTempMixin:
+    """Point store.py at a throwaway DB for the duration of a test, never the real one."""
+    def setUp(self):
+        import tempfile
+        fd, self._dbpath = tempfile.mkstemp(suffix=".db")
+        os.close(fd); os.remove(self._dbpath)
+        self._prev_path, self._prev_inited = _store_mod.DB_PATH, _store_mod._INITED
+        _store_mod.DB_PATH, _store_mod._INITED = self._dbpath, False
+
+    def tearDown(self):
+        _store_mod.DB_PATH, _store_mod._INITED = self._prev_path, self._prev_inited
+        for p in (self._dbpath, self._dbpath + "-wal", self._dbpath + "-shm"):
+            try:
+                if os.path.exists(p): os.remove(p)
+            except Exception:
+                pass
+
+    SUMMARY = {"address": "1 Test Street, London EC1V 1AE", "audience": "agent",
+               "low": 900000, "high": 1080000, "central": 915000, "guide": 800000,
+               "investment": False}
+
+
+class TestStore(_StoreTempMixin, unittest.TestCase):
+    def test_appraisal_roundtrip_and_district(self):
+        tok = _store_mod.record_appraisal(self.SUMMARY, finish="average",
+                                          source="test", tier="prophet")
+        self.assertTrue(tok)
+        got = _store_mod.get_appraisal(tok)
+        self.assertEqual(got["central"], 915000)
+        self.assertEqual(got["postcode"], "EC1V 1AE")
+        self.assertEqual(got["postcode_district"], "EC1V")
+        self.assertEqual(got["summary"]["guide"], 800000)
+
+    def test_district_helper(self):
+        self.assertEqual(_store_mod.district_of("EC1V 1AE"), "EC1V")
+        self.assertEqual(_store_mod.district_of("Flat 1, 2 Road, London EC1V 1AE"), "EC1V")
+        self.assertIsNone(_store_mod.district_of("nowhere in particular"))
+
+    def test_token_lifecycle(self):
+        tok = _store_mod.record_appraisal(self.SUMMARY)
+        _store_mod.record_deliverable(tok, "html", path="/tmp/x.html", body="<html>BODY</html>")
+        link = _store_mod.mint_token(tok, ttl_days=90)
+        res = _store_mod.resolve_token(link)
+        self.assertTrue(res["ok"])
+        self.assertEqual(res["html"], "<html>BODY</html>")
+        self.assertEqual(res["address"], self.SUMMARY["address"])
+        # unknown / revoked
+        self.assertEqual(_store_mod.resolve_token("garbage")["reason"], "unknown")
+        self.assertTrue(_store_mod.revoke_token(link))
+        self.assertEqual(_store_mod.resolve_token(link)["reason"], "revoked")
+
+    def test_token_expiry(self):
+        tok = _store_mod.record_appraisal(self.SUMMARY)
+        _store_mod.record_deliverable(tok, "html", body="<html>x</html>")
+        link = _store_mod.mint_token(tok, ttl_days=None)  # permanent...
+        with _store_mod._conn() as c:                      # ...then force it stale
+            c.execute("UPDATE tokens SET expires_at=? WHERE token=?", (1.0, link))
+        self.assertEqual(_store_mod.resolve_token(link)["reason"], "expired")
+
+    def test_market_analysis_cache_and_ttl(self):
+        _store_mod.record_market_analysis("EC1V", "sentiment", source="hit_scan",
+                                          payload={"raw": 1}, lines=["demand firm"],
+                                          sentiment="warm", ttl_hours=24)
+        ma = _store_mod.get_market_analysis("EC1V", "sentiment")
+        self.assertEqual(ma["lines"], ["demand firm"])
+        self.assertEqual(ma["sentiment"], "warm")
+        # a zero-ttl record is never fresh
+        _store_mod.record_market_analysis("EC1V", "stale", source="x", ttl_hours=0.0)
+        self.assertIsNone(_store_mod.get_market_analysis("EC1V", "stale", fresh_only=True))
+
+    def test_events_audit_trail(self):
+        tok = _store_mod.record_appraisal(self.SUMMARY)
+        _store_mod.record_deliverable(tok, "pdf", path="/tmp/x.pdf")
+        kinds = {e["kind"] for e in _store_mod.recent_events(limit=50)}
+        self.assertIn("valuation_requested", kinds)
+        self.assertIn("deliverable_built", kinds)
+
+    def test_best_effort_never_raises(self):
+        # a broken DB path must degrade to None/[] , not raise into the request path
+        _store_mod.DB_PATH, _store_mod._INITED = os.path.join(self._dbpath, "cant", "exist.db"), False
+        self.assertIsNone(_store_mod.record_appraisal(self.SUMMARY))
+        self.assertIsNone(_store_mod.get_appraisal("x"))
+        self.assertEqual(_store_mod.resolve_token("x")["ok"], False)
+        self.assertEqual(_store_mod.recent_events(), [])
+
+
+class TestHostedLink(_StoreTempMixin, unittest.TestCase):
+    """The /r/<token> route serves the byte-identical stored HTML; bad tokens get a
+    branded page. Driven through a real localhost server, the way it runs in production."""
+    def test_route_serves_and_gates(self):
+        import server, threading, urllib.request
+        from http.server import ThreadingHTTPServer
+        tok = _store_mod.record_appraisal(self.SUMMARY)
+        body = "<html><body>INTERACTIVE-REPORT-MARKER</body></html>"
+        _store_mod.record_deliverable(tok, "html", body=body)
+        link = _store_mod.mint_token(tok)
+
+        srv = ThreadingHTTPServer(("127.0.0.1", 0), server.H)
+        port = srv.server_address[1]
+        t = threading.Thread(target=srv.serve_forever, daemon=True); t.start()
+        try:
+            with urllib.request.urlopen(f"http://127.0.0.1:{port}/r/{link}", timeout=5) as r:
+                self.assertEqual(r.status, 200)
+                self.assertIn("INTERACTIVE-REPORT-MARKER", r.read().decode("utf-8"))
+            # an unknown token -> branded 404, never a stack trace, never another report
+            try:
+                urllib.request.urlopen(f"http://127.0.0.1:{port}/r/nope", timeout=5)
+                self.fail("expected 404")
+            except urllib.error.HTTPError as e:
+                self.assertEqual(e.code, 404)
+                self.assertIn("find that report", e.read().decode("utf-8"))
+        finally:
+            srv.shutdown(); srv.server_close()
+
+
+class TestWorkspace(_StoreTempMixin, unittest.TestCase):
+    """The Pro workspace endpoints: /api/portfolio lists THIS user's saved properties (newest
+    first), /api/property returns one they own (with its /r link) and refuses one they don't.
+    Auth is exercised by stubbing validate_init_data, the way a signed Telegram launch resolves."""
+    def _post(self, port, path, payload):
+        import urllib.request, urllib.error
+        req = urllib.request.Request(
+            f"http://127.0.0.1:{port}{path}",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"}, method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=5) as r:
+                return r.status, json.loads(r.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            return e.code, json.loads(e.read().decode("utf-8"))
+
+    def test_portfolio_and_property(self):
+        import server, threading
+        from http.server import ThreadingHTTPServer
+        # two properties for our user (newest last-inserted), one for someone else
+        t_old = _store_mod.record_appraisal(
+            {"address": "1 Mine Road, London EC1V 1AE", "central": 500000,
+             "evidence_purity": {"pct": 88}}, chat_id="999")
+        t_new = _store_mod.record_appraisal(
+            {"address": "2 Mine Road, London EC1V 1AE", "central": 600000}, chat_id="999")
+        _store_mod.record_deliverable(t_new, "html", body="<html>R</html>")
+        share = _store_mod.mint_token(t_new)
+        t_other = _store_mod.record_appraisal(
+            {"address": "9 Theirs Road, London EC1V 1AE", "central": 700000}, chat_id="555")
+
+        prev = server.validate_init_data
+        server.validate_init_data = lambda s: {"id": "999", "first_name": "Pat"}
+        srv = ThreadingHTTPServer(("127.0.0.1", 0), server.H)
+        port = srv.server_address[1]
+        th = threading.Thread(target=srv.serve_forever, daemon=True); th.start()
+        try:
+            code, data = self._post(port, "/api/portfolio", {"initData": "x"})
+            self.assertEqual(code, 200)
+            toks = [p["token"] for p in data["properties"]]
+            self.assertEqual(set(toks), {t_old, t_new})           # only OUR rows
+            self.assertNotIn(t_other, toks)                       # never another user's
+            self.assertEqual(data["properties"][0]["token"], t_new)  # newest first
+            by = {p["token"]: p for p in data["properties"]}
+            self.assertEqual(by[t_old]["purity"], 88)             # purity read from summary
+            self.assertEqual(by[t_new]["share_token"], share)
+
+            code, prop = self._post(port, "/api/property", {"initData": "x", "token": t_new})
+            self.assertEqual(code, 200)
+            self.assertEqual(prop["central"], 600000)
+            self.assertEqual(prop["report_url"], f"/r/{share}")
+
+            code, _ = self._post(port, "/api/property", {"initData": "x", "token": t_other})
+            self.assertEqual(code, 403)                           # not theirs
+            code, _ = self._post(port, "/api/property", {"initData": "x", "token": "nope"})
+            self.assertEqual(code, 404)
+        finally:
+            server.validate_init_data = prev
+            srv.shutdown(); srv.server_close()
+
+    def test_portfolio_requires_signed_launch(self):
+        import server, threading
+        from http.server import ThreadingHTTPServer
+        prev = server.validate_init_data
+        server.validate_init_data = lambda s: None               # an unsigned / forged launch
+        srv = ThreadingHTTPServer(("127.0.0.1", 0), server.H)
+        port = srv.server_address[1]
+        th = threading.Thread(target=srv.serve_forever, daemon=True); th.start()
+        try:
+            code, _ = self._post(port, "/api/portfolio", {"initData": "forged"})
+            self.assertEqual(code, 403)
+        finally:
+            server.validate_init_data = prev
+            srv.shutdown(); srv.server_close()
+
+
+class TestCatalogue(unittest.TestCase):
+    """The 30-product catalogue + the hybrid Pro economics (included / credits / standalone Stars)
+    + the flagship dossier - all offline, all data-gated, all charm-priced."""
+    def test_registry_pricing_and_dossier_selftests(self):
+        import catalogue, due_diligence
+        self.assertEqual(catalogue.selftest(), "ok")
+        self.assertEqual(due_diligence.selftest(), "ok")
+
+    def test_hybrid_purchase_mode(self):
+        import catalogue
+        flag = catalogue.get("buyer_001"); pack = catalogue.get("buyer_002"); read = catalogue.get("buyer_009")
+        self.assertTrue(flag["included"] and read["included"] and not pack["included"])
+        orig_sub, orig_bal = bot.subscribed, bot.credit_balance
+        try:
+            bot.subscribed = lambda u: False                 # non-subscriber: always standalone Stars
+            self.assertEqual(catalogue.purchase_mode(7, flag), "stars")
+            self.assertEqual(catalogue.purchase_mode(7, pack), "stars")
+            bot.subscribed = lambda u: True                  # subscriber: flagship/read free
+            bot.credit_balance = lambda u: 5
+            self.assertEqual(catalogue.purchase_mode(7, flag), "included")
+            self.assertEqual(catalogue.purchase_mode(7, read), "included")
+            self.assertEqual(catalogue.purchase_mode(7, pack), "credits")   # 2cr <= 5
+            bot.credit_balance = lambda u: 1                 # 1 < 2cr -> falls back to Stars
+            self.assertEqual(catalogue.purchase_mode(7, pack), "stars")
+        finally:
+            bot.subscribed, bot.credit_balance = orig_sub, orig_bal
+
+    def test_credit_pool_grant_spend_refund(self):
+        import tempfile
+        prev = bot.STATE
+        fd, path = tempfile.mkstemp(suffix=".json"); os.close(fd); os.remove(path)
+        bot.STATE = path
+        try:
+            uid = "4242"
+            bot.grant_sub(uid)                               # a renewal grants the monthly pool
+            self.assertEqual(bot.credit_balance(uid), bot.MONTHLY_CREDITS)
+            self.assertTrue(bot.subscribed(uid))
+            self.assertTrue(bot.spend_credits(uid, 2))
+            self.assertEqual(bot.credit_balance(uid), bot.MONTHLY_CREDITS - 2)
+            bot.refund_credits(uid, 2)
+            self.assertEqual(bot.credit_balance(uid), bot.MONTHLY_CREDITS)
+            self.assertFalse(bot.spend_credits(uid, 999))    # can't overspend
+            self.assertEqual(bot.credit_balance(uid), bot.MONTHLY_CREDITS)
+            bot.grant_sub(uid)                               # renewal resets the pool
+            self.assertEqual(bot.credit_balance(uid), bot.MONTHLY_CREDITS)
+        finally:
+            for p in (path,):
+                try:
+                    if os.path.exists(p): os.remove(p)
+                except Exception: pass
+            bot.STATE = prev
+
+
+class TestPropertyGraph(unittest.TestCase):
+    """The property knowledge graph: builds Property/Transaction/Area nodes + SOLD/IN_AREA/
+    COMPARABLE_TO edges from real-shaped HMLR sales, deduplicates a property sold twice, is
+    idempotent on re-ingest, and answers comparables/area queries. All offline."""
+    def test_graph_build_dedup_idempotent_queries(self):
+        import property_graph
+        property_graph.selftest()    # self-contained: temp DB, raises on any failure
 
 
 # ----------------------------------------------------------------- resilience wiring
@@ -1084,17 +1538,13 @@ class TestSchools(unittest.TestCase):
     def _r(self):
         return {"subject": {"address": "58 Cronin Street, London SE15 6JH"}}
 
-    def test_parses_and_sorts_by_distance(self):
+    def test_nearby_schools_does_not_call_commercial_api(self):
         out = self.products.nearby_schools(self._r(), "k", n=6)
-        self.assertEqual(out[0]["name"], "Near Primary")   # closest first
-        self.assertEqual(out[1]["name"], "Far School")
-        self.assertEqual(out[0]["ofsted_url"], "https://reports.ofsted.gov.uk/near")
+        self.assertEqual(out, [])
 
-    def test_brief_links_ofsted_and_disclaims_rating(self):
+    def test_brief_empty_until_direct_public_school_client_lands(self):
         brief = self.products.schools_brief(self.products.nearby_schools(self._r(), "k"))
-        self.assertIn("Schools nearby", brief)
-        self.assertIn("verify on Ofsted", brief)
-        self.assertIn("reports.ofsted.gov.uk/near", brief)
+        self.assertEqual(brief, "")
 
     def test_empty_when_no_postcode(self):
         self.assertEqual(self.products.nearby_schools({"subject": {"address": "nowhere"}}, "k"), [])
@@ -1133,8 +1583,8 @@ class _RecPDF:
 
 
 class TestMaterialInformation(unittest.TestCase):
-    """The NTSELAT Material Information starter: known facts rendered, unknown fields
-    honestly flagged 'Confirm with seller', never fabricated."""
+    """The NTSELAT Material Information starter: known facts rendered, disclosure-only
+    fields become decision-check items, never fabricated."""
 
     def _render(self, subject):
         import report
@@ -1158,9 +1608,10 @@ class TestMaterialInformation(unittest.TestCase):
         self.assertIn("£525,000", out)       # assessed central value
 
     def test_unknown_fields_flagged_not_invented(self):
-        # We hold none of: utilities, broadband, flood risk -> must say confirm, never blank/fake
+        # We hold none of: utilities, broadband, flood risk -> must be included as usable checks, never blank/fake
         out = self._render({"address": "x"})
-        self.assertIn("Confirm with seller", out)
+        self.assertIn("Decision-check item", out)
+        self.assertNotIn("Confirm with seller", out)
 
     def test_no_em_dash_in_output(self):
         out = self._render({"address": "x", "tax": "C"})

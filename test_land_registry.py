@@ -13,7 +13,8 @@ import land_registry as lr
 # ---- canned SPARQL + REST payloads -------------------------------------------
 _PPD_JSON = {
     "results": {"bindings": [
-        {"paon": {"value": "58"}, "street": {"value": "CRONIN STREET"},
+        {"tx": {"value": "http://landregistry.data.gov.uk/data/ppi/transaction/TX58/current"},
+         "paon": {"value": "58"}, "street": {"value": "CRONIN STREET"},
          "town": {"value": "LONDON"}, "amount": {"value": "310000"},
          "date": {"value": "2025-08-12"}, "category": {"value": "Standard Price Paid"},
          "type": {"value": "Terraced"}},
@@ -65,6 +66,8 @@ class TestPPD(unittest.TestCase):
         self.assertEqual(r["newest"], "2025-08-12")
         self.assertEqual(r["sales"][0]["address"], "58, CRONIN STREET, LONDON")
         self.assertEqual(r["sales"][0]["price"], 310000)
+        self.assertEqual(r["sales"][0]["hmlr_uri"],
+                         "http://landregistry.data.gov.uk/data/ppi/transaction/TX58/current")
 
     def test_empty_bindings_is_ok_zero(self):
         with mock.patch.object(lr, "_post_sparql", return_value={"results": {"bindings": []}}):
@@ -91,6 +94,91 @@ class TestPPD(unittest.TestCase):
             r = lr.ppd_postcode("SE15 6JH")
         self.assertEqual(r["count"], 1)
         self.assertEqual(r["median"], 250000)
+
+
+_COUNT_JSON = {"results": {"bindings": [{"n": {"value": "47"}}]}}
+
+
+class TestPPDCount(unittest.TestCase):
+    def test_parses_count(self):
+        with mock.patch.object(lr, "_post_sparql", return_value=_COUNT_JSON) as m:
+            r = lr.ppd_count(["SE15 6JH", "SE15 6JG", "SE15 6JF"])
+        self.assertTrue(r["ok"])
+        self.assertEqual(r["count"], 47)
+        self.assertEqual(r["n_postcodes"], 3)
+        self.assertIsNone(r["since"])
+        # postcodes are bound via VALUES (indexed), not a STRSTARTS prefix scan
+        q = m.call_args[0][0]
+        self.assertIn("VALUES ?postcode", q)
+        self.assertIn('"SE15 6JH"', q)
+        self.assertNotIn("STRSTARTS", q)
+
+    def test_since_adds_date_filter(self):
+        with mock.patch.object(lr, "_post_sparql", return_value=_COUNT_JSON) as m:
+            r = lr.ppd_count(["SE15 6JH"], since="2024-06-01")
+        self.assertEqual(r["since"], "2024-06-01")
+        q = m.call_args[0][0]
+        self.assertIn('FILTER(?date >= "2024-06-01"^^xsd:date)', q)
+
+    def test_no_since_omits_filter(self):
+        with mock.patch.object(lr, "_post_sparql", return_value=_COUNT_JSON) as m:
+            lr.ppd_count(["SE15 6JH"])
+        self.assertNotIn("FILTER", m.call_args[0][0])
+
+    def test_normalises_and_dedupes(self):
+        with mock.patch.object(lr, "_post_sparql", return_value=_COUNT_JSON) as m:
+            r = lr.ppd_count(["se156jh", "SE15 6JH", "  se15 6jg "])
+        self.assertEqual(r["n_postcodes"], 2)   # the two SE15 6JH spellings collapse to one
+        q = m.call_args[0][0]
+        self.assertIn('"SE15 6JH"', q)
+        self.assertIn('"SE15 6JG"', q)
+
+    def test_caps_the_values_list(self):
+        many = [f"SE15 {i}AA" for i in range(200)]
+        with mock.patch.object(lr, "_post_sparql", return_value=_COUNT_JSON):
+            r = lr.ppd_count(many, cap=150)
+        self.assertEqual(r["n_postcodes"], 150)
+
+    def test_empty_input_degrades(self):
+        r = lr.ppd_count([])
+        self.assertFalse(r["ok"])
+        self.assertIn("no postcodes", r["reason"])
+
+    def test_no_bindings_is_ok_zero(self):
+        with mock.patch.object(lr, "_post_sparql", return_value={"results": {"bindings": []}}):
+            r = lr.ppd_count(["SE15 6JH"])
+        self.assertTrue(r["ok"])
+        self.assertEqual(r["count"], 0)
+
+    def test_unparseable_count_degrades(self):
+        bad = {"results": {"bindings": [{"n": {"value": "not-a-number"}}]}}
+        with mock.patch.object(lr, "_post_sparql", return_value=bad):
+            r = lr.ppd_count(["SE15 6JH"])
+        self.assertFalse(r["ok"])
+        self.assertIn("unparseable", r["reason"])
+
+    def test_http_error_degrades(self):
+        import urllib.error
+        err = urllib.error.HTTPError("u", 503, "down", {}, None)
+        with mock.patch.object(lr, "_post_sparql", side_effect=err):
+            r = lr.ppd_count(["SE15 6JH"])
+        self.assertFalse(r["ok"])
+        self.assertIn("503", r["reason"])
+
+    def test_network_error_degrades_never_raises(self):
+        with mock.patch.object(lr, "_post_sparql", side_effect=Exception("boom")):
+            r = lr.ppd_count(["SE15 6JH"])
+        self.assertFalse(r["ok"])
+        self.assertIn("boom", r["reason"])
+
+    def test_cache_round_trips_and_avoids_second_call(self):
+        lr._COUNT_CACHE.clear()
+        with mock.patch.object(lr, "_post_sparql", return_value=_COUNT_JSON) as m:
+            r1 = lr.ppd_count(["SE15 6JH", "SE15 6JG"], use_cache=True)
+            r2 = lr.ppd_count(["SE15 6JG", "SE15 6JH"], use_cache=True)  # order-insensitive key
+        self.assertEqual(r1, r2)
+        self.assertEqual(m.call_count, 1)       # second read served from cache
+        lr._COUNT_CACHE.clear()
 
 
 class TestHPI(unittest.TestCase):

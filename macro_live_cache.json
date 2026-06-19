@@ -1,11 +1,11 @@
 {
-  "saved": 1780791276.3205712,
+  "saved": 1781810253.158062,
   "payload": {
-    "as_of": "2026-06-07",
-    "fetched_utc": "2026-06-07T00:14:36Z",
-    "score": -0.79,
+    "as_of": "2026-06-18",
+    "fetched_utc": "2026-06-18T19:17:33Z",
+    "score": -0.67,
     "lean": "soft",
-    "headline": "Live macro momentum is leaning soft for prices (score -0.79 on a -2 to +2 scale).",
+    "headline": "Live macro momentum is leaning soft for prices (score -0.67 on a -2 to +2 scale).",
     "drivers": [
       {
         "key": "mortgage",
@@ -19,27 +19,27 @@
       {
         "key": "realpay",
         "label": "real pay growth (pay minus inflation)",
-        "value": 0.93,
-        "avg": 1.77,
-        "z": -0.69,
+        "value": 1.2,
+        "avg": 1.88,
+        "z": -0.65,
         "sign": 1,
         "unit": "%"
       },
       {
         "key": "unemp",
         "label": "unemployment rate",
-        "value": 5.03,
-        "avg": 4.45,
-        "z": 1.55,
+        "value": 4.93,
+        "avg": 4.48,
+        "z": 1.22,
         "sign": -1,
         "unit": "%"
       }
     ],
     "lines": [
-      "Live macro momentum is leaning soft for prices (score -0.79 on a -2 to +2 scale).",
+      "Live macro momentum is leaning soft for prices (score -0.67 on a -2 to +2 scale).",
       "2-year fixed mortgage rate is 4.84%, above its 3-year average of 4.76% - a drag on affordability.",
-      "Real pay growth is about +0.9% (pay 4.1% against 2.8% inflation); rising real incomes lift buyer budgets.",
-      "Unemployment is 5.0%, above its 3-year average of 4.5% - softening labour market underpins less of housing demand.",
+      "Real pay growth is about +1.2% (pay 4.4% against 2.8% inflation); rising real incomes lift buyer budgets.",
+      "Unemployment is 4.9%, above its 3-year average of 4.5% - a softening labour market that takes some support away from demand.",
       "These are demand conditions over the next 6 to 12 months. They sit beside the figure, not inside it - the number is built from sold evidence."
     ],
     "sources": {

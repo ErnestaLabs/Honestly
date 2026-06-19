@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { getCatalog } from '../api';
+import { getCatalog, createInvoice } from '../api';
+import { loadCreditBalance, saveCreditBalance, setItem } from '../utils/tgStorage';
 
 export default function StorePage() {
   const [catalog, setCatalog] = useState(null);
   const [creditBalance, setCreditBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [purchasing, setPurchasing] = useState(null); // 'sub_plus' | 'sub_pro' | 'credits_250' | ...
 
   useEffect(() => {
     window.Telegram?.WebApp?.expand?.();
@@ -19,13 +21,9 @@ export default function StorePage() {
       const data = await getCatalog();
       setCatalog(data);
 
-      // Try to read current credit balance from last AVM result
-      try {
-        const avm = JSON.parse(sessionStorage.getItem('honestly_last_avm') || '{}');
-        if (avm.last_purchase?.remaining_credits_gbp !== undefined) {
-          setCreditBalance(avm.last_purchase.remaining_credits_gbp);
-        }
-      } catch {}
+      // Load credit balance from CloudStorage (persists across TG restarts)
+      const balance = await loadCreditBalance();
+      if (balance > 0) setCreditBalance(balance);
     } catch (err) {
       setError(err.message || 'Failed to load store');
     } finally {
@@ -33,20 +31,65 @@ export default function StorePage() {
     }
   };
 
-  const handleSendInvoice = (payload) => {
-    // The Mini App sends an invoice via the Telegram bot
-    // This requires the bot to handle the sendInvoice call
-    // For now, we open a deep link to the bot with the product data
-    const botUsername = 'HonestlyAVMBot';
-
-    const productPayload = typeof payload === 'string' ? payload : JSON.stringify(payload);
-    const link = `https://t.me/${botUsername}?start=${encodeURIComponent(productPayload)}`;
+  /**
+   * Open Telegram's native invoice overlay INSIDE the Mini App.
+   * Never opens a deep-link. Never leaves the app.
+   */
+  const openInvoice = async ({ productId, subTier, creditPackGbp, label }) => {
+    setPurchasing(label || productId || subTier);
+    setError(null);
 
     try {
-      window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('medium');
-      window.open(link, '_blank');
-    } catch {
-      window.location.href = link;
+      // Step 1: Backend creates the invoice link
+      const invoice = await createInvoice({ productId, subTier, creditPackGbp });
+      if (!invoice.ok || !invoice.invoice_url) {
+        throw new Error(invoice.error || 'Invoice creation failed');
+      }
+
+      // Step 2: Open the native TG invoice overlay
+      // Telegram.WebApp.openInvoice(url, callback) shows the payment
+      // sheet INSIDE the Mini App. The user never leaves.
+      const tg = window.Telegram?.WebApp;
+      if (!tg?.openInvoice) {
+        throw new Error('Telegram WebApp.openInvoice not available');
+      }
+
+      tg.openInvoice(invoice.invoice_url, async (status) => {
+        if (status === 'paid') {
+          window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('success');
+
+          // Update credit balance in CloudStorage
+          if (subTier) {
+            // Subscription: set a rough indicator in storage
+            await setItem('honestly_tier', subTier);
+            // Grant monthly credits immediately
+            const monthlyCredit = subTier === 'plus' ? 5.0 : 10.0;
+            const newBalance = creditBalance + monthlyCredit;
+            setCreditBalance(newBalance);
+            await saveCreditBalance(newBalance);
+          } else if (creditPackGbp) {
+            // Credit top-up: add to balance
+            const newBalance = creditBalance + creditPackGbp;
+            setCreditBalance(newBalance);
+            await saveCreditBalance(newBalance);
+          }
+
+          // Reload catalog to refresh tier/prices
+          loadStore();
+        } else if (status === 'cancelled') {
+          window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('warning');
+        } else {
+          // 'failed' or unknown
+          setError('Payment was not completed. Please try again.');
+          window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('error');
+        }
+      });
+    } catch (err) {
+      const msg = err.message || 'Payment failed';
+      setError(msg);
+      window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('error');
+    } finally {
+      setPurchasing(null);
     }
   };
 
@@ -66,7 +109,8 @@ export default function StorePage() {
       features: ['3 AVMs per day', 'Room posting', 'Ad-free', '£5 monthly credit'],
       cta: 'Subscribe Plus',
       highlight: true,
-      payload: JSON.stringify({ type: 'sub_plus', tier: 'plus', gbp: 4.99 }),
+      label: 'sub_plus',
+      subTier: 'plus',
     },
     {
       name: 'Pro',
@@ -74,15 +118,16 @@ export default function StorePage() {
       period: '/mo',
       features: ['Unlimited AVMs', 'Custom branding', 'Advanced maps', '£10 monthly credit'],
       cta: 'Subscribe Pro',
-      payload: JSON.stringify({ type: 'sub_pro', tier: 'pro', gbp: 14.99 }),
+      label: 'sub_pro',
+      subTier: 'pro',
     },
   ];
 
   // ── Credit packs ─────────────────────────────────────
   const creditPacks = [
-    { label: 'Starter Pack', credits: 250, gbp: 4.99, icon: '🌱' },
-    { label: 'Power Pack', credits: 500, gbp: 9.99, icon: '⚡', popular: true },
-    { label: 'Whale Pack', credits: 1200, gbp: 19.99, icon: '🐋' },
+    { label: 'credits_250', name: 'Starter Pack', credits: 250, gbp: 4.99, icon: '🌱' },
+    { label: 'credits_500', name: 'Power Pack', credits: 500, gbp: 9.99, icon: '⚡', popular: true },
+    { label: 'credits_1200', name: 'Whale Pack', credits: 1200, gbp: 19.99, icon: '🐋' },
   ];
 
   return (
@@ -92,7 +137,7 @@ export default function StorePage() {
         Credits unlock micro-upsells. Subscriptions unlock the full ecosystem.
       </p>
 
-      {/* ── Credit Balance ─────────────────────────────── */}
+      {/* ── Credit Balance (from CloudStorage) ─────────── */}
       <div style={{
         background: 'linear-gradient(135deg, #007aff, #5856d6)',
         borderRadius: 16,
@@ -143,22 +188,15 @@ export default function StorePage() {
           }}>
             {tier.highlight && (
               <div style={{
-                position: 'absolute',
-                top: -8,
-                right: 12,
-                background: 'var(--tg-button)',
-                color: '#fff',
-                fontSize: 10,
-                fontWeight: 700,
-                padding: '2px 8px',
-                borderRadius: 6,
-                textTransform: 'uppercase',
+                position: 'absolute', top: -8, right: 12,
+                background: 'var(--tg-button)', color: '#fff',
+                fontSize: 10, fontWeight: 700, padding: '2px 8px',
+                borderRadius: 6, textTransform: 'uppercase',
               }}>
                 Best Value
               </div>
             )}
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
               <div>
                 <div style={{ fontSize: 17, fontWeight: 600 }}>{tier.name}</div>
                 <div style={{ fontSize: 24, fontWeight: 700, marginTop: 2 }}>
@@ -166,7 +204,6 @@ export default function StorePage() {
                 </div>
               </div>
             </div>
-
             <ul style={{ margin: '0 0 12px', padding: 0, listStyle: 'none' }}>
               {tier.features.map((f, i) => (
                 <li key={i} style={{ fontSize: 13, color: 'var(--tg-hint)', padding: '2px 0', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -174,36 +211,26 @@ export default function StorePage() {
                 </li>
               ))}
             </ul>
-
-            {tier.payload && (
+            {tier.subTier ? (
               <button
-                onClick={() => handleSendInvoice(tier.payload)}
+                onClick={() => openInvoice({ subTier: tier.subTier, label: tier.label })}
+                disabled={purchasing === tier.label}
                 style={{
-                  width: '100%',
-                  padding: '12px',
-                  borderRadius: 10,
-                  background: 'var(--tg-button)',
-                  color: 'var(--tg-button-text)',
-                  border: 'none',
-                  fontSize: 14,
-                  fontWeight: 600,
-                  cursor: 'pointer',
+                  width: '100%', padding: '12px', borderRadius: 10,
+                  background: purchasing === tier.label ? 'var(--tg-hint)' : 'var(--tg-button)',
+                  color: 'var(--tg-button-text)', border: 'none',
+                  fontSize: 14, fontWeight: 600, cursor: purchasing ? 'not-allowed' : 'pointer',
+                  opacity: purchasing === tier.label ? 0.6 : 1,
                 }}
               >
-                {tier.cta}
+                {purchasing === tier.label ? 'Opening...' : tier.cta}
               </button>
-            )}
-            {!tier.payload && (
+            ) : (
               <div style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: 10,
-                background: 'var(--tg-secondary-bg)',
-                color: 'var(--tg-text)',
+                width: '100%', padding: '12px', borderRadius: 10,
+                background: 'var(--tg-secondary-bg)', color: 'var(--tg-text)',
                 border: '1px solid var(--tg-section-separator)',
-                fontSize: 14,
-                fontWeight: 600,
-                textAlign: 'center',
+                fontSize: 14, fontWeight: 600, textAlign: 'center',
               }}>
                 {tier.cta}
               </div>
@@ -222,17 +249,14 @@ export default function StorePage() {
             background: pack.popular
               ? 'linear-gradient(135deg, rgba(48,209,88,0.1), rgba(0,122,255,0.1))'
               : 'var(--tg-secondary-bg)',
-            borderRadius: 14,
-            padding: '12px 16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            borderRadius: 14, padding: '12px 16px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             border: pack.popular ? '1px solid rgba(48,209,88,0.4)' : '1px solid var(--tg-section-separator)',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ fontSize: 24 }}>{pack.icon}</span>
               <div>
-                <div style={{ fontWeight: 600, fontSize: 14 }}>{pack.label}</div>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>{pack.name}</div>
                 <div style={{ fontSize: 12, color: 'var(--tg-hint)' }}>
                   {pack.credits} credits
                   {pack.popular && <span style={{ color: 'var(--tg-accent)', marginLeft: 6 }}>★ Best value</span>}
@@ -242,42 +266,38 @@ export default function StorePage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ fontSize: 16, fontWeight: 700 }}>£{pack.gbp.toFixed(2)}</div>
               <button
-                onClick={() => handleSendInvoice(JSON.stringify({ type: `credits_${pack.credits}`, gbp: pack.gbp }))}
+                onClick={() => openInvoice({ creditPackGbp: pack.gbp, label: pack.label })}
+                disabled={purchasing === pack.label}
                 style={{
-                  padding: '8px 16px',
+                  padding: purchasing === pack.label ? '8px 12px' : '8px 16px',
                   borderRadius: 8,
-                  background: 'var(--tg-button)',
-                  color: 'var(--tg-button-text)',
-                  border: 'none',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: 'pointer',
+                  background: purchasing === pack.label ? 'var(--tg-hint)' : 'var(--tg-button)',
+                  color: 'var(--tg-button-text)', border: 'none',
+                  fontSize: 13, fontWeight: 600, cursor: purchasing ? 'not-allowed' : 'pointer',
+                  opacity: purchasing === pack.label ? 0.6 : 1,
                 }}
               >
-                Buy
+                {purchasing === pack.label ? '...' : 'Buy'}
               </button>
             </div>
           </div>
         ))}
       </div>
 
-      {/* ─── Product Catalog (from orchestrator) ────────── */}
+      {/* ── Product Catalog ────────────────────────────── */}
       {catalog?.products?.length > 0 && (
         <>
           <h3 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 10px' }}>
             🛠️ Micro-Upsells
           </h3>
           <p style={{ fontSize: 12, color: 'var(--tg-hint)', margin: '0 0 10px' }}>
-            These are triggered automatically when you run a valuation. Buy them individually with credits.
+            These are triggered automatically when you run a valuation. Buy them from the valuation report.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {catalog.products.map((p) => (
               <div key={p.id} style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                background: 'var(--tg-secondary-bg)',
-                borderRadius: 12,
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                background: 'var(--tg-secondary-bg)', borderRadius: 12,
                 padding: '10px 14px',
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>

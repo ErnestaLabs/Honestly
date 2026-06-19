@@ -1,0 +1,41 @@
+{
+  "captured_at": "2026-06-11",
+  "source_label": "Public UK property forums (r/HousingUK), captured via social listening",
+  "method": "Reddit search across r/HousingUK, r/UKPersonalFinance, r/PropertyInvestingUK and r/uklandlords for live discussion of selling city-centre flats. 141 threads monitored; the posts below were selected for being recent and on-theme. Quoted verbatim, lightly trimmed; each links to its public thread.",
+  "disclaimer": "These are individual posts on public property forums, quoted as social sentiment only. They are anecdote, not evidence of value, and not one of them fed any figure in this study. We include them because they put a human voice to what the transaction and listing data already shows.",
+  "scan_id": "scan_1781141045824",
+  "voices": [
+    {
+      "quote": "Our flat has been on the market for 4 months with only 3 viewings... we are trying to decide whether we should reduce the asking price or rent it out.",
+      "reply": "Interest rates are high. Your service charge is high... You're going to have to take a real hit if you want to get rid of it, so rental might be the best idea.",
+      "where": "Seller, 2-bed flat, South London",
+      "subreddit": "r/HousingUK",
+      "url": "https://www.reddit.com/r/HousingUK/comments/1tmhjrc/stuck_trying_to_sell_south_london_flat_with_high/",
+      "ties_to": "SE15: 76 days on market, 26% of stock stuck 90+ days, asking 6% under the sold median"
+    },
+    {
+      "quote": "If you bought 2 years ago it's likely that your flat is worth less than you paid - I think there was another thread from someone in Manchester.",
+      "reply": "",
+      "where": "Reply to a Manchester city-centre flat seller",
+      "subreddit": "r/HousingUK",
+      "url": "https://www.reddit.com/r/HousingUK/comments/16qzrm2/thinking_of_selling_my_city_centre_flat_as_a/",
+      "ties_to": "M1: asking median sits 16% under the sold median, 128 days on market"
+    },
+    {
+      "quote": "I think it's a slow market, I also think people will always choose houses over flats, so if it's in a similar price range to a house, even further out of the city, you might struggle.",
+      "reply": "",
+      "where": "Reply to a seller with 3 viewings in 5 weeks, North-West England",
+      "subreddit": "r/HousingUK",
+      "url": "https://www.reddit.com/r/HousingUK/comments/13qezx8/what_would_you_consider_to_be_too_much/",
+      "ties_to": "Why city-centre flat stock sits: flats compete with cheaper-per-foot houses"
+    },
+    {
+      "quote": "I've been in discussion about buying the flat that I rent in Glasgow city centre, but I wondered if there is any advice about cladding / building fire safety requirements... it needs an EWS1 form for a mortgage.",
+      "reply": "",
+      "where": "Prospective buyer, Glasgow city-centre flat",
+      "subreddit": "r/HousingUK",
+      "url": "https://www.reddit.com/r/HousingUK/comments/1l1js6o/ews1_glasgow_city_centre_flat/",
+      "ties_to": "G1 and every flat-heavy core: cladding and EWS1 paperwork is a real friction on sales"
+    }
+  ]
+}

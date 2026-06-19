@@ -1,0 +1,18 @@
+[Unit]
+Description=Honestly web app and hosted report server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/honestly
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=-/opt/honestly/.env
+ExecStart=/usr/bin/python3 /opt/honestly/server.py --port 8080
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/honestly-web.log
+StandardError=append:/var/log/honestly-web.log
+
+[Install]
+WantedBy=multi-user.target

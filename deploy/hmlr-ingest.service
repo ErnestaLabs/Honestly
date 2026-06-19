@@ -1,0 +1,24 @@
+[Unit]
+Description=HM Land Registry Price Paid full-dataset ingestion daemon (free, OGL v3.0)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/honestly
+EnvironmentFile=-/opt/honestly/.env
+Environment=HMLR_DATA_DIR=/opt/honestly/data
+Environment=HMLR_POLL_SECONDS=21600
+# Keep the small box responsive: the ingest is a low-priority background citizen so the
+# Telegram bot and web server always win CPU/IO contention during the bulk load.
+Nice=15
+IOSchedulingClass=idle
+ExecStart=/usr/bin/python3 /opt/honestly/hmlr_ingest.py daemon
+Restart=always
+RestartSec=30
+# Resumable download + idempotent INSERT OR REPLACE means a restart never corrupts the DB.
+StandardOutput=append:/var/log/hmlr-ingest.log
+StandardError=append:/var/log/hmlr-ingest.log
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,269 @@
+{
+  "by_city": {
+    "london": {
+      "captured_at": "2026-06-16",
+      "source_label": "Public reporting on the UK property market",
+      "method": "We collect recent, publicly published newsletters, blog posts and articles about this city's property market, quote each verbatim with a link to the original, and set it beside the official sold record for the city's postcode districts that we already publish. We recognise the source, cite it, and clarify - we do not rewrite anyone's reporting.",
+      "disclaimer": "These are other people's published claims, cited as such. They are checked against the recorded sold prices for this city's postcodes. National or regional commentary can be right about its own scope while the local figure looks different - both can be shown without declaring a winner. Not one quoted claim is a figure on this page; every number in the clarification is the city's own sold record.",
+      "intro": [
+        "London's property headlines rarely agree, so we set four recent ones beside the only thing that does not have an opinion: the price people actually paid. Across the 17 London postcode districts we track, the recorded median sale price is £575,000, with individual district medians running from £446,224 to £1.3 million. Homes take a median of 77 days to sell, and we count about 1,143 recorded sales across those districts in the last 12 months. None of the figures below is taken from the articles; every number is our own sold record."
+      ],
+      "synthesis": [
+        "Read together, the four sources broadly rhyme. MoneyWeek and the ONS see a slight fall, Zoopla sees flat, and the one outlier, rising sales agreed, is about future completions rather than today's prices. Our recorded median of £575,000 across 17 districts sits comfortably inside that range: a few percent above MoneyWeek's all-London average, and consistent with a market that is soft but not sliding hard.",
+        "The honest limit runs through all of it: a single sold snapshot is a position, not a trajectory. It is very good at saying what a home like yours actually fetched, and deliberately silent on what next quarter holds. For the figure that matters to you, this address rather than the region, that is the right tool. The rest is commentary, cited and left as commentary."
+      ],
+      "claims": [
+        {
+          "publisher": "MoneyWeek",
+          "title": "House prices: where are they heading in 2026?",
+          "url": "https://moneyweek.com/investments/house-prices/house-prices",
+          "date": "Updated 1 June 2026, by Daniel Hilton",
+          "quote": "House prices in London continue to slide, falling by 2% between March 2025 and March 2026, from £553,812 to £542,065.",
+          "topic": "London prices",
+          "metric": "sold_median",
+          "claim_dir": "down",
+          "claim_value": 542065.0,
+          "claim_value_str": "£542,065 (London average, HM Land Registry, March 2026)",
+          "dek": "MoneyWeek says London prices are sliding. The level checks out; the slide is a separate question.",
+          "analysis": [
+            "MoneyWeek puts the London average at £542,065 in March 2026, down 2% on a year earlier. That is an average across all London sales; our own median across the 17 districts we report is £575,000. The two sit within about 6% of each other, which is close for figures built from different baskets of homes, so the level MoneyWeek quotes is credible.",
+            "The part a single sold snapshot cannot settle is the direction. A 2% fall is a change over time, and our figure here is a position, not a trend line: we can say the level is consistent with MoneyWeek's, but we cannot from this page alone confirm or deny the slide. What we will not do is borrow their £542,065 and reprint it as a London number. The £575,000 above is ours, measured the same way for every district."
+          ]
+        },
+        {
+          "publisher": "Zoopla",
+          "title": "House Price Index: May 2026",
+          "url": "https://www.zoopla.co.uk/discover/property-news/house-price-index/",
+          "date": "28 May 2026",
+          "quote": "London ... overall prices have not moved.",
+          "topic": "London prices",
+          "metric": "sold_median",
+          "claim_dir": "flat",
+          "claim_value": null,
+          "claim_value_str": "",
+          "dek": "Zoopla says London prices have flatlined. Here is the level they have flatlined at.",
+          "analysis": [
+            "Zoopla's read is that London prices have, on balance, not moved. A flat market is exactly the kind of claim a single sold snapshot is well placed to ground rather than rate: it cannot tell you prices held steady all year, but it can tell you the level they are sitting at now. Across our 17 districts that level is a median of £575,000, spanning £446,224 in the most affordable district we track to £1.3 million at the top.",
+            "Set against that spread, 'not moved' reads less as a forecast and more as a description of a wide, segmented market where the cheaper and dearer ends can pull in opposite directions and net out flat. The £10,479 per square metre we record is the better like-for-like gauge if you want to compare a London flat with one elsewhere, because it strips out the effect of simply buying more space."
+          ]
+        },
+        {
+          "publisher": "Zoopla",
+          "title": "House Price Index: May 2026",
+          "url": "https://www.zoopla.co.uk/discover/property-news/house-price-index/",
+          "date": "28 May 2026",
+          "quote": "In London, sales agreed are up 8% on last year, the strongest of any region.",
+          "topic": "London sales activity",
+          "metric": "",
+          "claim_dir": "",
+          "claim_value": null,
+          "claim_value_str": "",
+          "dek": "Zoopla says London sales agreed are up 8%. That is a pipeline metric the sold record does not see.",
+          "analysis": [
+            "This is the one claim on the page our sold record genuinely cannot speak to. 'Sales agreed' counts deals that have gone under offer but not yet completed and registered; our data is the opposite end of that pipe, completed sales with a recorded price. The two can move apart for months, which is why we mark this beyond what the sold record can confirm rather than pretend otherwise.",
+            "For context, not confirmation: we count roughly 1,143 recorded completed sales across the 17 districts in the last 12 months, at a median of 77 days to sell. A rising agreed-sales figure today would only show up in numbers like those later, once the deals complete. If activity really is the strongest of any region, the sold record is where it will eventually land, and we will report it when it does."
+          ]
+        },
+        {
+          "publisher": "HM Land Registry / Office for National Statistics",
+          "title": "UK House Price Index: summary, March 2026",
+          "url": "https://www.gov.uk/government/statistics/uk-house-price-index-for-march-2026/uk-house-price-index-summary-march-2026",
+          "date": "Published 20 May 2026",
+          "quote": "London was the English region with the lowest annual inflation, where prices decreased by 2.1% in the 12 months to March 2026.",
+          "topic": "London regional trend",
+          "metric": "sold_median",
+          "claim_dir": "down",
+          "claim_value": null,
+          "claim_value_str": "",
+          "dek": "The official statistician says London had England's lowest annual inflation. Our level sits beside it.",
+          "analysis": [
+            "This is the official line from the same data family we build on, HM Land Registry sold prices processed by the ONS, so it is less a claim to check than a national frame to place our local figure inside. London being the weakest English region for annual house-price growth is consistent with the flat-to-falling picture the other three sources describe.",
+            "What our page adds is the level beneath the percentage. A 2.1% fall for London is a rate of change; the £575,000 median across our 17 districts is the standing figure that change is acting on. Both matter: the ONS tells you the tide, the sold record tells you the water line."
+          ]
+        }
+      ]
+    },
+    "manchester": {
+      "captured_at": "2026-06-12",
+      "source_label": "Public reporting on the UK property market",
+      "method": "We collect recent, publicly published claims about this city's property market, quote each verbatim with a link to the original, and set it beside the official sold record for the city's postcode districts that we already publish. We recognise the source, cite it, and clarify - we do not rewrite anyone's reporting.",
+      "disclaimer": "These are other people's published claims, cited as such. We check them against the one thing we can speak to with authority: the recorded sold prices for this city's postcodes. National or regional commentary can be right about its own scope while our local figure looks different - we show both and name the gap rather than declare a winner. Not one quoted claim is a figure on this page; every number in our clarification is the city's own sold record.",
+      "claims": [
+        {
+          "publisher": "Office for National Statistics",
+          "title": "Housing prices in Manchester (UK House Price Index)",
+          "url": "https://www.ons.gov.uk/visualisations/housingpriceslocal/E08000003/",
+          "date": "UK House Price Index, March 2026 (provisional)",
+          "quote": "The provisional average house price in Manchester in March 2026 was £248,000. This was slightly higher than the average of £245,000 in March 2025 (revised), a 1.4% rise.",
+          "topic": "City-wide average",
+          "metric": "sold_median",
+          "claim_dir": "up",
+          "claim_value": 248000.0,
+          "claim_value_str": "£248,000 (Manchester local-authority average, March 2026)"
+        },
+        {
+          "publisher": "TK Property Group",
+          "title": "Why Manchester house prices could rise steadily in 2026",
+          "url": "https://tkpg.co.uk/why-manchester-house-prices-could-rise-steadily-in-2026/",
+          "date": "22 April 2026",
+          "quote": "Manchester's housing market looks set for another measured year of growth in 2026, with prices expected to increase by around 3% to 4% as limited supply continues to meet steady demand.",
+          "topic": "2026 forecast",
+          "metric": "",
+          "claim_dir": "up",
+          "claim_value": null,
+          "claim_value_str": ""
+        }
+      ]
+    },
+    "leeds": {
+      "captured_at": "2026-06-12",
+      "source_label": "Public reporting on the UK property market",
+      "method": "We collect recent, publicly published claims about this city's property market, quote each verbatim with a link to the original, and set it beside the official sold record for the city's postcode districts that we already publish. We recognise the source, cite it, and clarify - we do not rewrite anyone's reporting.",
+      "disclaimer": "These are other people's published claims, cited as such. We check them against the one thing we can speak to with authority: the recorded sold prices for this city's postcodes. National or regional commentary can be right about its own scope while our local figure looks different - we show both and name the gap rather than declare a winner. Not one quoted claim is a figure on this page; every number in our clarification is the city's own sold record.",
+      "claims": [
+        {
+          "publisher": "Office for National Statistics",
+          "title": "Housing prices in Leeds (UK House Price Index)",
+          "url": "https://www.ons.gov.uk/visualisations/housingpriceslocal/E08000035/",
+          "date": "UK House Price Index, March 2026 (provisional)",
+          "quote": "The provisional average house price in Leeds in March 2026 was £244,000. This was higher than the average of £239,000 in March 2025 (revised), a 2.3% rise.",
+          "topic": "City-wide average",
+          "metric": "sold_median",
+          "claim_dir": "up",
+          "claim_value": 244000.0,
+          "claim_value_str": "£244,000 (Leeds local-authority average, March 2026)"
+        }
+      ]
+    },
+    "birmingham": {
+      "captured_at": "15 June 2026",
+      "source_label": "Official UK house price statistics (ONS)",
+      "method": "We collect recent, publicly published newsletters, blog posts and articles about this city's property market, quote each verbatim with a link to the original, and set it beside the official sold record for the city's postcode districts that we already publish. We recognise the source, cite it, and clarify - we do not rewrite anyone's reporting.",
+      "disclaimer": "These are other people's published claims, cited as such. They are checked against the recorded sold prices for this city's postcodes. National or regional commentary can be right about its own scope while the local figure looks different - both can be shown without declaring a winner. Not one quoted claim is a figure on this page; every number in the clarification is the city's own sold record.",
+      "claims": [
+        {
+          "publisher": "Office for National Statistics",
+          "title": "Housing prices in Birmingham - UK House Price Index",
+          "url": "https://www.ons.gov.uk/visualisations/housingpriceslocal/E08000025/",
+          "date": "March 2026",
+          "quote": "The provisional average house price in Birmingham in March 2026 was £233,000, similar to the average of £233,000 in March 2025.",
+          "topic": "Average house price",
+          "metric": "sold_median",
+          "claim_dir": "flat",
+          "claim_value": 233000.0,
+          "claim_value_str": "£233,000"
+        }
+      ]
+    },
+    "bristol": {
+      "captured_at": "15 June 2026",
+      "source_label": "Official UK house price statistics (ONS)",
+      "method": "We collect recent, publicly published newsletters, blog posts and articles about this city's property market, quote each verbatim with a link to the original, and set it beside the official sold record for the city's postcode districts that we already publish. We recognise the source, cite it, and clarify - we do not rewrite anyone's reporting.",
+      "disclaimer": "These are other people's published claims, cited as such. They are checked against the recorded sold prices for this city's postcodes. National or regional commentary can be right about its own scope while the local figure looks different - both can be shown without declaring a winner. Not one quoted claim is a figure on this page; every number in the clarification is the city's own sold record.",
+      "claims": [
+        {
+          "publisher": "Office for National Statistics",
+          "title": "Housing prices in Bristol - UK House Price Index",
+          "url": "https://www.ons.gov.uk/visualisations/housingpriceslocal/E06000023/",
+          "date": "March 2026",
+          "quote": "The provisional average house price in Bristol in March 2026 was £348,000, down 2.6% from £357,000 in March 2025.",
+          "topic": "Average house price",
+          "metric": "sold_median",
+          "claim_dir": "down",
+          "claim_value": 348000.0,
+          "claim_value_str": "£348,000"
+        }
+      ]
+    },
+    "liverpool": {
+      "captured_at": "15 June 2026",
+      "source_label": "Official UK house price statistics (ONS)",
+      "method": "We collect recent, publicly published newsletters, blog posts and articles about this city's property market, quote each verbatim with a link to the original, and set it beside the official sold record for the city's postcode districts that we already publish. We recognise the source, cite it, and clarify - we do not rewrite anyone's reporting.",
+      "disclaimer": "These are other people's published claims, cited as such. They are checked against the recorded sold prices for this city's postcodes. National or regional commentary can be right about its own scope while the local figure looks different - both can be shown without declaring a winner. Not one quoted claim is a figure on this page; every number in the clarification is the city's own sold record.",
+      "claims": [
+        {
+          "publisher": "Office for National Statistics",
+          "title": "Housing prices in Liverpool - UK House Price Index",
+          "url": "https://www.ons.gov.uk/visualisations/housingpriceslocal/E08000012/",
+          "date": "March 2026",
+          "quote": "The provisional average house price in Liverpool in March 2026 was £182,000, higher than the average of £176,000 in March 2025, a 2.9% rise.",
+          "topic": "Average house price",
+          "metric": "sold_median",
+          "claim_dir": "up",
+          "claim_value": 182000.0,
+          "claim_value_str": "£182,000"
+        }
+      ]
+    },
+    "nottingham": {
+      "captured_at": "2026-06-16",
+      "source_label": "Public reporting on the UK property market",
+      "method": "We collect recent, publicly published newsletters, blog posts and articles about this city's property market, quote each verbatim with a link to the original, and set it beside the official sold record for the city's postcode districts that we already publish. We recognise the source, cite it, and clarify - we do not rewrite anyone's reporting.",
+      "disclaimer": "These are other people's published claims, cited as such. They are checked against the recorded sold prices for this city's postcodes. National or regional commentary can be right about its own scope while the local figure looks different - both can be shown without declaring a winner. Not one quoted claim is a figure on this page; every number in the clarification is the city's own sold record.",
+      "intro": [
+        "Two recent figures describe Nottingham's market, and they look like they disagree with us, which makes this the most useful kind of page to write. Across the 8 Nottingham postcode districts we report, the recorded median sale price is £146,125, with district medians running from £123,750 to £250,000, and homes take a median of 59 days to sell. Where an outside figure sits well above ours, the gap is not an error in either number; it is a difference in what is being counted, and that is worth showing plainly."
+      ],
+      "synthesis": [
+        "The two figures only look like a disagreement until you separate the questions. The ONS average and our district median are measuring different baskets, and the regional growth rate is a trend laid over a level we can show. Across the 8 districts we report, that level is £146,125, with homes taking a median of 59 days to sell.",
+        "Our rule on this page does not change: we never reprint someone else's number as a Nottingham figure. £192,000 is the ONS's, cited and linked; £146,125 is ours, measured the same way across every district. When they differ we explain the difference rather than pick a winner, because for the home you actually care about, the honest answer is the one built from what homes like it actually sold for."
+      ],
+      "claims": [
+        {
+          "publisher": "Office for National Statistics",
+          "title": "Housing prices in Nottingham - UK House Price Index",
+          "url": "https://www.ons.gov.uk/visualisations/housingpriceslocal/E06000018/",
+          "date": "March 2026",
+          "quote": "The provisional average house price in Nottingham in March 2026 was £192,000, in line with the average of £194,000 in March 2025, a 0.8% change.",
+          "topic": "Average house price",
+          "metric": "sold_median",
+          "claim_dir": "flat",
+          "claim_value": 192000.0,
+          "claim_value_str": "£192,000",
+          "dek": "The ONS puts the Nottingham average at £192,000. Our median across the districts we report is lower, and here is why both can be right.",
+          "analysis": [
+            "The ONS provisional average house price for Nottingham in March 2026 is £192,000. Our recorded median across the 8 districts we report is £146,125, around a third lower. That is a real gap, not a rounding difference, and pretending it away would be the dishonest move.",
+            "The gap is mostly about three things. First, mean versus median: the ONS quotes an average, which a handful of large or new-build sales pull upward, while we report a median, the middle sale, which resists that pull. Second, coverage: the ONS figure spans the whole local-authority area, while we report the inner postcode districts where we hold a robust sold basis, and the outer, higher-value fringes are exactly where Nottingham's dearer stock sits. Third, mix: a basket weighted to flats and terraces sits below one weighted to detached homes.",
+            "So both figures are right about different questions. If you want the headline number for the city as a whole, the ONS average is the one to quote. If you want the number a typical home in these districts actually sold for, ours is closer to your reality. The £3,417 per square metre we record is the cleanest cross-check, because it compares price for like-for-like space rather than whole-home totals that mix in size and type."
+          ]
+        },
+        {
+          "publisher": "HM Land Registry / Office for National Statistics",
+          "title": "UK House Price Index: summary, March 2026",
+          "url": "https://www.gov.uk/government/statistics/uk-house-price-index-for-march-2026/uk-house-price-index-summary-march-2026",
+          "date": "Published 20 May 2026",
+          "quote": "Of the English regions, annual house price inflation was highest in the East Midlands, where prices increased by 0.7% in the 12 months to March 2026.",
+          "topic": "East Midlands trend",
+          "metric": "sold_median",
+          "claim_dir": "up",
+          "claim_value": null,
+          "claim_value_str": "",
+          "dek": "The official statistician says the East Midlands led England for annual growth. Our local level sits inside that.",
+          "analysis": [
+            "The same official release notes the East Midlands had the highest annual house-price inflation of any English region, up 0.7% in the 12 months to March 2026. That is a regional rate of change, and our page does not dispute it; it grounds it with the level underneath, a £146,125 median across the 8 Nottingham districts we track.",
+            "A region leading on growth while still being among the more affordable places to buy is not a contradiction; it is the normal pattern for markets catching up from a lower base. The regional percentage tells you the direction of travel; the sold median tells you the starting point. For a specific Nottingham address, the second is the one that decides what it is worth today."
+          ]
+        }
+      ]
+    },
+    "sheffield": {
+      "captured_at": "15 June 2026",
+      "source_label": "Official UK house price statistics (ONS)",
+      "method": "We collect recent, publicly published newsletters, blog posts and articles about this city's property market, quote each verbatim with a link to the original, and set it beside the official sold record for the city's postcode districts that we already publish. We recognise the source, cite it, and clarify - we do not rewrite anyone's reporting.",
+      "disclaimer": "These are other people's published claims, cited as such. They are checked against the recorded sold prices for this city's postcodes. National or regional commentary can be right about its own scope while the local figure looks different - both can be shown without declaring a winner. Not one quoted claim is a figure on this page; every number in the clarification is the city's own sold record.",
+      "claims": [
+        {
+          "publisher": "Office for National Statistics",
+          "title": "Housing prices in Sheffield - UK House Price Index",
+          "url": "https://www.ons.gov.uk/visualisations/housingpriceslocal/E08000039/",
+          "date": "March 2026",
+          "quote": "The provisional average house price in Sheffield in March 2026 was £222,000, in line with the average of £220,000 in March 2025, a 1.0% change.",
+          "topic": "Average house price",
+          "metric": "sold_median",
+          "claim_dir": "flat",
+          "claim_value": 222000.0,
+          "claim_value_str": "£222,000"
+        }
+      ]
+    }
+  }
+}

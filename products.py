@@ -17,9 +17,9 @@ component degrades to what it can honestly say.
 """
 import os
 import appraise
-from appraise import money, pos_loc, listing_link, postcode_of
+from appraise import money, pos_loc, txn_link, postcode_of
 
-# coordinate fields a PropertyData listing might carry, in order of preference
+# coordinate fields a listing/evidence row might carry, in order of preference
 _LAT = ("latitude", "lat")
 _LNG = ("longitude", "lng", "lon", "lng")
 
@@ -34,51 +34,14 @@ def _coord(x):
 
 
 # ------------------------------------------------------------------ nearby schools (Ofsted)
-def nearby_schools(r, key, n=6):
-    """Nearest state schools with phase, distance and a link to the OFFICIAL Ofsted report.
+def nearby_schools(r, key=None, n=6):
+    """Nearest schools placeholder.
 
-    Pulled from PropertyData's schools endpoint (same key, no new dependency). We show
-    only what the record states - name, phase, type, distance, pupils - and link each
-    school to its public Ofsted page so the reader verifies the rating at source. We
-    never assert a rating ourselves. Best-effort: returns [] on any failure, never raises."""
-    subj = r["subject"]
-    pc = postcode_of(subj.get("address", ""))
-    if not pc:
-        return []
-    try:
-        resp = appraise.api("schools", key, postcode=pc)
-    except Exception:
-        return []
-    data = (resp or {}).get("data") or {}
-    nearest = []
-    # state schools live under data.state.nearest; tolerate shape drift
-    for bucket in ("state", "independent"):
-        b = data.get(bucket)
-        if isinstance(b, dict) and isinstance(b.get("nearest"), list):
-            for s in b["nearest"]:
-                s = dict(s); s["sector"] = bucket
-                nearest.append(s)
-    if not nearest:
-        return []
-    def _dist(s):
-        try:    return float(s.get("distance"))
-        except (TypeError, ValueError): return 99.0
-    nearest.sort(key=_dist)
-    out = []
-    for s in nearest[:n]:
-        name = (s.get("name") or "").strip()
-        if not name:
-            continue
-        out.append({
-            "name": name,
-            "phase": (s.get("phase") or "").strip(),
-            "type": (s.get("type") or "").strip(),
-            "sector": s.get("sector", "state"),
-            "pupils": s.get("num_pupils"),
-            "distance": _dist(s) if _dist(s) < 99 else None,
-            "ofsted_url": (s.get("url") or "").strip(),
-        })
-    return out
+    We no longer call a commercial property aggregator for schools. This stays as a stable
+    seam for a future direct Ofsted/Get Information About Schools integration and degrades
+    silently until that direct public-source client exists.
+    """
+    return []
 
 
 def schools_brief(schools):
@@ -100,49 +63,38 @@ def schools_brief(schools):
 
 
 # ------------------------------------------------------------------ target listings
-def target_listings(r, key, audience, n=20):
-    """Up to n live nearby listings to act on, ranked for this audience.
-      agent  - reduction/instruction opportunities first (longest on market), then fresh
-      vendor - the fiercest competition first (highest asking in the band)
-      buyer  - best-value available alternatives first (lowest asking, not under offer)
-    Each row: address, loc, price, beds, dom, status, link, coord. Best-effort; [] on failure."""
-    subj = r["subject"]
-    pdtype = r.get("pdtype") or "flat"
-    try:
-        listings = appraise.pull_listings(subj, key, pdtype) or []
-    except Exception:
-        listings = []
-    here = subj["address"].split(",")[0].strip().lower()
+def target_listings(r, key=None, audience="vendor", n=20):
+    """Up to n nearby action rows without paid listing data.
+
+    Until we add a direct portal/open-listings spine, the map pack uses the strongest HMLR
+    proof rows as nearby evidence targets. They are not live listings and are labelled as
+    sold evidence, with each row linking to HMLR/GOV proof.
+    """
+    subj = r.get("subject") or {}
+    here = (subj.get("address") or "").split(",")[0].strip().lower()
     rows, seen = [], set()
-    for x in listings:
-        if not (x.get("price") and x.get("address")):
-            continue
-        a0 = x["address"].split(",")[0].strip().lower()
-        if a0 == here or a0 in seen:                 # drop the subject and duplicates
+    comps = sorted(r.get("compsA") or [], key=lambda x: (-(x.get("score") or 0), x.get("dist") or 99, -(x.get("price") or 0)))
+    for x in comps:
+        addr = x.get("address") or ""
+        a0 = addr.split(",")[0].strip().lower()
+        if not addr or a0 == here or a0 in seen:
             continue
         seen.add(a0)
-        rows.append(x)
-
-    if audience == "agent":
-        rows.sort(key=lambda x: (0 if (x.get("days_on_market") or 0) >= 90 else 1,
-                                 -(x.get("days_on_market") or 0)))
-    elif audience == "vendor":
-        rows.sort(key=lambda x: -(x.get("price") or 0))
-    else:  # buyer
-        rows = [x for x in rows if not x.get("sstc")]
-        rows.sort(key=lambda x: (x.get("price") or 0))
-
-    out = []
-    for x in rows[:n]:
-        pname, plink = listing_link(x.get("url"))
-        out.append({
-            "address": x["address"], "loc": pos_loc(x["address"]),
-            "price": x["price"], "price_str": money(x["price"]),
-            "beds": x.get("bedrooms"), "dom": x.get("days_on_market") or 0,
-            "status": "Under offer" if x.get("sstc") else "Available",
-            "portal": pname, "link": plink, "coord": _coord(x),
+        rows.append({
+            "address": addr,
+            "loc": pos_loc(addr),
+            "price": x.get("price"),
+            "price_str": money(x.get("price")),
+            "beds": None,
+            "dom": 0,
+            "status": "Sold evidence",
+            "portal": "HMLR",
+            "link": txn_link(x),
+            "coord": _coord(x),
         })
-    return out
+        if len(rows) >= n:
+            break
+    return rows
 
 
 def target_map(targets, subj, out_path="_targets.png"):

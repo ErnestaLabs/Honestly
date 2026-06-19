@@ -14,8 +14,7 @@ One address in, one evidence-backed valuation out. No black-box number. The comp
 sales, the condition adjustment, the live-market steer, and the exact arithmetic are all
 shown. **The honesty is the product** - the moat is a glass box, not a guarded oracle.
 
-Every figure traces to a free, verifiable public source (HM Land Registry sold prices via
-PropertyData). Asking prices are treated as positioning, never as evidence.
+Every figure traces to a free, verifiable public/direct source: HM Land Registry Price Paid Data and UK HPI, EPC where matched, Postcodes.io/ONS geography, Bank of England/ONS context, plus optional Google APIs for address/map/frontage/solar context. Asking prices are treated as positioning, never as evidence.
 
 ## 2. Problem & positioning
 
@@ -32,8 +31,7 @@ tools while out-trusting the free ones.
 | Portal estimates | Consumer | Free but non-defensible, no working shown |
 | PropertyData (raw) | Pro/devs | Raw data, no audience framing, no deliverable |
 
-**Our wedge:** the exposed valuation formula + audience framing + a real deliverable, on
-Telegram, for pounds not hundreds.
+**Our wedge:** the exposed valuation formula + audience framing + a real deliverable, on Telegram, for pounds not hundreds. Paid enriches the decision, not the data-vendor dependency.
 
 ## 3. Audiences
 
@@ -47,6 +45,8 @@ The valuation is identical for everyone; the framing and the call-to-action diff
 
 ### 4.1 Shipped
 - [x] Assessed range + central value, audience-framed (`engine.summary`).
+- [x] Deterministic `valuation_formula`: evidence filters, constants, finish rule, fallback, rounding and result.
+- [x] `honestly_enrichment`: proof, basis, subject history, public material-fact status, Google/free API context, decision signals and monitoring triggers.
 - [x] Branded multi-section PDF (`report.build`): hero, exec summary, property on record,
       comparable evidence (each row a clickable HM Land Registry record), native bar chart,
       **Basis of assessment (the glass-box working)**, live positioning, net proceeds,
@@ -59,10 +59,8 @@ The valuation is identical for everyone; the framing and the call-to-action diff
       "Confirm with seller." *(shipped this iteration)*
 
 ### 4.2 Requirements (prioritised - see Section 8 for the roadmap)
-- [x] Glass-box one-liner in the bot message: the literal arithmetic
-      (`sold median -> condition-adjusted -> live market % = central`). *(shipped + live)*
-- [x] Schools nearby + official Ofsted report links (PropertyData schools endpoint, no new
-      dependency). Bot brief + PDF section. We never assert a rating - link to source. *(shipped + live)*
+- [x] Glass-box formula in the bot message: HMLR evidence set -> condition rule or subject-history HPI fallback -> rounded range/central. *(shipped + live)*
+- [ ] Schools nearby + official Ofsted report links from direct public Ofsted/GIAS data. No commercial property aggregator dependency.
 - [x] **Audio walkthrough of the valuation (Voxtral TTS, Mistral)** - spoken narration of the
       glass-box working, figures reproduced verbatim. Stdlib-only client, best-effort, key-gated.
       *(shipped this iteration - Hermes-side + auto-enables in-bot when `MISTRAL_API_KEY` is set)*
@@ -136,8 +134,7 @@ never an input. Hermes obeys every constraint in Section 9.
        report.py sanitiser, the purge-tool regex and the ban test retain the glyph, all by design)*
 
 **P1 - enrichment (medium effort, real data sources):** ALL SHIPPED
-4. [x] Schools + Ofsted section, via the PropertyData schools endpoint (no new dependency).
-       Bot brief + PDF, links to the official Ofsted report. *(shipped + live)*
+4. [ ] Schools + Ofsted section via direct public Ofsted/GIAS data. Bot brief + PDF, links to the official Ofsted report. No commercial property aggregator dependency.
 5. [x] Hermes narration: the glass-box chain reproduced verbatim in `_valuation_tool.compose_card`,
        with `sold_median` passed through to Hermes. *(shipped - Hermes-side tool)*
 

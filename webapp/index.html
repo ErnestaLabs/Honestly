@@ -3,92 +3,344 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Honestly - what it's really worth</title>
+<title>Honestly · Property Intelligence</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{ --green:#1f6f5c; --greend:#143f33; --terra:#b9623a; --ink:#1c1a16; --mut:#6b6557;
-         --line:#e7e1d4; --bg:#f6f3ec; --card:#fff; }
-  *{box-sizing:border-box} html,body{margin:0}
-  body{font:16px/1.5 -apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg);
-       -webkit-font-smoothing:antialiased}
-  .wrap{max-width:620px;margin:0 auto;padding:20px 16px 64px}
-  header{display:flex;align-items:baseline;gap:10px;margin:6px 0 2px}
-  .logo{font:700 26px/1 Georgia,serif;color:var(--greend);letter-spacing:-.5px}
-  .logo b{color:var(--green)}
-  .tag{color:var(--mut);font-size:13px;margin:0 0 20px}
-  .seg{display:flex;background:#ece6d9;border-radius:12px;padding:4px;gap:4px;margin-bottom:14px}
-  .seg button{flex:1;border:0;background:transparent;padding:10px 6px;border-radius:9px;font-size:14px;
-              font-weight:600;color:var(--mut);cursor:pointer}
-  .seg button.on{background:#fff;color:var(--greend);box-shadow:0 1px 3px rgba(0,0,0,.08)}
-  label{display:block;font-size:12px;font-weight:600;color:var(--mut);margin:12px 0 5px;text-transform:uppercase;letter-spacing:.4px}
-  input{width:100%;border:1px solid var(--line);background:#fff;border-radius:10px;padding:13px 14px;font-size:16px;color:var(--ink)}
-  input:focus{outline:0;border-color:var(--green)}
-  .go{width:100%;margin-top:16px;border:0;background:var(--green);color:#fff;font-size:16px;font-weight:700;
-      padding:15px;border-radius:11px;cursor:pointer}
-  .go:disabled{opacity:.5}
-  .row2{display:flex;gap:10px;margin-top:0}.row2>div{flex:1}
-  .row3{display:flex;gap:8px;margin-top:0}.row3>div{flex:1;min-width:0}
-  select{width:100%;border:1px solid var(--line);background:#fff;border-radius:10px;padding:13px 14px;font-size:16px;color:var(--ink);appearance:none}
-  select:focus{outline:0;border-color:var(--green)}
-  .opt{font-weight:400;text-transform:none;letter-spacing:0;color:#a8a294}
-  .check{display:flex;align-items:center;gap:9px;margin:14px 0 0;font-size:14px;font-weight:500;color:var(--ink);text-transform:none;letter-spacing:0}
-  .check input{width:auto;margin:0}
-  .hint{font-size:12px;color:var(--mut);margin-top:6px}
-  .loading{text-align:center;color:var(--mut);padding:40px 0;display:none}
-  .spin{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--green);border-radius:50%;
-        margin:0 auto 12px;animation:s 1s linear infinite}@keyframes s{to{transform:rotate(360deg)}}
-  #out{display:none;margin-top:22px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
-  .h{font-size:13px;color:var(--mut);margin:0 0 4px}
-  .range{font:700 30px/1.1 Georgia,serif;color:var(--greend);margin:2px 0}
-  .sub{color:var(--mut);font-size:14px}
-  .guide{margin-top:12px;font-size:15px}.guide b{color:var(--green);font-size:18px}
-  .meta{font-size:13px;color:var(--mut);margin-top:4px}
-  .verdict{border-radius:11px;padding:13px 14px;font-size:14px;margin-bottom:14px;font-weight:500}
-  .warn{background:#fbeee7;color:#8a3c1d;border:1px solid #ecc7b6}
-  .ok{background:#e8f1ee;color:var(--greend);border:1px solid #cfe3dc}
-  .frame{width:100%;border-radius:12px;display:block;border:1px solid var(--line)}
-  .cap{font-size:12px;color:var(--mut);margin:6px 2px 0}
-  .evrow{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px}
-  .evrow:last-child{border:0}
-  .evrow .a{color:var(--ink)} .evrow .a small{color:var(--mut)}
-  .evrow .p{font-weight:700;white-space:nowrap;text-align:right}
-  .evrow .p a{display:block;font-weight:400;font-size:12px;color:var(--green);text-decoration:none}
-  .pos{background:#f3ede0;border-radius:11px;padding:13px 14px;font-size:14px;color:#5a5340;margin-top:6px}
-  .err{background:#fbeee7;color:#8a3c1d;border-radius:11px;padding:14px;font-size:14px;display:none}
-  footer{font-size:11px;color:var(--mut);text-align:center;margin-top:18px;line-height:1.6}
-  footer a{color:var(--mut)}
-  .buy{margin-top:18px}
-  .buy h3{font:700 17px/1.2 Georgia,serif;color:var(--greend);margin:0 0 3px}
-  .buy .lede{font-size:13px;color:var(--mut);margin:0 0 12px}
-  .pack{border:1px solid var(--line);border-radius:13px;padding:14px;margin-bottom:10px;background:#fff}
-  .pack.best{border-color:var(--green);box-shadow:0 2px 10px rgba(31,111,92,.10)}
-  .pack .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-  .pack .nm{font-weight:700;color:var(--ink);font-size:15px}
-  .pack .pr{font:700 17px/1 Georgia,serif;color:var(--green);white-space:nowrap}
-  .pack ul{margin:9px 0 0;padding:0 0 0 18px;font-size:13px;color:var(--mut)}
-  .pack ul li{margin:3px 0}
-  .pack button{width:100%;margin-top:12px;border:0;background:var(--green);color:#fff;font-size:15px;
-               font-weight:700;padding:12px;border-radius:10px;cursor:pointer}
-  .pack button:disabled{opacity:.55}
-  .pack.best button{background:var(--greend)}
-  .intro{background:#fef6ed;color:#8a5a2b;border:1px solid #f0d9bf;border-radius:9px;
-         padding:9px 12px;font-size:13px;font-weight:600;margin-bottom:12px}
-  .pro{font-size:13px;color:var(--mut);text-align:center;margin-top:4px}
-  .pro a{color:var(--green);font-weight:600;text-decoration:none;cursor:pointer}
-  .tgonly{background:#e8f1ee;color:var(--greend);border:1px solid #cfe3dc;border-radius:11px;
-          padding:14px;font-size:14px;text-align:center;margin-top:18px}
-  .tgonly a{color:var(--green);font-weight:700}
-  .tochat{width:100%;margin-top:16px;border:0;background:var(--greend);color:#fff;font-size:15px;
-          font-weight:700;padding:14px;border-radius:11px;cursor:pointer}
-  .tochat:disabled{opacity:.55}
+/* ============================================================
+   HONESTLY · brand-true workspace (the live system, elevated)
+   green #15807f · navy #0e2747 · teal #2aa39a · gold #d89a32
+   cream #f6f3ec · paper #fbf9f4 · line #e7e1d4 · Fraunces display
+   The uplift is in craft — typography, depth, rhythm, motion —
+   not a palette swap. The logo is the real PNG (Brand Asset Rule).
+   ============================================================ */
+:root{
+  --green:#15807f; --greend:#0c5f5e; --navy:#0e2747; --teal:#2aa39a;
+  --gold:#d89a32; --golddk:#3a2a08;
+  --ink:#1c1a16; --mut:#6b6557; --dim:#a39c8c;
+  --line:#e7e1d4; --line2:#ddd5c4;
+  --bg:#f4f0e7; --paper:#fbf9f4; --card:#ffffff; --pale:#eef4f1;
+  --disp:"Fraunces",Georgia,"Times New Roman",serif;
+  --ui:"Inter",-apple-system,"Segoe UI",Roboto,sans-serif;
+  --r:16px; --rb:12px; --rs:10px;
+  --sh1:0 1px 2px rgba(14,39,71,.04), 0 2px 8px rgba(14,39,71,.05);
+  --sh2:0 2px 6px rgba(14,39,71,.06), 0 10px 28px rgba(14,39,71,.09);
+  --shg:0 6px 18px rgba(21,128,127,.22);
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font:15px/1.55 var(--ui);color:var(--ink);
+     background:var(--bg);-webkit-font-smoothing:antialiased;
+     overscroll-behavior:none;
+     background-image:radial-gradient(120% 80% at 50% -10%, rgba(42,163,154,.10), transparent 60%);
+     background-attachment:fixed}
+
+/* ---- LAYOUT ---- */
+.wrap{max-width:560px;margin:0 auto;padding:0 0 84px}
+
+/* ---- HEADER ---- */
+header{display:flex;align-items:center;gap:9px;padding:14px 18px 12px;
+       position:sticky;top:0;z-index:10;
+       background:rgba(244,240,231,.82);
+       backdrop-filter:blur(18px) saturate(1.4);
+       -webkit-backdrop-filter:blur(18px) saturate(1.4);
+       border-bottom:1px solid rgba(221,213,196,.7)}
+header .logo-icon{height:27px;width:27px;flex:none;display:block}
+header .logo-mark{height:19px;width:auto;display:block}
+
+/* ---- WORKSPACE TABS ---- */
+.tabs{display:flex;gap:2px;
+      background:rgba(244,240,231,.82);
+      backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+      border-bottom:1px solid rgba(221,213,196,.7);
+      padding:0 10px;
+      position:sticky;top:53px;z-index:9;
+      overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:1;min-width:60px;border:0;background:transparent;
+             padding:12px 8px 11px;
+             font:600 12.5px/1 var(--ui);color:var(--dim);letter-spacing:.1px;
+             cursor:pointer;white-space:nowrap;
+             position:relative;transition:color .2s var(--ease)}
+.tabs button:hover{color:var(--mut)}
+.tabs button.on{color:var(--green)}
+.tabs button.on::after{content:'';position:absolute;bottom:-1px;left:14px;right:14px;
+                       height:2.5px;background:var(--green);
+                       border-radius:3px 3px 0 0}
+.tab[hidden]{display:none}
+
+/* ---- TAB CONTENT PADDING ---- */
+#t_value,#t_store,#t_library,#t_portfolio,#t_property{padding:20px 18px}
+
+/* ---- CARDS ---- */
+.card{background:var(--card);border:1px solid var(--line);
+      border-radius:var(--r);padding:20px;margin-bottom:14px;box-shadow:var(--sh1)}
+
+/* ---- HEADINGS ---- */
+h3{font:600 21px/1.2 var(--disp);color:var(--navy);margin:0 0 5px;letter-spacing:-.4px}
+.h{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;
+   color:var(--dim);margin:0 0 8px}
+.sub{font-size:14px;color:var(--mut)}
+.meta{font-size:13px;color:var(--mut);margin-top:5px}
+
+/* ---- THE BIG NUMBER ---- */
+.range{font:600 40px/1.04 var(--disp);color:var(--navy);
+       margin:6px 0 3px;letter-spacing:-1.6px}
+.guide{margin-top:12px;font-size:15px;color:var(--mut)}
+.guide b{color:var(--green);font:600 21px var(--disp)}
+
+/* ---- FORM ---- */
+.tag{font-size:13px;color:var(--mut);padding:8px 18px 0}
+label{display:block;font-size:11px;font-weight:600;color:var(--mut);
+      margin:16px 0 6px;text-transform:uppercase;letter-spacing:.7px}
+input,select{width:100%;background:var(--paper);
+             border:1.5px solid var(--line);border-radius:var(--rb);
+             padding:13px 14px;font:15px var(--ui);color:var(--ink);
+             appearance:none;-webkit-appearance:none;
+             transition:border-color .18s var(--ease),box-shadow .18s var(--ease),background .18s var(--ease)}
+input::placeholder{color:var(--dim)}
+input:focus,select:focus{outline:0;border-color:var(--green);background:#fff;
+                          box-shadow:0 0 0 3px rgba(21,128,127,.12)}
+select{cursor:pointer;
+       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='6' viewBox='0 0 11 6'%3E%3Cpath d='M1 1l4.5 4L10 1' fill='none' stroke='%236b6557' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+       background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.row2{display:flex;gap:10px}.row2>div{flex:1}
+.row3{display:flex;gap:8px}.row3>div{flex:1;min-width:0}
+.opt{font-weight:400;text-transform:none;letter-spacing:0;color:var(--dim)}
+.check{display:flex;align-items:center;gap:9px;margin:16px 0 0;
+       font-size:14px;font-weight:500;color:var(--ink);
+       text-transform:none;letter-spacing:0}
+.check input{width:auto;margin:0;accent-color:var(--green);width:17px;height:17px}
+.hint{font-size:12.5px;color:var(--dim);margin-top:8px;line-height:1.5}
+
+/* ---- BUTTONS ---- */
+.go{width:100%;margin-top:18px;border:0;
+    background:linear-gradient(180deg,var(--green),var(--greend));
+    color:#fff;font:600 15.5px var(--ui);padding:15px;border-radius:var(--rb);
+    cursor:pointer;transition:transform .12s var(--ease),box-shadow .2s var(--ease),filter .2s var(--ease);
+    box-shadow:var(--shg);letter-spacing:-.1px}
+.go:hover{filter:brightness(1.06);box-shadow:0 8px 22px rgba(21,128,127,.3)}
+.go:active{transform:translateY(1px) scale(.995)}
+.go:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+.tochat{width:100%;margin-top:14px;border:1.5px solid var(--line2);background:#fff;
+        color:var(--navy);font:600 14px var(--ui);padding:13px;
+        border-radius:var(--rb);cursor:pointer;transition:all .15s var(--ease)}
+.tochat:hover{border-color:var(--green);color:var(--green)}
+.tochat:disabled{opacity:.5}
+
+/* ---- LOADING / STATE ---- */
+.loading{text-align:center;color:var(--mut);padding:44px 0;display:none}
+.spin{width:28px;height:28px;border:2.5px solid var(--line);border-top-color:var(--green);
+      border-radius:50%;margin:0 auto 14px;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#out{display:none}
+.err{background:#fbeee7;color:#8a3c1d;border:1px solid #ecc7b6;
+     border-radius:var(--rb);padding:13px 16px;font-size:14px;display:none;margin-top:12px}
+
+/* ---- VERDICTS ---- */
+.verdict{border-radius:var(--rb);padding:13px 15px;font-size:14px;
+         margin-bottom:14px;font-weight:500}
+.warn{background:#fbeee7;color:#8a3c1d;border:1px solid #ecc7b6}
+.ok{background:var(--pale);color:var(--greend);border:1px solid #cfe3dc}
+.pos{background:var(--paper);border:1px solid var(--line);border-radius:var(--rb);
+     padding:13px 15px;font-size:14px;color:var(--mut);margin-top:8px}
+.plain{background:var(--paper);border:1px solid var(--line);border-radius:var(--rb);
+       padding:13px 15px;font-size:14px;color:var(--mut);margin-top:8px}
+.plain b{color:var(--navy)}
+
+/* ---- EVIDENCE COMPARABLES ---- */
+.evrow{display:flex;justify-content:space-between;gap:10px;padding:12px 0;
+       border-bottom:1px solid var(--line);font-size:14px}
+.evrow:last-child{border:0}
+.evrow .a{color:var(--ink)}.evrow .a small{color:var(--dim)}
+.evrow .p{font-weight:700;white-space:nowrap;text-align:right;color:var(--navy)}
+.evrow .p a{display:block;font-weight:400;font-size:12px;color:var(--green);text-decoration:none}
+
+/* ---- IMAGES ---- */
+.frame{width:100%;border-radius:var(--r);display:block;border:1px solid var(--line);box-shadow:var(--sh1)}
+.cap{font-size:12px;color:var(--dim);margin:8px 2px 0}
+
+/* ---- PORTFOLIO PROPERTY CARDS ---- */
+.pcard{display:flex;justify-content:space-between;align-items:center;gap:12px;
+       background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+       padding:16px 18px;margin-bottom:10px;cursor:pointer;text-align:left;width:100%;
+       box-shadow:var(--sh1);transition:transform .15s var(--ease),box-shadow .2s var(--ease),border-color .2s var(--ease)}
+.pcard:hover,.pcard:focus{border-color:var(--line2);box-shadow:var(--sh2);transform:translateY(-1px);outline:0}
+.pcard .pa{font-weight:600;font-size:14.5px;color:var(--navy);line-height:1.3}
+.pcard .pm{font-size:12px;color:var(--mut);margin-top:3px}
+.pcard .pv{font:600 22px/1 var(--disp);color:var(--green);white-space:nowrap;letter-spacing:-.5px}
+.purity{display:inline-block;font-size:10.5px;font-weight:700;color:var(--greend);
+        background:var(--pale);border-radius:20px;padding:2px 9px;margin-top:5px;letter-spacing:.2px}
+.empty{text-align:center;padding:44px 22px;color:var(--mut)}
+.empty b{display:block;color:var(--navy);font:600 18px var(--disp);margin-bottom:8px}
+.backlink{display:inline-flex;align-items:center;gap:5px;border:0;background:transparent;
+          color:var(--green);font:600 13.5px var(--ui);cursor:pointer;padding:8px 0;margin-bottom:8px}
+.backlink:hover{color:var(--greend)}
+
+/* ---- BUY / CATALOGUE CONTAINER ---- */
+.buy{margin-top:20px}
+.buy h3{margin-bottom:5px}
+.buy .lede{font-size:13.5px;color:var(--mut);margin:0 0 14px;line-height:1.6}
+
+/* ---- AUDIENCE SELECTOR ---- */
+.seg{display:flex;background:#ece6d9;border-radius:13px;padding:4px;gap:4px;margin-bottom:16px;
+     box-shadow:inset 0 1px 2px rgba(14,39,71,.05)}
+.seg button{flex:1;border:0;background:transparent;padding:10px 8px;border-radius:9px;
+            font:600 13.5px var(--ui);color:var(--mut);cursor:pointer;transition:all .18s var(--ease)}
+.seg button.on{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(14,39,71,.12)}
+
+/* ---- PRODUCT PACK CARDS ---- */
+.pack{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+      padding:18px;margin-bottom:12px;box-shadow:var(--sh1)}
+.pack .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.pack .nm{font-weight:600;color:var(--navy);font-size:15.5px;line-height:1.3}
+.pack .pr{font:600 17px/1 var(--disp);color:var(--green);white-space:nowrap}
+.pack ul{margin:11px 0 0;padding:0;font-size:13px;color:var(--mut);list-style:none}
+.pack ul li{margin:6px 0;padding-left:22px;position:relative}
+.pack ul li::before{content:"✓";position:absolute;left:0;top:0;color:var(--green);font-weight:800}
+.pack button{width:100%;margin-top:14px;border:0;
+             background:linear-gradient(180deg,var(--green),var(--greend));color:#fff;
+             font:600 14.5px var(--ui);padding:12px;border-radius:var(--rb);cursor:pointer;
+             box-shadow:var(--shg);transition:transform .12s var(--ease),filter .2s var(--ease)}
+.pack button:hover{filter:brightness(1.06)}
+.pack button:active{transform:translateY(1px)}
+.pack button:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+
+/* flagship = hero pack: navy frame, gold ribbon — premium, not one card among equals */
+.pack.best{border:1.5px solid var(--navy);box-shadow:0 8px 26px rgba(14,39,71,.16);
+           background:linear-gradient(180deg,#fff,#fbf9f4)}
+.pack.best .nm{font:600 18px/1.2 var(--disp);color:var(--navy)}
+.pack.best .pr{color:var(--navy)}
+.pack.best button{background:linear-gradient(180deg,var(--navy),#091a31);box-shadow:0 6px 18px rgba(14,39,71,.28);font-size:15.5px;padding:14px}
+.pack.best .ribbon{display:inline-block;background:linear-gradient(180deg,#e8ad44,var(--gold));
+                   color:var(--golddk);font-size:10.5px;font-weight:800;letter-spacing:.06em;
+                   text-transform:uppercase;padding:4px 10px;border-radius:7px;margin-bottom:11px;
+                   box-shadow:0 2px 6px rgba(216,154,50,.3)}
+.pack.lite{background:var(--paper)}
+.pack.lite .nm{font-size:14.5px}
+.pack.lite button{background:#fff;color:var(--green);border:1.5px solid var(--line2);box-shadow:none}
+.pack.lite button:hover{border-color:var(--green);filter:none}
+
+/* anchor + urgency text */
+.anchor{font-size:12.5px;line-height:1.6;color:var(--mut);margin:12px 0 0;
+        padding-top:12px;border-top:1px dashed var(--line2)}
+.anchor b{color:var(--navy)}
+.urg{font-size:12.5px;color:#8a5a2b;font-weight:600;margin:9px 0 0}
+.intro{background:#fef6ed;color:#8a5a2b;border:1px solid #f0d9bf;border-radius:9px;
+       padding:10px 13px;font-size:13px;font-weight:600;margin-bottom:12px}
+
+/* Pro subscription block */
+.problock{border:1.5px solid var(--green);border-radius:var(--r);padding:18px;margin-top:8px;
+          background:linear-gradient(165deg,#f1f8f6,#fff)}
+.problock .ph{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px}
+.problock .pn{font:600 17px/1.2 var(--disp);color:var(--green)}
+.problock .pp{font:600 17px/1 var(--disp);color:var(--green);white-space:nowrap}
+.problock p{font-size:13px;line-height:1.6;color:var(--ink);margin:0 0 13px}
+.problock button{width:100%;border:1.5px solid var(--green);background:#fff;color:var(--green);
+                 font:600 14.5px var(--ui);padding:13px;border-radius:var(--rb);cursor:pointer;
+                 transition:all .15s var(--ease)}
+.problock button:hover{background:var(--green);color:#fff}
+.problock button:disabled{opacity:.5}
+
+/* Outside Telegram notice */
+.tgonly{background:var(--pale);color:var(--greend);border:1px solid #cfe3dc;
+        border-radius:var(--r);padding:16px;font-size:14px;text-align:center;margin-top:18px;line-height:1.6}
+.tgonly a{color:var(--green);font-weight:700}
+
+/* Micro products grid */
+.microgrid{display:grid;gap:10px}
+.micro{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:15px;box-shadow:var(--sh1)}
+.micro button{width:100%;border:1.5px solid var(--line2);background:#fff;color:var(--green);
+              font:600 13.5px var(--ui);padding:11px;border-radius:var(--rs);cursor:pointer;
+              transition:all .15s var(--ease)}
+.micro button:hover{border-color:var(--green);background:var(--pale)}
+.micro button:disabled{opacity:.5}
+
+/* ---- RESEARCH PANEL ---- */
+.rsrch{margin-top:14px}
+.rsrch .rh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.rsrch .rh h4{margin:0;font:600 15px/1 var(--disp);color:var(--navy)}
+.rsrch .rh small{font-size:11px;color:var(--dim)}
+.rsrch .src-list{margin-bottom:12px;min-height:20px}
+.rsrch .src-item{font-size:12px;padding:6px 0;border-bottom:1px solid var(--line);
+                 color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rsrch .src-item:last-child{border:0}
+.rsrch .src-hint{font-size:12px;color:var(--dim);padding:4px 0}
+.rsrch .src-row{display:flex;gap:8px;margin-bottom:12px}
+.rsrch .src-row input{flex:1;font-size:13px;padding:10px 12px}
+.rsrch .src-row button{flex:none;border:1.5px solid var(--green);background:#fff;color:var(--green);
+                       border-radius:var(--rs);padding:10px 14px;font:700 13px var(--ui);cursor:pointer;white-space:nowrap}
+.rsrch .src-row button:disabled{opacity:.5}
+.rsrch .chat-box{max-height:200px;overflow-y:auto;margin-bottom:8px;display:none;
+                 background:var(--paper);border:1px solid var(--line);border-radius:var(--rb);padding:10px}
+.rsrch .chat-box .cm-u{text-align:right;margin:6px 0}
+.rsrch .chat-box .cm-u span{background:var(--pale);color:var(--greend);border-radius:10px;
+                             padding:6px 11px;font-size:13px;display:inline-block;max-width:88%;text-align:left}
+.rsrch .chat-box .cm-a{margin:6px 0}
+.rsrch .chat-box .cm-a span{background:#fff;border:1px solid var(--line);border-radius:10px;
+                              padding:7px 11px;font-size:13px;display:inline-block;max-width:92%;white-space:pre-wrap}
+.rsrch .chat-row{display:flex;gap:8px}
+.rsrch .chat-row textarea{flex:1;border:1.5px solid var(--line);background:var(--paper);color:var(--ink);
+                           border-radius:var(--rs);padding:10px 12px;font:13px var(--ui);resize:none}
+.rsrch .chat-row textarea:focus{outline:0;border-color:var(--green);background:#fff}
+.rsrch .chat-row button{flex:none;border:0;background:linear-gradient(180deg,var(--green),var(--greend));
+                        color:#fff;border-radius:var(--rs);padding:10px 15px;font:700 13px var(--ui);
+                        cursor:pointer;align-self:flex-end}
+.rsrch .chat-row button:disabled{opacity:.5}
+.rsrch .chat-st{font-size:11px;color:var(--dim);margin-top:6px;height:14px}
+.rsrch-offline{font-size:12px;color:var(--mut);background:var(--paper);border:1px solid var(--line);border-radius:var(--rs);padding:11px 13px}
+.rsrch-offline code{font-size:11px;color:var(--navy);background:var(--pale);padding:1px 5px;border-radius:4px}
+
+/* ---- PAYWALL ---- */
+#paywall .card{max-width:480px;margin:28px auto}
+#paywall .card ul{margin:0 0 4px;padding-left:20px;line-height:1.85;color:var(--mut)}
+#paywall .card li{margin-bottom:5px;font-size:14px}
+
+/* ---- FOOTER ---- */
+footer{font-size:11px;color:var(--dim);text-align:center;margin-top:22px;padding:0 18px;line-height:1.7}
+footer a{color:var(--dim)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header><div class="logo">Honest<b>ly</b></div></header>
-  <p class="tag">What your property is <i>really</i> worth - backed by real sold prices, not a guess.</p>
+  <header>
+    <img class="logo-icon" src="/img/logo-icon.png" alt="" width="27" height="27">
+    <img class="logo-mark" src="/img/logo-wordmark-clean.png" alt="Honestly" width="84" height="19">
+  </header>
 
+  <!-- Pro gate: the Mini App is a subscriber workspace. The free valuation lives in the bot
+       chat; this app requires an active Pro subscription. Non-subscribers see the paywall;
+       subscribers (and comp owners) get the full workspace. -->
+  <section id="paywall" style="display:none"></section>
+
+  <div id="workspace" style="display:none">
+
+  <!-- Workspace tabs. Portfolio is home; Value adds a new property; Library holds every report;
+       Store is the full product catalogue. Property is a drill-down, not a top-level tab. -->
+  <nav class="tabs" id="tabs">
+    <button data-t="portfolio" class="on">Portfolio</button>
+    <button data-t="value">+ Value</button>
+    <button data-t="library">Library</button>
+    <button data-t="store">Store</button>
+  </nav>
+
+  <!-- PORTFOLIO (home — your saved properties) -->
+  <section class="tab" id="t_portfolio"></section>
+
+  <!-- PROPERTY DRILL-DOWN (opened from a Portfolio card, hidden by default) -->
+  <section class="tab" id="t_property" hidden></section>
+
+  <!-- LIBRARY (every report and product you've purchased) -->
+  <section class="tab" id="t_library" hidden></section>
+
+  <!-- STORE (full product catalogue — loads on tab open) -->
+  <section class="tab" id="t_store" hidden><div id="catalog"></div></section>
+
+  <!-- VALUE (the evidence-based valuation form) -->
+  <section class="tab" id="t_value" hidden>
   <div class="seg" id="seg">
     <button data-a="vendor">🏠 Vendor</button>
     <button data-a="buyer">🔍 Buyer</button>
@@ -115,7 +367,7 @@
     </div>
   </div>
 
-  <label>Finish detail <span class="opt">two same-size homes are not worth the same</span></label>
+  <label>Finish detail <span class="opt">same size ≠ same value</span></label>
   <div class="row3">
     <div>
       <select id="c_kitchen" aria-label="Kitchen">
@@ -128,32 +380,35 @@
       <select id="c_bath" aria-label="Bathrooms">
         <option value="0">Baths: dated</option>
         <option value="1" selected>Baths: modern</option>
-        <option value="2">Baths: marble / stone</option>
+        <option value="2">Baths: stone</option>
       </select>
     </div>
     <div>
-      <select id="c_premium" aria-label="Premium materials">
+      <select id="c_premium" aria-label="Materials">
         <option value="0" selected>Materials: standard</option>
-        <option value="1">Materials: some premium</option>
-        <option value="2">Materials: premium</option>
+        <option value="1">Some premium</option>
+        <option value="2">Full premium</option>
       </select>
     </div>
   </div>
 
-  <label class="check"><input type="checkbox" id="invest"> <span>Investment / buy-to-let - show CGT on a sale</span></label>
+  <label class="check"><input type="checkbox" id="invest"> <span>Investment / buy-to-let — show CGT on a sale</span></label>
 
   <div id="extra"></div>
 
-  <button class="go" id="go">Value it</button>
-  <div class="hint">Every figure links to its HM Land Registry record. Asking prices are never used to value.</div>
+  <button class="go" id="go">Check the sold evidence</button>
+  <div class="hint">Built from completed sales, never asking prices.</div>
 
   <div class="err" id="err"></div>
   <div class="loading" id="load"><div class="spin"></div>Pulling sold comparables...</div>
 
   <div id="out"></div>
+  </section><!-- /#t_value -->
+
+  </div><!-- /#workspace -->
 
   <footer>
-    HM Land Registry Price Paid Data via PropertyData · imagery © Google.<br>
+    HM Land Registry Price Paid Data · imagery © Google.<br>
     A comparative market appraisal, not a RICS Red Book valuation.
   </footer>
 </div>
@@ -172,6 +427,7 @@ seg.addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   [...seg.children].forEach(x => x.classList.remove("on"));
   b.classList.add("on"); audience = b.dataset.a; renderExtra();
+  loadCatalog();          // re-render the storefront in the new audience's language
 });
 function renderExtra(){
   if (audience === "buyer")
@@ -184,6 +440,7 @@ renderExtra();
 
 const $ = id => document.getElementById(id);
 function money(n){ return "£" + Math.round(n).toLocaleString("en-GB"); }
+function esc(s){ return String(s ?? "").replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
 
 async function valueIt(){
   const address = $("addr").value.trim();
@@ -218,7 +475,8 @@ async function valueIt(){
 function showErr(m){ const e=$("err"); e.textContent = m; e.style.display="block"; }
 
 function render(d){
-  const titles = {vendor:"What your home is really worth", buyer:"What this home is really worth", agent:"Instant appraisal"};
+  const _cat = $("catalog"); if (_cat) _cat.style.display = "none";   // contextual offer takes over
+  const titles = {vendor:"Price supported by sold evidence", buyer:"Check before you offer", agent:"Instant evidence pack"};
   let h = "";
   h += `<div class="card">
     <p class="h">${titles[d.audience]}</p>
@@ -228,6 +486,12 @@ function render(d){
     ${d.audience==="agent" ? `<div class="meta">${d.sqm} sqm · ${d.beds||"?"} bed · EPC ${d.epc||"?"} · £${(d.psm||0).toLocaleString("en-GB")}/sqm</div>` : ""}
   </div>`;
 
+  if (d.plain_english)
+    h += `<div class="plain"><b>In plain English:</b> ${esc(d.plain_english.headline || "")}${d.plain_english.bullets ? `<br><br>${d.plain_english.bullets.slice(0,3).map(x => `• ${esc(x)}`).join("<br>")}` : ""}</div>`;
+
+  if (d.upgrade)
+    h += `<div class="plain" style="background:#eef4f1;border-color:#cfe3dc"><b>${esc(d.upgrade.headline || "")}</b>${d.upgrade.bullets ? `<br><br>${d.upgrade.bullets.slice(0,3).map(x => `• ${esc(x)}`).join("<br>")}` : ""}</div>`;
+
   if (d.verdict)
     h += `<div class="verdict ${d.verdict.tone}">${d.verdict.tone==="warn"?"⚠️ ":"✓ "}${d.verdict.text}</div>`;
 
@@ -235,12 +499,12 @@ function render(d){
     h += `<div class="pos">${d.finish_note}</div>`;
 
   if (d.images && d.images.frontage)
-    h += `<img class="frame" src="${d.images.frontage}" alt="frontage"><div class="cap">Street View frontage${d.frontage_date?" - captured "+d.frontage_date:""}</div>`;
+    h += `<img class="frame" src="${d.images.frontage}" alt="frontage"><div class="cap">Street View frontage${d.frontage_date?" — captured "+d.frontage_date:""}</div>`;
 
-  h += `<div class="card"><p class="h">Evidence - comparable homes, sold</p>`;
+  h += `<div class="card"><p class="h">Evidence — comparable homes, sold</p>`;
   d.evidence.forEach(c => {
     h += `<div class="evrow"><div class="a">${c.address} <small>· ${c.sqm} sqm · ${c.date}</small></div>
-          <div class="p">${c.price_str}<a href="${c.verify}" target="_blank" rel="noopener">verify ↗</a></div></div>`;
+          <div class="p">${c.price_str}<a href="${c.verify}" target="_blank" rel="noopener">source ↗</a></div></div>`;
   });
   h += `</div>`;
 
@@ -250,13 +514,14 @@ function render(d){
   if (d.images && d.images.map){
     const r = d.route || {};
     h += `<img class="frame" style="margin-top:14px" src="${d.images.map}" alt="map">
-          <div class="cap">${d.audience==="agent" && r.doors ? `Door-knock route - ${r.doors} doors, ${r.km}km, ~${r.mins}min` : "Comparable locations"}</div>`;
+          <div class="cap">${d.audience==="agent" && r.doors ? `Door-knock route — ${r.doors} doors, ${r.km}km, ~${r.mins}min` : "Comparable locations"}</div>`;
   }
 
   h += `<div class="buy" id="buy"></div>`;
   $("out").innerHTML = h; $("out").style.display = "block";
   $("out").scrollIntoView({behavior:"smooth", block:"start"});
-  buildBuy();
+  renderCatalogue($("buy"));   // the catalogue store, contextual to the property just valued
+  saveCurrent();               // auto-save into the Pro workspace portfolio (best-effort)
 }
 
 // ---- the paywall: the figure above is free; the documents are the products ----
@@ -264,33 +529,541 @@ async function buildBuy(){
   const box = $("buy"); if (!box) return;
   if (!TG || !TG.initData){
     // public browser link - Stars only work inside Telegram, so send them to the bot
-    box.innerHTML = `<div class="tgonly">Want the full appraisal - the branded PDF, the
-      interactive report${audience==="agent"?", the door-knock map and script":""}? <br>
+    box.innerHTML = `<div class="tgonly">Want the full appraisal — the branded PDF, the
+      interactive report${audience==="agent"?", the door-knock map and script":""}?<br>
       <a href="${BOT}" target="_blank" rel="noopener">Open Honestly in Telegram ↗</a></div>`;
     return;
   }
   let data;
   try { data = await (await fetch(`/api/packs?as=${audience}`)).json(); }
   catch(e){ return; }
-  let h = `<h3>Take it further</h3>
-    <p class="lede">The figure above is yours, free. These turn it into something you can send, knock on, or act on.</p>`;
-  if (data.intro) h += `<div class="intro">✨ Introductory price - 50% off while we launch.</div>`;
-  data.packs.forEach((p, i) => {
-    const best = i === data.packs.length - 1;
-    h += `<div class="pack${best?" best":""}">
-      <div class="top"><span class="nm">${p.name}</span><span class="pr">${p.gbp} · ⭐${p.stars}</span></div>
-      <ul>${p.includes.map(x => `<li>${x}</li>`).join("")}${p.plus_above?`<li><i>plus everything above</i></li>`:""}</ul>
-      <button data-pack="${p.id}">Get the ${p.name.toLowerCase()}</button>
+  // The same stacked offer the bot presents, so the chat and the Mini App never differ in
+  // either the price OR the conviction: hero Decision pack (every deliverable a ✓, anchored
+  // against the real cost of the pro tools, 50%-off urgency), a lighter Evidence pack, then
+  // Pro as its own conviction block. Decision is the last pack in bot.PACKS (the hero).
+  const hero = data.packs[data.packs.length - 1];
+  const lite = data.packs.length > 1 ? data.packs[0] : null;
+  let h = `<h3>You have the number. Here's how you act on it.</h3>
+    <p class="lede">The figure above is yours, free. These turn it into something you can send, renegotiate with, or act on today.</p>`;
+
+  // hero Decision pack
+  h += `<div class="pack best">
+      <span class="ribbon">Everything you need to act</span>
+      <div class="top"><span class="nm">${hero.name}</span><span class="pr">${hero.gbp} · ⭐${hero.stars}</span></div>
+      <ul>${hero.all_includes.map(x => `<li>${x}</li>`).join("")}</ul>
+      ${data.anchor ? `<p class="anchor">${data.anchor}</p>` : ""}
+      ${data.intro ? `<p class="urg">✨ ${hero.gbp} is 50% off while we launch.</p>` : ""}
+      <button data-pack="${hero.id}">Get the ${hero.name.toLowerCase()} · ${hero.gbp}</button>
     </div>`;
-  });
-  h += `<p class="pro">Run lots? <a id="gopro">Honestly Pro - ${data.pro.gbp}/mo for ${data.pro.packs_per_month} full packs ↗</a></p>`;
+
+  // lighter Evidence pack
+  if (lite) h += `<div class="pack lite">
+      <div class="top"><span class="nm">Just the proof for now? ${lite.name}</span><span class="pr">${lite.gbp} · ⭐${lite.stars}</span></div>
+      <ul>${lite.all_includes.map(x => `<li>${x}</li>`).join("")}</ul>
+      <button data-pack="${lite.id}">Get the ${lite.name.toLowerCase()} · ${lite.gbp}</button>
+    </div>`;
+
+  // Pro - its own conviction block
+  h += `<div class="problock">
+      <div class="ph"><span class="pn">🔑 Honestly Pro</span><span class="pp">${data.pro.gbp}/mo</span></div>
+      <p>${data.pro.pitch || (data.pro.packs_per_month + " full Decision packs every month.")}</p>
+      <button id="gopro">Go Pro · ${data.pro.gbp}/mo (${data.pro.packs_per_month} packs)</button>
+    </div>`;
+
+  // à-la-carte micro-upsells
+  if (data.micros && data.micros.length){
+    h += `<div class="micros" style="margin-top:18px">
+      <h3>Add just what you need</h3>
+      <p class="lede">Each piece is built from this property's own public data.</p>
+      <div class="microgrid">` +
+      data.micros.map(m => `<div class="micro">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline">
+          <span style="font-weight:600;color:var(--navy)">${m.name}</span><span style="white-space:nowrap;font-weight:700;font-size:15px;color:var(--green)">${m.gbp} · ⭐${m.stars}</span></div>
+        <p style="margin:7px 0 11px;font-size:13px;color:var(--mut);line-height:1.5">${m.blurb}</p>
+        <button data-micro="${m.id}">Add · ${m.gbp}</button></div>`).join("") +
+      `</div></div>`;
+  }
+
   h += `<button id="tochat" class="tochat">📲 Get the full report in your chat</button>
-        <p class="lede" style="text-align:center">We carry everything you entered over - no need to re-type a thing.</p>`;
+        <p class="lede" style="text-align:center;margin-top:8px">Everything you entered carries over — no re-typing.</p>`;
   box.innerHTML = h;
   box.querySelectorAll("button[data-pack]").forEach(b =>
     b.addEventListener("click", () => buy(b.dataset.pack, b)));
-  const pro = $("gopro"); if (pro) pro.addEventListener("click", () => buy("pro"));
+  box.querySelectorAll("button[data-micro]").forEach(b =>
+    b.addEventListener("click", () => buyMicro(b.dataset.micro, b)));
+  const pro = $("gopro"); if (pro) pro.addEventListener("click", () => buy("pro", pro));
   const tc = $("tochat"); if (tc) tc.addEventListener("click", () => handoff(tc));
+}
+
+// ---- Pro gate: the Mini App is a subscriber workspace --------------------------------
+// The free valuation lives in the bot chat. Entry here requires an active Pro subscription
+// (comp owners pass). Non-subscribers get the paywall; subscribers get the workspace.
+async function gateApp(){
+  const ws = $("workspace"), pw = $("paywall");
+  let pro = false;
+  try {
+    const me = await api("/api/me", {});
+    pro = !!(me && me.pro);
+  } catch(e){}
+  if (pro){
+    if (pw) pw.style.display = "none";
+    if (ws) ws.style.display = "";
+    initWorkspace();
+  } else {
+    showPaywall(!!(TG && TG.initData));
+  }
+}
+function showPaywall(inTelegram){
+  const ws = $("workspace"), pw = $("paywall"); if (!pw) return;
+  if (ws) ws.style.display = "none";
+  pw.style.display = "block";
+  const cta = inTelegram
+    ? `<button id="pw_go" class="go" style="margin-top:16px">🔑 Unlock with Honestly Pro</button>`
+    : `<a class="go" href="${BOT}" target="_blank" rel="noopener" style="display:block;text-align:center;margin-top:16px;text-decoration:none;color:#fff">Open Honestly in Telegram</a>`;
+  pw.innerHTML = `<div class="card">
+    <p class="h">Your property workspace</p>
+    <p style="font-size:14px;color:var(--mut);margin-bottom:14px;line-height:1.6">Free valuations live in the chat. <b style="color:var(--navy)">Honestly Pro</b> turns them into a workspace — every property you value, saved and working for you.</p>
+    <ul>
+      <li>Every valuation <b style="color:var(--navy)">saved</b> — revisit any property, any time</li>
+      <li>The full <b style="color:var(--navy)">decision layer</b> on each: ledger, scenarios, outlook</li>
+      <li><b style="color:var(--navy)">Alerts</b> when the sold evidence on your saved streets moves</li>
+      <li>Every report and document in <b style="color:var(--navy)">one library</b></li>
+    </ul>
+    ${cta}
+    <p class="hint" style="text-align:center;margin-top:12px">Just want a quick free valuation? <a href="${BOT}" target="_blank" rel="noopener" style="color:var(--green)">Do it in the chat</a> — no subscription needed.</p>
+  </div>`;
+  const b = $("pw_go"); if (b) b.addEventListener("click", () => buy("pro", b));
+}
+
+// ---- the workspace: one persistent object (the property), four surfaces ----------------
+const TABS = ["portfolio", "value", "library", "store"];
+
+async function api(path, body){
+  // authed POST helper: a signed Telegram launch acting on behalf of THIS user
+  const payload = Object.assign({ initData: (TG && TG.initData) || "" }, body || {});
+  const res = await fetch(path, {method:"POST", headers:{"Content-Type":"application/json"},
+                                 body: JSON.stringify(payload)});
+  return res.json();
+}
+
+function showTab(name){
+  TABS.forEach(t => { const el = $("t_" + t); if (el) el.hidden = (t !== name); });
+  const pv = $("t_property"); if (pv) pv.hidden = (name !== "property");
+  // a drilled-in property keeps Portfolio lit in the nav
+  const navName = (name === "property") ? "portfolio" : name;
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.t === navName));
+  if (name === "portfolio") loadPortfolio();
+  else if (name === "library") loadLibrary();
+  else if (name === "store") renderCatalogue($("catalog"));
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+function initWorkspace(){
+  const tabs = $("tabs");
+  if (tabs) tabs.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (b) showTab(b.dataset.t);
+  });
+  showTab("portfolio");
+}
+
+async function loadPortfolio(){
+  const box = $("t_portfolio"); if (!box) return;
+  box.innerHTML = `<div class="loading" style="display:block"><div class="spin"></div>Loading your properties...</div>`;
+  let data; try { data = await api("/api/portfolio", {}); } catch(e){ data = {}; }
+  const props = (data && data.properties) || [];
+  if (!props.length){
+    box.innerHTML = `<div class="card empty"><b>No saved properties yet</b>
+      Value a property and it's saved here automatically — every figure kept, evidenced, and
+      working for you.<div style="margin-top:18px"><button class="go" id="pf_new">+ Value a property</button></div></div>`;
+    const n = $("pf_new"); if (n) n.addEventListener("click", () => showTab("value"));
+    return;
+  }
+  let h = `<h3 style="margin:2px 0 16px">Your properties</h3>`;
+  props.forEach(p => {
+    const pur = (p.purity != null) ? `<div><span class="purity">${p.purity}% evidence</span></div>` : "";
+    h += `<button class="pcard" data-token="${esc(p.token)}">
+      <div><div class="pa">${esc(p.address || "—")}</div>
+        <div class="pm">${esc(p.postcode_district || "")}${p.audience ? " · " + esc(p.audience) : ""}</div>${pur}</div>
+      <div class="pv">${p.central ? money(p.central) : "—"}</div></button>`;
+  });
+  h += `<button class="go" id="pf_new" style="margin-top:8px">+ Value another property</button>`;
+  box.innerHTML = h;
+  box.querySelectorAll(".pcard").forEach(b => b.addEventListener("click", () => openProperty(b.dataset.token)));
+  const n = $("pf_new"); if (n) n.addEventListener("click", () => showTab("value"));
+}
+
+async function openProperty(token){
+  const box = $("t_property"); if (!box) return;
+  showTab("property");
+  box.innerHTML = `<button class="backlink" id="pb">← Portfolio</button>
+                   <div class="loading" style="display:block"><div class="spin"></div>Opening...</div>`;
+  let d; try { d = await api("/api/property", {token}); } catch(e){ d = {}; }
+  const back = `<button class="backlink" id="pb">← Portfolio</button>`;
+  if (!d || d.error){
+    box.innerHTML = back + `<div class="card">Couldn't open that property.</div>`;
+    const x = $("pb"); if (x) x.addEventListener("click", () => showTab("portfolio")); return;
+  }
+  const range = (d.low && d.high) ? `${money(d.low)} – ${money(d.high)}` : money(d.central || 0);
+  let h = back + `<div class="card"><p class="h">${esc(d.address || "")}</p>
+    <div class="range">${range}</div>
+    <div class="sub">most likely ~${money(d.central || 0)}</div>
+    ${d.postcode ? `<div class="meta">${esc(d.postcode)}${d.audience ? " · " + esc(d.audience) : ""}</div>` : ""}
+  </div>`;
+  if (d.report_url)
+    h += `<a class="go" href="${d.report_url}" target="_blank" rel="noopener"
+            style="display:block;text-align:center;text-decoration:none;margin-bottom:14px;color:#fff">📄 Open the full report</a>`;
+  // Research assistant panel (powered by Open Notebook if running on the server)
+  h += `<div class="card rsrch" id="research_panel">
+    <div class="rh"><h4>🔬 Research Assistant</h4><small>AI chat · add your own docs</small></div>
+    <div class="src-list" id="rsrc_list"><div class="src-hint">Loading sources…</div></div>
+    <div class="src-row">
+      <input type="url" id="rsrc_url" placeholder="Paste a URL (survey, planning, article…)" autocomplete="off">
+      <button id="rsrc_add">Add</button>
+    </div>
+    <div class="chat-box" id="rchat_box"></div>
+    <div class="chat-row">
+      <textarea id="rchat_q" rows="2" placeholder="Ask anything about this property…"></textarea>
+      <button id="rchat_send">Ask</button>
+    </div>
+    <div class="chat-st" id="rchat_st"></div>
+  </div>`;
+  h += `<div class="buy" id="buy"></div>`;
+  box.innerHTML = h;
+  const x = $("pb"); if (x) x.addEventListener("click", () => showTab("portfolio"));
+  // the per-property store: point the buy flow at THIS property, then render the catalogue
+  lastReq = {address: d.address, as: d.audience || audience, investment: d.investment ? 1 : 0};
+  audience = d.audience || audience;
+  renderCatalogue($("buy"));
+  // Research assistant - initialise notebook and wire up buttons
+  _initResearch(token);
+}
+
+function _initResearch(propToken){
+  let nbId = null;
+
+  async function ensureNb(){
+    if (nbId) return nbId;
+    try {
+      const r = await api("/api/research/notebook", {token: propToken});
+      if (r && r.ok){ nbId = r.notebook_id; return nbId; }
+    } catch(e){}
+    return null;
+  }
+
+  async function loadSources(){
+    const box = $("rsrc_list"); if (!box) return;
+    try {
+      const r = await api("/api/research/sources", {token: propToken});
+      const srcs = (r && r.sources) || [];
+      if (!srcs.length){
+        box.innerHTML = `<div class="src-hint">No documents yet — add a survey, planning link, or notes above.</div>`;
+        return;
+      }
+      let h = `<div class="src-hint" style="margin-bottom:4px">${srcs.length} document${srcs.length!==1?"s":""}</div>`;
+      srcs.slice(0, 8).forEach(s => {
+        const lbl = s.title || s.url || "Document";
+        h += `<div class="src-item">📎 ${esc(lbl)}</div>`;
+      });
+      box.innerHTML = h;
+    } catch(e){
+      box.innerHTML = `<div class="rsrch-offline">Research service offline. Start Open Notebook on the server to enable.</div>`;
+    }
+  }
+
+  // Ensure notebook + load sources in the background after the property view renders
+  (async () => {
+    const nb = await ensureNb();
+    if (!nb){
+      const panel = $("research_panel"); if (!panel) return;
+      panel.innerHTML = `<div class="rh"><h4>🔬 Research Assistant</h4></div>
+        <div class="rsrch-offline">Research service offline.<br>
+        Run <code>docker compose -f docker-compose-notebook.yml up -d</code> on the server to enable.</div>`;
+      return;
+    }
+    loadSources();
+  })();
+
+  const addBtn = $("rsrc_add");
+  if (addBtn) addBtn.addEventListener("click", async () => {
+    const inp = $("rsrc_url"); if (!inp) return;
+    const url = inp.value.trim(); if (!url) return;
+    addBtn.disabled = true; addBtn.textContent = "…";
+    const nb = await ensureNb();
+    if (!nb){ notify("Research service unavailable"); addBtn.disabled = false; addBtn.textContent = "Add"; return; }
+    try {
+      const r = await api("/api/research/source", {token: propToken, url});
+      if (r && r.ok){ inp.value = ""; loadSources(); }
+      else notify(r && r.error || "Couldn't add that source");
+    } catch(e){ notify("Couldn't add that source"); }
+    addBtn.disabled = false; addBtn.textContent = "Add";
+  });
+
+  const sendBtn = $("rchat_send");
+  if (sendBtn) sendBtn.addEventListener("click", async () => {
+    const qa = $("rchat_q"); if (!qa) return;
+    const message = qa.value.trim(); if (!message) return;
+    sendBtn.disabled = true; sendBtn.textContent = "…";
+    const st = $("rchat_st"); if (st) st.textContent = "Thinking…";
+    const nb = await ensureNb();
+    if (!nb){ notify("Research service unavailable"); sendBtn.disabled = false; sendBtn.textContent = "Ask"; return; }
+    const msgBox = $("rchat_box");
+    if (msgBox){ msgBox.style.display = "block";
+      msgBox.innerHTML += `<div class="cm-u"><span>${esc(message)}</span></div>`;
+      msgBox.scrollTop = msgBox.scrollHeight; }
+    qa.value = "";
+    try {
+      const r = await api("/api/research/chat", {token: propToken, message});
+      if (r && r.ok && r.reply){
+        if (msgBox){ msgBox.innerHTML += `<div class="cm-a"><span>${esc(r.reply)}</span></div>`;
+          msgBox.scrollTop = msgBox.scrollHeight; }
+        if (st) st.textContent = "";
+      } else {
+        if (st) st.textContent = r && r.error || "No response";
+      }
+    } catch(e){ if (st) st.textContent = "Research service unavailable"; }
+    sendBtn.disabled = false; sendBtn.textContent = "Ask";
+  });
+}
+
+async function loadLibrary(){
+  const box = $("t_library"); if (!box) return;
+  box.innerHTML = `<div class="loading" style="display:block"><div class="spin"></div>Loading your library...</div>`;
+  let data; try { data = await api("/api/library", {}); } catch(e){ data = {}; }
+  const items = (data && data.items) || [];
+  if (!items.length){
+    box.innerHTML = `<div class="card empty"><b>Your library is empty</b>
+      Every report and product you generate is saved here — open them any time, on any device.</div>`;
+    return;
+  }
+  let h = `<h3 style="margin:2px 0 16px">Your library</h3>`;
+  items.forEach(it => {
+    const isProduct = it.kind === "product";
+    const icon = isProduct ? "📄" : "📊";
+    const badge = isProduct
+      ? `<div class="pm" style="color:var(--green);font-weight:600">Product document</div>`
+      : `<div class="pm">Valuation report</div>`;
+    h += `<button class="pcard" data-url="${esc(it.url || "")}">
+      <div>
+        <div class="pa">${icon} ${esc(it.title || "—")}</div>
+        ${badge}
+        ${it.address && it.address !== it.title ? `<div class="pm" style="margin-top:2px">${esc(it.address)}</div>` : ""}
+      </div>
+      <div class="pv">Open ↗</div></button>`;
+  });
+  box.innerHTML = h;
+  box.querySelectorAll(".pcard[data-url]").forEach(b => {
+    const url = b.dataset.url;
+    if (!url) return;
+    b.addEventListener("click", () => {
+      if (TG && TG.openLink) TG.openLink(location.origin + url);
+      else window.open(url, "_blank");
+    });
+  });
+}
+
+async function saveCurrent(){
+  // Pro is a workspace: every valuation a subscriber runs is saved to their portfolio
+  // automatically (no "save" button). Best-effort and out of the way - never blocks the figure.
+  if (!lastReq || !TG || !TG.initData) return;
+  try { await api("/api/save", lastReq); } catch(e){}
+}
+
+// ---- the catalogue: the 30-product storefront, hybrid economics resolved per user --------------
+// Renders the profile's products with their resolved CTA ("Included with Pro" / "Use N credits" /
+// "Get £x") from /api/catalogue. One source of truth (catalogue.py). Buying needs a property in
+// context (lastReq) so it is always deliverable.
+function notify(msg){
+  if (TG && TG.showAlert) { try { TG.showAlert(msg); return; } catch(e){} }
+  showErr(msg);
+}
+
+async function renderCatalogue(box){
+  if (!box) return;
+  box.innerHTML = `<div class="loading" style="display:block"><div class="spin"></div>Loading the store...</div>`;
+  let data; try { data = await api("/api/catalogue", {as: audience}); } catch(e){ box.innerHTML = ""; return; }
+  const prods = (data && data.products) || [];
+  if (!prods.length){ box.innerHTML = ""; return; }
+  const haveProp = !!(lastReq && lastReq.address);
+  let h = `<div class="buy" style="display:block"><h3>The store</h3>
+    <p class="lede">Every product is built from a property's own public data — the interpretation and the decision IS the product. Your flagship + the market reads are included with Pro.</p>
+    <div class="seg" id="shop_seg" style="margin-bottom:14px">
+      <button data-a="vendor"${audience === "vendor" ? ' class="on"' : ""}>🏠 Vendor</button>
+      <button data-a="buyer"${audience === "buyer" ? ' class="on"' : ""}>🔍 Buyer</button>
+      <button data-a="agent"${audience === "agent" ? ' class="on"' : ""}>📋 Agent</button>
+    </div>`;
+  // every product acts on a property. If one is in context (just valued / opened from Portfolio)
+  // we shop for it; otherwise ask which address so a tap always delivers - never a dead bounce.
+  if (haveProp)
+    h += `<div class="purity" style="display:block;margin:0 0 14px;font-size:13px">🏠 Shopping for <b>${esc(lastReq.address)}</b></div>`;
+  else
+    h += `<label>Which property are you shopping for?</label>
+      <input id="shop_addr" placeholder="Full address, e.g. 58 Cronin Street, London SE15 6JH" autocomplete="off" style="margin-bottom:6px">
+      <div class="hint" style="margin-bottom:14px">We build each product live from this property's public data.</div>`;
+  if (data.credits != null)
+    h += `<div class="purity" style="display:block;margin:0 0 14px;font-size:13px">💳 <b>${data.credits}</b> Pro credits left this cycle — packs draw on these; your flagship &amp; reads are free.</div>`;
+  // HERO ROW: need-named products ("Why isn't my house selling?", "Is this house overpriced?")
+  // pinned to the top across every profile, each taking its own input — never buried among packs.
+  const feat = (data.featured || []);
+  if (feat.length){
+    h += `<div class="h" style="margin:4px 0 8px">The exact question you're asking</div>`;
+    feat.forEach(p => {
+      h += `<div class="pack best">
+        <div class="top"><span class="nm">${esc(p.name)}</span><span class="pr">${p.included ? "Pro" : p.gbp + " · ⭐" + p.stars}</span></div>
+        <p style="font-size:13px;color:var(--mut);margin:7px 0 11px;line-height:1.5">${esc(p.blurb)}</p>
+        ${p.input ? `<label style="margin-top:0">${esc(p.input.label)}</label>
+          <input id="pin_${esc(p.id)}" data-key="${esc(p.input.key)}" inputmode="numeric"
+                 placeholder="${esc(p.input.placeholder||'')}" style="margin-bottom:10px">` : ""}
+        <button data-pid="${esc(p.id)}">${esc(p.cta)}</button></div>`;
+    });
+    h += `<div class="h" style="margin:16px 0 8px">Everything else for ${esc(audience)}s</div>`;
+  }
+  prods.forEach(p => {
+    if (p.need_named) return;   // already shown in the hero row above — don't duplicate
+    const hero = p.kind === "flagship";
+    const badge = p.included ? `<span class="purity">Included with Pro</span>`
+                : p.discount ? `<span class="purity">${esc(p.discount)} off</span>` : "";
+    h += `<div class="pack ${hero ? "best" : "lite"}">
+      ${hero ? `<span class="ribbon">Your flagship report</span>` : ""}
+      <div class="top"><span class="nm">${esc(p.name)}</span><span class="pr">${p.included ? "Pro" : p.gbp + " · ⭐" + p.stars}</span></div>
+      <p style="font-size:13px;color:var(--mut);margin:7px 0 11px;line-height:1.5">${esc(p.blurb)} ${badge}</p>
+      ${p.input ? `<label style="margin-top:0">${esc(p.input.label)}</label>
+        <input id="pin_${esc(p.id)}" data-key="${esc(p.input.key)}" inputmode="numeric"
+               placeholder="${esc(p.input.placeholder||'')}" style="margin-bottom:10px">` : ""}
+      <button data-pid="${esc(p.id)}">${esc(p.cta)}</button></div>`;
+  });
+  h += `</div>`;
+  box.innerHTML = h;
+  const sseg = box.querySelector("#shop_seg");
+  if (sseg) sseg.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    audience = b.dataset.a; renderCatalogue(box);     // re-render the profile's catalogue
+  });
+  box.querySelectorAll("button[data-pid]").forEach(b =>
+    b.addEventListener("click", () => buyProduct(b.dataset.pid, b)));
+}
+
+async function buyProduct(pid, btn){
+  if (!TG || !TG.initData){ window.open(BOT, "_blank"); return; }
+  // resolve the property this product is for: the active one, else the address typed in the Store
+  let req = (lastReq && lastReq.address) ? lastReq : null;
+  if (!req){
+    const inp = $("shop_addr");
+    const addr = inp ? inp.value.trim() : "";
+    if (addr.length < 6){ notify("Enter the property address first, then tap the product."); if (inp) inp.focus(); return; }
+    req = { address: addr, as: audience, investment: 0 };
+  }
+  // per-product input (e.g. the asking price for a diagnostic): required when present
+  const extra = {};
+  const pinEl = $("pin_" + pid);
+  if (pinEl){
+    const v = pinEl.value.replace(/[^0-9]/g, "");
+    if (v.length < 4){ notify("Enter the price first, then tap the button."); pinEl.focus(); return; }
+    extra[pinEl.dataset.key] = Number(v);
+  }
+  const orig = btn ? btn.textContent : "";
+  if (btn){ btn.disabled = true; btn.textContent = "Building your document..."; }
+  let d;
+  try {
+    d = await api("/api/product", Object.assign({product: pid}, req, extra));
+  } catch(e){
+    notify("Couldn't reach the store. Try again.");
+    if (btn){ btn.disabled = false; btn.textContent = orig; }
+    return;
+  }
+  // Stars checkout - non-subscriber path, delivered via successful_payment webhook
+  if (d.mode === "stars" && d.link){
+    if (btn){ btn.disabled = false; btn.textContent = orig; }
+    TG.openInvoice(d.link, status => {
+      if (status === "paid"){
+        notify("Paid — your document is building. Check your Library in a moment.");
+        if (btn){ btn.disabled = true; btn.textContent = "✓ Paid — check your Library"; }
+      }
+    });
+    return;
+  }
+  // included / credits - poll until the document is ready
+  if (!d.job_id){
+    notify(d.error || "Couldn't build that just now - no charge taken.");
+    if (btn){ btn.disabled = false; btn.textContent = orig; }
+    return;
+  }
+  if (btn) btn.textContent = "Building...";
+  let tries = 0;
+  const poll = async () => {
+    tries++;
+    let r;
+    try { r = await api("/api/product_poll", {job_id: d.job_id}); } catch(e){ r = {}; }
+    if (r.status === "done" && r.url){
+      if (btn){ btn.disabled = false; btn.textContent = "Open your " + (r.title || "document") + " ↗"; }
+      // open the real hosted document page in Telegram's built-in browser
+      try {
+        if (TG.openLink) TG.openLink(location.origin + r.url);
+        else window.open(r.url, "_blank");
+      } catch(e){ window.open(r.url, "_blank"); }
+      // refresh the Library tab so the new doc appears there
+      if ($("t_library")) loadLibrary();
+    } else if (r.status === "error"){
+      notify(r.error || "Couldn't build that just now - no charge taken.");
+      if (btn){ btn.disabled = false; btn.textContent = orig; }
+    } else if (tries < 40){
+      // still building - poll again in 3s (max ~2 minutes total)
+      setTimeout(poll, 3000);
+    } else {
+      notify("This is taking longer than expected. Check your Library in a minute - the document may still arrive.");
+      if (btn){ btn.disabled = false; btn.textContent = orig; }
+    }
+  };
+  setTimeout(poll, 3000);
+}
+
+// ---- always-visible catalogue (storefront) -----------------------------------------
+// Renders the full product menu on open (packs + Pro + every a-la-carte add-on/guide), in
+// the reader's audience language, from the SAME /api/packs source as the bot. Works in or
+// out of Telegram (a plain GET). Buying is gated on a valued property (see buy/buyMicro), so
+// the catalogue can browse freely but never sells something we cannot deliver.
+async function loadCatalog(){
+  const box = $("catalog"); if (!box) return;   // lives in the Store tab now - always renders
+  let data;
+  try { data = await (await fetch(`/api/packs?as=${audience}`)).json(); }
+  catch(e){ return; }
+  if (!data || !data.packs || !data.packs.length) return;
+  const hero = data.packs[data.packs.length - 1];
+  const lite = data.packs.length > 1 ? data.packs[0] : null;
+  let h = `<div class="buy" style="display:block"><h3>What you can unlock</h3>
+    <p class="lede">Your valuation is free. These turn the number into something you can send, renegotiate with, or act on — each built from your property's own data.</p>
+    <div class="pack best"><span class="ribbon">Everything you need to act</span>
+      <div class="top"><span class="nm">${hero.name}</span><span class="pr">${hero.gbp} · ⭐${hero.stars}</span></div>
+      <ul>${hero.all_includes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+      ${data.anchor ? `<p class="anchor">${data.anchor}</p>` : ""}
+      ${data.intro ? `<p class="urg">✨ ${hero.gbp} is 50% off while we launch.</p>` : ""}
+      <button data-pack="${hero.id}">Get the ${esc(hero.name.toLowerCase())} · ${hero.gbp}</button></div>`;
+  if (lite) h += `<div class="pack lite"><div class="top"><span class="nm">Just the proof? ${lite.name}</span><span class="pr">${lite.gbp} · ⭐${lite.stars}</span></div>
+      <ul>${lite.all_includes.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+      <button data-pack="${lite.id}">Get the ${esc(lite.name.toLowerCase())} · ${lite.gbp}</button></div>`;
+  h += `<div class="problock"><div class="ph"><span class="pn">🔑 Honestly Pro</span><span class="pp">${data.pro.gbp}/mo</span></div>
+      <p>${data.pro.pitch || (data.pro.packs_per_month + " full Decision packs every month.")}</p>
+      <button data-pack="pro">Go Pro · ${data.pro.gbp}/mo (${data.pro.packs_per_month} packs)</button></div>`;
+  if (data.micros && data.micros.length){
+    h += `<h3 style="margin-top:20px">Or add just the piece you need</h3>
+      <div class="microgrid" style="margin-top:12px">` +
+      data.micros.map(m => `<div class="micro">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline">
+          <span style="font-weight:600;color:var(--navy)">${esc(m.name)}</span><span style="white-space:nowrap;font-weight:700;font-size:15px;color:var(--green)">${m.gbp} · ⭐${m.stars}</span></div>
+        <p style="margin:7px 0 11px;font-size:13px;color:var(--mut);line-height:1.5">${esc(m.blurb)}</p>
+        <button data-micro="${m.id}">Add · ${m.gbp}</button></div>`).join("") + `</div>`;
+  }
+  h += `<p class="lede" style="text-align:center;margin-top:16px">Pick anything — I'll value your property first, then build it.</p></div>`;
+  box.innerHTML = h; box.style.display = "block";
+  box.querySelectorAll("button[data-pack]").forEach(b => b.addEventListener("click", () => buy(b.dataset.pack, b)));
+  box.querySelectorAll("button[data-micro]").forEach(b => b.addEventListener("click", () => buyMicro(b.dataset.micro, b)));
+}
+
+// A purchase needs a valued property so it is always deliverable. If they tap a catalogue buy
+// before valuing, send them to the form rather than sell something we can't build.
+function _needValuation(){
+  if (lastReq) return false;
+  showErr("Enter your address above and run the free valuation first - then add this in one tap.");
+  const a = $("addr"); if (a){ a.scrollIntoView({behavior:"smooth", block:"center"}); a.focus(); }
+  return true;
 }
 
 // hand the whole intake (address + answers) to the bot, so the chat picks up mid-flow
@@ -317,8 +1090,38 @@ async function handoff(btn){
   }
 }
 
+async function buyMicro(microId, btn){
+  if (!TG || !TG.initData){ window.open(BOT, "_blank"); return; }
+  if (_needValuation()) return;
+  const orig = btn ? btn.textContent : "";
+  if (btn){ btn.disabled = true; btn.textContent = "Opening payment..."; }
+  try {
+    const payload = Object.assign({ initData: TG.initData, micro: microId }, lastReq || {});
+    const res = await fetch("/api/invoice", {
+      method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)
+    });
+    const d = await res.json();
+    if (d.link){
+      TG.openInvoice(d.link, status => {
+        if (status === "paid" && TG.showPopup)
+          TG.showPopup({title:"Thank you", message:"Your add-on is on its way in the chat.", buttons:[{type:"ok"}]});
+        if (btn){ btn.disabled = false; btn.textContent = orig; }
+      });
+    } else {
+      showErr(d.error || "Couldn't start that add-on.");
+      if (btn){ btn.disabled = false; btn.textContent = orig; }
+    }
+  } catch(e){
+    showErr("Couldn't reach payment.");
+    if (btn){ btn.disabled = false; btn.textContent = orig; }
+  }
+}
+
 async function buy(packId, btn){
   if (!TG || !TG.initData){ window.open(BOT, "_blank"); return; }
+  // Pro is a monthly SUBSCRIPTION, not a per-property report - it must charge without a
+  // valuation. Only the property-specific packs (Decision/Evidence) need a valued property.
+  if (packId !== "pro" && _needValuation()) return;
   if (btn){ btn.disabled = true; btn.textContent = "Opening payment..."; }
   try {
     const payload = Object.assign({ initData: TG.initData, pack: packId }, lastReq || {});
@@ -344,6 +1147,7 @@ async function buy(packId, btn){
 
 $("go").addEventListener("click", valueIt);
 $("addr").addEventListener("keydown", e => { if (e.key === "Enter") valueIt(); });
+gateApp();   // Pro gate first: paywall for non-subscribers, workspace for subscribers
 </script>
 </body>
 </html>

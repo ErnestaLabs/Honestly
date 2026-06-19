@@ -1,3 +1,10 @@
+/**
+ * api.js — Honestly API client.
+ *
+ * SECURITY: The frontend NEVER dictates the user's tier.
+ * The auth interceptor only passes the Telegram user_id (or initData in production).
+ * The backend resolves the tier server-side via Redis on every request.
+ */
 import axios from 'axios';
 
 const BASE = import.meta.env.VITE_API_BASE || 'https://usehonestly.co.uk';
@@ -8,16 +15,17 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Inject auth token from Telegram user data
+// Inject auth: only user_id. NO tier information is passed.
+// The backend resolves the tier server-side.
 api.interceptors.request.use((config) => {
   try {
     const tg = window.Telegram?.WebApp;
     const userId = tg?.initDataUnsafe?.user?.id || 'anonymous';
-    // Tier is stored in sessionStorage after initial load
-    const tier = sessionStorage.getItem('honestly_tier') || 'free';
-    config.headers.Authorization = `Bearer ${userId}:${tier}`;
+    // Bearer token contains ONLY the user_id. No tier.
+    // In production, we could pass the full initData string for server-side validation.
+    config.headers.Authorization = `Bearer ${userId}`;
   } catch {
-    config.headers.Authorization = 'Bearer anonymous:free';
+    config.headers.Authorization = 'Bearer anonymous';
   }
   return config;
 });
@@ -46,6 +54,17 @@ export async function purchaseProduct(productId, valuationContext) {
     user_id: String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id || ''),
     product_id: productId,
     valuation_context: valuationContext,
+  });
+  return data;
+}
+
+// ── Invoice (native Telegram payment overlay) ──────────
+export async function createInvoice({ productId, subTier, creditPackGbp } = {}) {
+  const { data } = await api.post('/v1/payments/create_invoice', {
+    user_id: String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id || ''),
+    product_id: productId || null,
+    sub_tier: subTier || null,
+    credit_pack_gbp: creditPackGbp || null,
   });
   return data;
 }

@@ -1,0 +1,46 @@
+{
+  "by_slug": {
+    "london-se15": {
+      "captured_at": "2026-06-11",
+      "source_label": "Public UK property forums (r/HousingUK), captured via hitman.red (Ernesta Labs Exclusive Preview)",
+      "method": "Captured by listening across public UK property forums for live discussion of buying and selling in Peckham / SE15. Threads selected for being recent and on-theme; quoted verbatim, lightly trimmed; each links to its public thread.",
+      "disclaimer": "These are individual posts on public property forums, quoted as social sentiment only. They are anecdote, not evidence of value, and not one of them fed any figure on this page. We include them because they put a human voice to what the sold and listing data already shows.",
+      "scan_id": "scan_1781217185294",
+      "voices": [
+        {
+          "quote": "Munday's said they'd list at £450,000 and expect to get maybe £425,000. Acorn said they'd list at £400,000 and expect to get maybe between £375,000 and £400,000.",
+          "reply": "",
+          "where": "Seller of an ex-local-authority flat in Peckham, weighing two agents",
+          "subreddit": "r/HousingUK",
+          "url": "https://www.reddit.com/r/HousingUK/comments/1iw6pp9/",
+          "ties_to": "Two agents, two prices £50,000 apart on the same flat - exactly the spread this report narrows with sold comparables instead of opinion."
+        },
+        {
+          "quote": "We initially put it at 375k but it's probably more around 350-360k. Flat in Peckham SE15, only had two viewings in about two months.",
+          "reply": "",
+          "where": "Seller adjusting the asking price, Peckham SE15",
+          "subreddit": "r/HousingUK",
+          "url": "https://www.reddit.com/r/HousingUK/comments/nitdwl/",
+          "ties_to": "An asking price cut within months of listing - the gap between hope and the sold record this report measures."
+        },
+        {
+          "quote": "Should I buy this house on Staffordshire St, Peckham (SE15)? Is the price reasonable?",
+          "reply": "",
+          "where": "Buyer weighing a Peckham (SE15) house",
+          "subreddit": "r/HousingUK",
+          "url": "https://www.reddit.com/r/HousingUK/comments/1n7dykh/",
+          "ties_to": "The one question this report answers: what does the sold evidence say a fair price is, before anyone names a figure?"
+        },
+        {
+          "quote": "SE London - am I being delusional with my flat search?",
+          "reply": "",
+          "where": "Buyer in SE London, lost out in best-and-finals",
+          "subreddit": "r/HousingUK",
+          "url": "https://www.reddit.com/r/HousingUK/comments/1iy7k16/",
+          "ties_to": "The competitive, best-and-finals pressure that sits behind the days-on-market and asking-vs-sold figures above."
+        }
+      ]
+    }
+  },
+  "by_city": {}
+}

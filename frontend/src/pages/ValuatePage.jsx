@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { valuate } from '../api';
+import { saveLastAvm, saveCreditBalance } from '../utils/tgStorage';
 
 export default function ValuatePage() {
   const [address, setAddress] = useState('');
@@ -51,9 +52,13 @@ export default function ValuatePage() {
     try {
       const result = await valuate(address.trim());
       if (result.ok && result.avm?.ok) {
-        // Store the full result for the report page
-        sessionStorage.setItem('honestly_last_avm', JSON.stringify(result));
+        // Store the full result in CloudStorage (survives TG background kills)
+        await saveLastAvm(result);
         window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('success');
+        // Also save credit balance if available
+        if (result.credit_balance_gbp !== undefined) {
+          await saveCreditBalance(result.credit_balance_gbp);
+        }
         navigate('/report', { state: { avmResult: result } });
       } else {
         throw new Error(result.avm?.error || 'Valuation failed');

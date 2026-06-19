@@ -72,11 +72,26 @@ def _label(subj_count, nbr_counts):
     return ("in line with nearby streets", round(ratio, 2))
 
 
+def _sector_of(postcode):
+    """Postcode SECTOR: outward + space + first inward digit, e.g. 'SE15 6JH' -> 'SE15 6'.
+    None if the postcode has no inward part to take a sector from."""
+    parts = (postcode or "").upper().split()
+    if len(parts) == 2 and parts[1]:
+        return f"{parts[0]} {parts[1][0]}"
+    return None
+
+
 def for_postcode(postcode, window_months=24, ring=6, audience="buyer"):
-    """Area demand read for a postcode. Resolves the nearest `ring` postcodes, counts
-    official transactions in each over `window_months`, derives a relative liquidity
-    label, and attaches the qualitative sentiment cross-check. Never raises."""
-    g = geo.nearest(postcode, limit=ring + 1)
+    """Area demand read for a postcode. One wide Postcodes.io ring serves two reads:
+    a RELATIVE liquidity label (subject vs its nearest `ring` postcodes) and a meaningful
+    SECTOR volume (every recorded sale across the postcode sector, e.g. SE15 6, in one
+    indexed HMLR count) - because unit-postcode counts alone are far too sparse to read
+    demand from. Attaches the qualitative sentiment cross-check. Never raises."""
+    # widen the ring enough to enumerate the whole sector, not just the closest handful;
+    # the relative read still uses only the nearest `ring`, so its behaviour is unchanged.
+    g = geo.nearest(postcode, limit=100, radius=1000)
+    if not g.get("ok"):
+        g = geo.nearest(postcode, limit=ring + 1)        # fall back to the tight ring
     if not g.get("ok"):
         return {"ok": False, "reason": f"geo: {g.get('reason')}"}
     neighbours = g["neighbours"]
@@ -96,8 +111,31 @@ def for_postcode(postcode, window_months=24, ring=6, audience="buyer"):
     nbr_counts = [x["count"] for x in nbr]
     label, ratio = _label(subj_count, nbr_counts)
     area_total = subj_count + sum(nbr_counts)
-    # Thin postcode-unit samples are noisy; say so rather than overclaim.
-    confidence = "low" if area_total < 10 else ("medium" if area_total < 30 else "good")
+
+    # SECTOR volume: count every sale across the postcode sector in one indexed query.
+    # This is the meaningful denominator the sparse unit counts can't give. Best-effort -
+    # a down registry just omits the sector block and we fall back to the ring read.
+    sector = None
+    sector_prefix = _sector_of(subj_pc)
+    if sector_prefix:
+        members = [n["postcode"] for n in neighbours
+                   if (n.get("postcode") or "").upper().startswith(sector_prefix)]
+        if members:
+            try:
+                sc = lr.ppd_count(members, since=cutoff, use_cache=True)
+            except Exception:
+                sc = {"ok": False}               # a raising count never breaks the read
+            if sc.get("ok"):
+                sector = {"sector": sector_prefix, "count": sc["count"],
+                          "postcodes_sampled": sc["n_postcodes"]}
+
+    # Confidence prefers the sector volume (a real sample); falls back to the thin ring
+    # total only when the sector count is unavailable. Honest about thin samples either way.
+    if sector:
+        sc_n = sector["count"]
+        confidence = "low" if sc_n < 15 else ("medium" if sc_n < 40 else "good")
+    else:
+        confidence = "low" if area_total < 10 else ("medium" if area_total < 30 else "good")
 
     out = {
         "ok": True, "postcode": subj_pc,
@@ -106,8 +144,9 @@ def for_postcode(postcode, window_months=24, ring=6, audience="buyer"):
         "neighbour_counts": nbr,
         "neighbour_median": (statistics.median(nbr_counts) if nbr_counts else None),
         "area_total": area_total,
+        "sector": sector,
         "relative": label, "ratio": ratio, "confidence": confidence,
-        "source": "HM Land Registry Price Paid Data (counts) via Postcodes.io ring",
+        "source": "HM Land Registry Price Paid Data (counts) via Postcodes.io ring + sector",
     }
 
     # qualitative cross-check - shown beside the count, never blended into it
@@ -125,9 +164,13 @@ def for_postcode(postcode, window_months=24, ring=6, audience="buyer"):
             pass
 
     nbr_n = len(nbr)
+    sector_lead = ""
+    if sector:
+        sector_lead = (f"{sector['count']} recorded sales across the {sector['sector']} "
+                       f"sector since {cutoff[:7]} ({sector['postcodes_sampled']} postcodes). ")
     out["note"] = (
-        f"{subj_count} recorded sales in {subj_pc} since {cutoff[:7]}; "
-        f"{label}"
+        sector_lead
+        + f"{subj_count} in {subj_pc} itself; {label}"
         + (f" (about {ratio}x the {nbr_n}-postcode neighbour median)." if ratio else ".")
         + f" Demand read, beside the figure - it does not move the valuation."
         + (" Thin sample, treat as directional." if confidence == "low" else "")
@@ -141,7 +184,10 @@ def brief(d):
         return ""
     s = d.get("sentiment") or {}
     tail = f" Chatter: {s['read']}." if s.get("read") else ""
-    return f"Area demand: {d['relative']} ({d['subject_count']} sales since {d['since'][:7]}, "\
+    sec = d.get("sector") or {}
+    vol = (f"{sec['count']} sales across {sec['sector']}" if sec
+           else f"{d['subject_count']} sales")
+    return f"Area demand: {d['relative']} ({vol} since {d['since'][:7]}, "\
            f"confidence {d['confidence']}).{tail}"
 
 
