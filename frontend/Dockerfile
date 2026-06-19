@@ -10,7 +10,7 @@ WORKDIR /app
 
 # Copy dependency manifests first (Docker layer cache)
 COPY package.json package-lock.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci && npm cache clean --force
 
 # Copy source and build
 COPY . .
