@@ -1,37 +1,71 @@
 @import "tailwindcss";
 
-/* ── Telegram theme variables ────────────────────────── */
-:root {
-  --tg-bg: var(--tg-theme-bg-color, #1c1c1e);
-  --tg-text: var(--tg-theme-text-color, #ffffff);
-  --tg-hint: var(--tg-theme-hint-color, #8e8e93);
-  --tg-link: var(--tg-theme-link-color, #007aff);
-  --tg-button: var(--tg-theme-button-color, #007aff);
-  --tg-button-text: var(--tg-theme-button-text-color, #ffffff);
-  --tg-secondary-bg: var(--tg-theme-secondary-bg-color, #2c2c2e);
-  --tg-section-bg: var(--tg-theme-section-bg-color, #1c1c1e);
-  --tg-section-separator: var(--tg-theme-section-separator-color, #38383a);
-  --tg-accent: var(--tg-theme-accent-text-color, #34c759);
-  --tg-header-bg: var(--tg-theme-header-bg-color, #1c1c1e);
-  --tg-bottom-nav-bg: var(--tg-theme-bottom-bar-bg-color, #1c1c1e);
-  --tg-destructive: #ff3b30;
+/* ── Honestly Brand Identity ───────────────────────────
+   Extracted from usehonestly.co.uk landing page.
+   Cream/paper background, dark navy CTAs, teal-green accent.
+   Font: Fraunces for display, system-ui for body.
+   Glass-panel cards, sharp typography, premium appraisal feel.
+   ───────────────────────────────────────────────────── */
 
-  /* Emotion colours */
-  --color-anger: #ff453a;
-  --color-fomo: #ff9f0a;
-  --color-greed: #30d158;
-  --color-fear: #ffd60a;
-  --color-laziness: #64d2ff;
+/* ── Brand CSS variables (Telegram Mini App compatible) ── */
+:root {
+  /* Brand palette */
+  --brand-cream: #f6f3ec;
+  --brand-paper: #fbf9f4;
+  --brand-ink: #1c1a16;
+  --brand-muted: #6b6557;
+  --brand-green: #15807f;
+  --brand-dark: #0e2747;
+  --brand-terra: #2aa39a;
+  --brand-gold: #d89a32;
+  --brand-line: #e7e1d4;
+  --brand-tg: #229ED9;
+  --brand-pale: #e7eef0;
+
+  /* Map TG theme → Brand (with TG fallback for dark mode compat) */
+  --tg-bg: var(--tg-theme-bg-color, var(--brand-cream));
+  --tg-text: var(--tg-theme-text-color, var(--brand-ink));
+  --tg-hint: var(--tg-theme-hint-color, var(--brand-muted));
+  --tg-link: var(--brand-green);
+  --tg-button: var(--brand-dark);
+  --tg-button-text: var(--brand-cream);
+  --tg-secondary-bg: var(--tg-theme-secondary-bg-color, var(--brand-paper));
+  --tg-section-bg: var(--tg-theme-section-bg-color, var(--brand-paper));
+  --tg-section-separator: var(--brand-line);
+  --tg-accent: var(--brand-green);
+  --tg-header-bg: var(--tg-theme-header-bg-color, var(--brand-cream));
+  --tg-bottom-nav-bg: var(--brand-cream);
+  --tg-destructive: #c73a3a;
+
+  /* Emotion colours (brand-tinted) */
+  --color-anger: #c73a3a;
+  --color-fomo: #d89a32;
+  --color-greed: #15807f;
+  --color-fear: #d4a017;
+  --color-laziness: #229ED9;
 }
 
 /* ── Base styles ─────────────────────────────────────── */
 body {
   background: var(--tg-bg);
   color: var(--tg-text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: "Fraunces", Georgia, "Times New Roman", serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   margin: 0;
   padding: 0;
-  -webkit-font-smoothing: antialiased;
+}
+
+/* System font for UI elements (buttons, inputs, labels) */
+input, button, select, textarea, .ui-text {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-feature-settings: "ss01", "cv01";
+}
+
+/* ── Selection ────────────────────────────────────────── */
+::selection {
+  background: var(--brand-green);
+  color: var(--brand-cream);
 }
 
 /* ── TG MainButton override ──────────────────────────── */
@@ -43,11 +77,18 @@ body {
   z-index: 50;
 }
 
+/* ── Glass panel (matching landing page) ─────────────── */
+.glass-panel {
+  background: rgba(246, 243, 236, 0.82);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+}
+
 /* ── Bottom sheet backdrop ───────────────────────────── */
 .sheet-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(14, 39, 71, 0.4);
   z-index: 100;
   animation: fadeIn 0.2s ease;
 }
@@ -57,7 +98,7 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--tg-section-bg);
+  background: var(--brand-paper);
   border-radius: 16px 16px 0 0;
   z-index: 101;
   animation: slideUp 0.3s ease;
@@ -76,30 +117,278 @@ body {
 }
 
 /* ── Confidence gauge ────────────────────────────────── */
+
+/* Tribute pill button */
+.tribute-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  white-space: nowrap;
+  background: var(--brand-dark);
+  color: var(--brand-cream);
+}
+
+.tribute-pill:active {
+  transform: scale(0.96);
+}
+
 .gauge-track {
   width: 100%;
-  height: 8px;
-  background: var(--tg-section-separator);
-  border-radius: 4px;
+  height: 6px;
+  background: var(--brand-line);
+  border-radius: 3px;
   overflow: hidden;
 }
 
 .gauge-fill {
   height: 100%;
-  border-radius: 4px;
+  border-radius: 3px;
   transition: width 0.6s ease;
 }
 
 /* ── Product trigger cards ───────────────────────────── */
 .product-card {
-  border-radius: 12px;
-  border: 1px solid var(--tg-section-separator);
+  border-radius: 8px;
+  border: 1px solid var(--brand-line);
   transition: all 0.15s ease;
   cursor: pointer;
 }
 
 .product-card:active {
   transform: scale(0.98);
+}
+
+/* ── Tribute locked content card ───────────────────── */
+
+.blurred-content {
+  filter: blur(8px);
+  -webkit-filter: blur(8px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.lock-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  z-index: 2;
+  background: rgba(246, 243, 236, 0.15);
+  backdrop-filter: blur(2px);
+}
+
+.locked-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--brand-paper);
+  border: 1px solid var(--brand-line);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.locked-card:active {
+  transform: scale(0.98);
+}
+
+/* Tribute-style pill button */
+.tribute-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  white-space: nowrap;
+}
+
+.tribute-pill:active {
+  transform: scale(0.96);
+}
+
+/* Glowing unlock button */
+.unlock-button {
+  width: 100%;
+  padding: 18px;
+  border-radius: 12px;
+  border: none;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: linear-gradient(135deg, var(--brand-dark), #1a3a6b);
+  color: var(--brand-cream);
+  box-shadow: 0 4px 20px rgba(14, 39, 71, 0.3);
+}
+
+.unlock-button:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 10px rgba(14, 39, 71, 0.2);
+}
+
+.unlock-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Tribute menu row */
+.tribute-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--brand-line);
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.tribute-row:last-child {
+  border-bottom: none;
+}
+
+.tribute-row:active {
+  background: rgba(21, 128, 127, 0.04);
+  margin: 0 -16px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-radius: 4px;
+}
+
+/* Live feed card */
+.feed-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--brand-paper);
+  border: 1px solid var(--brand-line);
+  border-radius: 10px;
+  transition: all 0.15s ease;
+}
+
+/* Credit balance pill */
+.credit-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px 6px 10px;
+  background: var(--brand-dark);
+  color: var(--brand-cream);
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.credit-pill .plus-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--brand-green);
+  color: white;
+  border: none;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+/* Floating CTA */
+.floating-cta {
+  position: fixed;
+  bottom: 80px;
+  left: 16px;
+  right: 16px;
+  z-index: 50;
+}
+
+/* Avatar placeholder */
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--brand-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.brand-card {
+  background: var(--brand-paper);
+  border: 1px solid var(--brand-line);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(14, 39, 71, 0.05), 0 18px 40px rgba(14, 39, 71, 0.12);
+}
+
+/* ── CTA button (matches landing page .btn-primary) ──── */
+.brand-cta {
+  background: var(--brand-dark);
+  color: var(--brand-cream);
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 14px 24px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.brand-cta:hover {
+  opacity: 0.9;
+}
+
+.brand-cta:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Green accent button (secondary CTAs) ────────────── */
+.brand-cta-green {
+  background: var(--brand-green);
+  color: var(--brand-cream);
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 14px 24px;
+  border: none;
+  cursor: pointer;
+}
+
+/* ── Uppercase document labels ───────────────────────── */
+.brand-label {
+  text-transform: uppercase;
+  letter-spacing: 0.26em;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+/* ── Hairline dividers ───────────────────────────────── */
+.brand-hair {
+  background: var(--brand-line);
+  height: 1px;
+  border: none;
 }
 
 /* ── Scrollbar ───────────────────────────────────────── */

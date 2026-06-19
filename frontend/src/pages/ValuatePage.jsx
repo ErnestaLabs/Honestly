@@ -17,8 +17,8 @@ export default function ValuatePage() {
 
     const btn = tg.MainButton;
     btn.setText('Value My Property');
-    btn.color = '#007aff';
-    btn.textColor = '#ffffff';
+    btn.color = '#0e2747';
+    btn.textColor = '#f6f3ec';
 
     const handler = () => handleValuate();
     btn.onClick(handler);
@@ -39,7 +39,6 @@ export default function ValuatePage() {
     }
   }, [address, loading]);
 
-  // ── Auto-focus on mount ──────────────────────────────
   useEffect(() => {
     window.Telegram?.WebApp?.expand?.();
     setTimeout(() => inputRef.current?.focus(), 300);
@@ -52,10 +51,8 @@ export default function ValuatePage() {
     try {
       const result = await valuate(address.trim());
       if (result.ok && result.avm?.ok) {
-        // Store the full result in CloudStorage (survives TG background kills)
         await saveLastAvm(result);
         window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('success');
-        // Also save credit balance if available
         if (result.credit_balance_gbp !== undefined) {
           await saveCreditBalance(result.credit_balance_gbp);
         }
@@ -77,18 +74,45 @@ export default function ValuatePage() {
   };
 
   return (
-    <div style={{ padding: '20px 16px 100px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ textAlign: 'center', marginTop: 20 }}>
-        <div style={{ fontSize: 48, marginBottom: 4 }}>🏠</div>
-        <h1 style={{ fontSize: 26, fontWeight: 700, margin: '0 0 4px' }}>
+    <div style={{ padding: '20px 16px 100px' }}>
+      {/* ── Brand header ──────────────────────────────── */}
+      <div style={{ textAlign: 'center', marginTop: 16, marginBottom: 24 }}>
+        <img
+          src="/logo-wordmark.png"
+          alt="Honestly"
+          style={{ height: 28, margin: '0 auto 8px', opacity: 0.9 }}
+          onError={(e) => { e.target.style.display = 'none'; }}
+        />
+        <div className="brand-label" style={{ color: 'var(--brand-muted)', marginBottom: 12 }}>
+          Property Valuation · HM Land Registry
+        </div>
+        <h1 style={{
+          fontFamily: '"Fraunces", Georgia, "Times New Roman", serif',
+          fontSize: 28,
+          fontWeight: 600,
+          lineHeight: 1.04,
+          letterSpacing: '-0.02em',
+          margin: '0 0 6px',
+          color: 'var(--brand-ink)',
+        }}>
           What's your property worth?
         </h1>
-        <p style={{ fontSize: 14, color: 'var(--tg-hint)', margin: 0 }}>
-          Backed by HM Land Registry sold evidence. Free, no sign-up required.
+        <p style={{
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          fontSize: 14,
+          color: 'var(--brand-muted)',
+          lineHeight: 1.5,
+          margin: 0,
+          maxWidth: 280,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+        }}>
+          Backed by HM Land Registry sold evidence. Free, no sign-up.
         </p>
       </div>
 
-      <div style={{ position: 'relative', marginTop: 8 }}>
+      {/* ── Search input ──────────────────────────────── */}
+      <div style={{ position: 'relative', marginBottom: 20 }}>
         <input
           ref={inputRef}
           type="text"
@@ -96,79 +120,86 @@ export default function ValuatePage() {
           onChange={(e) => setAddress(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleValuate()}
           placeholder="Enter address or postcode..."
+          className="ui-text"
           style={{
             width: '100%',
             padding: '16px 16px 16px 48px',
-            borderRadius: 14,
-            border: '1px solid var(--tg-section-separator)',
-            background: 'var(--tg-secondary-bg)',
-            color: 'var(--tg-text)',
-            fontSize: 16,
+            borderRadius: 8,
+            border: '1px solid var(--brand-line)',
+            background: 'var(--brand-paper)',
+            color: 'var(--brand-ink)',
+            fontSize: 15,
             outline: 'none',
             boxSizing: 'border-box',
+            boxShadow: '0 1px 2px rgba(14, 39, 71, 0.05)',
           }}
         />
         <span style={{
-          position: 'absolute',
-          left: 14,
-          top: '50%',
-          transform: 'translateY(-50%)',
-          fontSize: 20,
+          position: 'absolute', left: 14, top: '50%',
+          transform: 'translateY(-50%)', fontSize: 18,
         }}>
           📍
         </span>
       </div>
 
       {error && (
-        <div style={{
-          background: 'rgba(255,69,58,0.1)',
-          borderRadius: 12,
-          padding: 12,
-          fontSize: 13,
-          color: 'var(--color-anger)',
+        <div className="brand-card" style={{
+          padding: 12, marginBottom: 16,
+          borderColor: 'var(--color-anger)',
+          fontSize: 13, color: 'var(--color-anger)',
           lineHeight: 1.5,
         }}>
           {error}
         </div>
       )}
 
-      {/* Features list */}
-      <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {/* ── Features ──────────────────────────────────── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
         {[
           { icon: '📊', text: 'AVM valuation with strict HM Land Registry comparables' },
           { icon: '📄', text: 'Beautiful report with PDF download and share link' },
           { icon: '🏆', text: 'Daily Arena leaderboard for your postcode' },
           { icon: '🚀', text: 'Micro-upsells: counter-offer letters, planning checks, and more' },
         ].map((feat, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ fontSize: 18 }}>{feat.icon}</span>
-            <span style={{ fontSize: 14, color: 'var(--tg-text)' }}>{feat.text}</span>
+          <div key={i} style={{
+            display: 'flex', alignItems: 'center', gap: 12,
+            padding: '10px 12px',
+            background: 'var(--brand-paper)',
+            borderRadius: 8,
+            border: '1px solid var(--brand-line)',
+          }}>
+            <span style={{ fontSize: 16 }}>{feat.icon}</span>
+            <span className="ui-text" style={{ fontSize: 13, color: 'var(--brand-ink)' }}>
+              {feat.text}
+            </span>
           </div>
         ))}
       </div>
 
-      {/* Mobile fallback button (hidden when TG MainButton is available) */}
+      {/* ── CTA ───────────────────────────────────────── */}
       <button
         id="valuate-fallback-btn"
         onClick={handleValuate}
         disabled={loading || address.trim().length < 5}
+        className="brand-cta"
         style={{
-          display: window.Telegram?.WebApp?.MainButton ? 'none' : 'block',
           width: '100%',
-          padding: '16px',
-          borderRadius: 14,
-          background: loading ? 'var(--tg-hint)' : 'var(--tg-button)',
-          color: 'var(--tg-button-text)',
-          border: 'none',
-          fontSize: 17,
-          fontWeight: 600,
-          cursor: loading || address.trim().length < 5 ? 'not-allowed' : 'pointer',
-          opacity: loading || address.trim().length < 5 ? 0.6 : 1,
-          marginTop: 8,
+          display: window.Telegram?.WebApp?.MainButton ? 'none' : 'block',
+          fontSize: 16,
+          padding: '16px 24px',
         }}
       >
         {loading ? 'Valuing...' : 'Value My Property'}
       </button>
+
+      {/* ── Brand footer ──────────────────────────────── */}
+      <div className="brand-hair" style={{ margin: '24px 0 12px' }} />
+      <p className="brand-label" style={{
+        textAlign: 'center', color: 'var(--brand-muted)',
+        fontSize: 10, letterSpacing: '0.18em',
+      }}>
+        Honestly · your property's price, proved
+      </p>
     </div>
   );
 }
