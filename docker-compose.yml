@@ -1,0 +1,109 @@
+# ────────────────────────────────────────────────────────
+# Honestly — Full Stack Docker Compose
+# ────────────────────────────────────────────────────────
+# Services:
+#   db       — PostGIS (Postgres + spatial extensions)
+#   redis    — In-memory cache, leaderboards, rate limits
+#   backend  — FastAPI + Uvicorn (4 workers)
+#   frontend — Nginx serving React SPA, proxying /api/ to backend
+# ────────────────────────────────────────────────────────
+
+version: "3.8"
+
+networks:
+  honestly-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+services:
+
+  # ── PostGIS Database ──────────────────────────────────
+  db:
+    image: postgis/postgis:15-3.4
+    container_name: honestly-db
+    restart: unless-stopped
+    networks:
+      - honestly-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-honestly}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-honestly_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-honestly}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-honestly}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    ports:
+      - "5432:5432"
+
+  # ── Redis Cache ───────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: honestly-redis
+    restart: unless-stopped
+    networks:
+      - honestly-network
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --save 60 1
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    ports:
+      - "6379:6379"
+
+  # ── FastAPI Backend ───────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: honestly-backend
+    restart: unless-stopped
+    networks:
+      - honestly-network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      # Override connection strings for Docker compose service names
+      DATABASE_URL: postgresql://${POSTGRES_USER:-honestly}:${POSTGRES_PASSWORD:-honestly_secret}@db:5432/${POSTGRES_DB:-honestly}
+      REDIS_URL: redis://redis:6379/0
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    ports:
+      - "8000:8000"
+
+  # ── React Frontend (Nginx) ────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: honestly-frontend
+    restart: unless-stopped
+    networks:
+      - honestly-network
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    # Optionally expose 443 if you have SSL configured
+    # - "443:443"

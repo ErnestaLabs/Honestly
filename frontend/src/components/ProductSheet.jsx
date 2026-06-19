@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { purchaseProduct } from '../api';
+import { purchaseProduct, createInvoice } from '../api';
+import { saveCreditBalance, loadCreditBalance, setItem } from '../utils/tgStorage';
 
 const EMOTION_COLORS = {
   anger: { accent: '#ff453a', label: 'Anger' },
@@ -24,23 +25,83 @@ export default function ProductSheet({ product, valuationContext, onClose, onCom
   const handlePurchase = async () => {
     setLoading(true);
     setError(null);
+
     try {
+      // Try credit purchase first (if user has credits)
       const res = await purchaseProduct(product.id, valuationContext);
       if (res.ok) {
         window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('success');
         setResult(res);
+        // Update credit balance in CloudStorage
+        if (res.remaining_credits_gbp !== undefined) {
+          await saveCreditBalance(res.remaining_credits_gbp);
+        }
         onComplete?.(res);
-      } else {
-        throw new Error(res.error || 'Purchase failed');
+        return;
       }
     } catch (err) {
-      const msg = err.response?.data?.detail?.message || err.message || 'Something went wrong';
+      const detail = err.response?.data?.detail;
+      if (err.response?.status === 402) {
+        // Insufficient credits — fall through to Stars payment
+        // Don't set error yet, try invoice payment
+      } else if (err.response?.status === 403) {
+        setError('This product requires a higher subscription tier.');
+        window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('error');
+        setLoading(false);
+        return;
+      } else {
+        const msg = detail?.message || err.message || 'Purchase failed';
+        setError(msg);
+        window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('error');
+        setLoading(false);
+        return;
+      }
+    }
+
+    // ── Fallback: open Telegram native invoice overlay ──
+    try {
+      const invoice = await createInvoice({ productId: product.id });
+      if (!invoice.ok || !invoice.invoice_url) {
+        throw new Error(invoice.error || 'Invoice creation failed');
+      }
+
+      const tg = window.Telegram?.WebApp;
+      if (!tg?.openInvoice) {
+        throw new Error('Telegram WebApp.openInvoice not available');
+      }
+
+      tg.openInvoice(invoice.invoice_url, async (status) => {
+        if (status === 'paid') {
+          window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('success');
+          // After Stars payment succeeds, try the credit purchase again
+          // (the webhook will have granted an entitlement or credits)
+          try {
+            const retry = await purchaseProduct(product.id, valuationContext);
+            if (retry.ok) {
+              setResult(retry);
+              if (retry.remaining_credits_gbp !== undefined) {
+                await saveCreditBalance(retry.remaining_credits_gbp);
+              }
+              onComplete?.(retry);
+            } else {
+              setResult({ ok: true, charged_gbp: 0, remaining_credits_gbp: 'unlocked' });
+            }
+          } catch {
+            // Payment was received, product will be delivered async
+            setResult({ ok: true, charged_gbp: invoice.gbp_price, remaining_credits_gbp: 'unlocked' });
+          }
+        } else if (status === 'cancelled') {
+          setError('Payment cancelled.');
+          window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('warning');
+        } else {
+          setError('Payment failed. Please try again.');
+          window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('error');
+        }
+      });
+    } catch (err) {
+      const msg = err.message || 'Payment failed';
       setError(msg);
       window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('error');
-      if (err.response?.status === 402) {
-        // Insufficient credits - navigate to store
-        setTimeout(() => onClose?.('navigate_store'), 1500);
-      }
     } finally {
       setLoading(false);
     }
@@ -62,20 +123,18 @@ export default function ProductSheet({ product, valuationContext, onClose, onCom
               <div style={{ fontSize: 48, marginBottom: 8 }}>✅</div>
               <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600 }}>Purchased!</h2>
               <p style={{ color: 'var(--tg-hint)', fontSize: 14, margin: '0 0 12px' }}>
-                Charged £{result.charged_gbp?.toFixed(2)} · £{result.remaining_credits_gbp?.toFixed(2)} remaining
+                {result.charged_gbp > 0
+                  ? `Charged £${result.charged_gbp?.toFixed(2)}`
+                  : 'Unlocked via Telegram Stars'}
+                {result.remaining_credits_gbp !== undefined && typeof result.remaining_credits_gbp === 'number' &&
+                  ` · £${result.remaining_credits_gbp?.toFixed(2)} remaining`}
               </p>
               {result.result?.output && (
                 <div
                   style={{
-                    background: 'var(--tg-secondary-bg)',
-                    borderRadius: 12,
-                    padding: 16,
-                    fontSize: 13,
-                    lineHeight: 1.5,
-                    textAlign: 'left',
-                    maxHeight: 240,
-                    overflowY: 'auto',
-                    whiteSpace: 'pre-wrap',
+                    background: 'var(--tg-secondary-bg)', borderRadius: 12, padding: 16,
+                    fontSize: 13, lineHeight: 1.5, textAlign: 'left',
+                    maxHeight: 240, overflowY: 'auto', whiteSpace: 'pre-wrap',
                     color: 'var(--tg-text)',
                   }}
                 >
@@ -87,16 +146,9 @@ export default function ProductSheet({ product, valuationContext, onClose, onCom
               <button
                 onClick={() => onClose?.()}
                 style={{
-                  marginTop: 16,
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: 12,
-                  background: 'var(--tg-button)',
-                  color: 'var(--tg-button-text)',
-                  border: 'none',
-                  fontSize: 16,
-                  fontWeight: 600,
-                  cursor: 'pointer',
+                  marginTop: 16, width: '100%', padding: '14px', borderRadius: 12,
+                  background: 'var(--tg-button)', color: 'var(--tg-button-text)',
+                  border: 'none', fontSize: 16, fontWeight: 600, cursor: 'pointer',
                 }}
               >
                 Done
@@ -106,7 +158,12 @@ export default function ProductSheet({ product, valuationContext, onClose, onCom
             // ── Purchase confirmation ──────────────────────
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <span style={{ fontSize: 24 }}>{product.emotion_trigger === 'anger' ? '😤' : product.emotion_trigger === 'fomo' ? '🔥' : product.emotion_trigger === 'greed' ? '💰' : product.emotion_trigger === 'fear' ? '😰' : '😴'}</span>
+                <span style={{ fontSize: 24 }}>
+                  {product.emotion_trigger === 'anger' ? '😤'
+                    : product.emotion_trigger === 'fomo' ? '🔥'
+                    : product.emotion_trigger === 'greed' ? '💰'
+                    : product.emotion_trigger === 'fear' ? '😰' : '😴'}
+                </span>
                 <div>
                   <div style={{ fontSize: 17, fontWeight: 600 }}>{product.name}</div>
                   <div style={{ fontSize: 12, color: emotion.accent, fontWeight: 500, textTransform: 'uppercase' }}>
@@ -121,12 +178,8 @@ export default function ProductSheet({ product, valuationContext, onClose, onCom
 
               {error && (
                 <div style={{
-                  background: 'rgba(255,69,58,0.1)',
-                  borderRadius: 8,
-                  padding: 10,
-                  marginBottom: 12,
-                  fontSize: 13,
-                  color: 'var(--color-anger)',
+                  background: 'rgba(255,69,58,0.1)', borderRadius: 8, padding: 10,
+                  marginBottom: 12, fontSize: 13, color: 'var(--color-anger)',
                 }}>
                   {error}
                 </div>
@@ -136,32 +189,21 @@ export default function ProductSheet({ product, valuationContext, onClose, onCom
                 onClick={handlePurchase}
                 disabled={loading}
                 style={{
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: 12,
+                  width: '100%', padding: '14px', borderRadius: 12,
                   background: loading ? 'var(--tg-hint)' : emotion.accent,
-                  color: '#fff',
-                  border: 'none',
-                  fontSize: 16,
-                  fontWeight: 600,
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  opacity: loading ? 0.6 : 1,
+                  color: '#fff', border: 'none', fontSize: 16, fontWeight: 600,
+                  cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.6 : 1,
                 }}
               >
-                {loading ? 'Purchasing...' : `Buy Now · ${priceLabel}`}
+                {loading ? 'Processing...' : `Buy Now · ${priceLabel}`}
               </button>
 
               <button
                 onClick={() => onClose?.()}
                 style={{
-                  width: '100%',
-                  padding: '12px',
-                  marginTop: 8,
-                  background: 'none',
-                  border: 'none',
-                  fontSize: 14,
-                  color: 'var(--tg-hint)',
-                  cursor: 'pointer',
+                  width: '100%', padding: '12px', marginTop: 8,
+                  background: 'none', border: 'none', fontSize: 14,
+                  color: 'var(--tg-hint)', cursor: 'pointer',
                 }}
               >
                 Cancel

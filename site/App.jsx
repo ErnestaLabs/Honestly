@@ -100,7 +100,7 @@ function ValuationCard() {
               <Icon icon="solar:home-smile-bold" className="text-xl" />
             </div>
             <div>
-              <div className="text-sm font-semibold tracking-tight text-dark">24 Wolves Lane, London N22</div>
+              <div className="text-sm font-semibold tracking-tight text-dark">Wolves Lane, London N22</div>
               <div className="text-xs font-medium text-muted">Sample appraisal - vendor view</div>
             </div>
           </div>
@@ -440,7 +440,7 @@ function ValuationWidget() {
             onKeyDown={(e) => {
               if (e.key === "Enter") window.open(buildLink(), "_blank", "noopener");
             }}
-            placeholder="e.g. 24 Wolves Lane, London N22"
+            placeholder="e.g. Wolves Lane, London N22"
             className="mb-4 w-full rounded-xl border border-line bg-white px-4 py-3 text-sm font-medium text-ink outline-none transition placeholder:text-muted/70 focus:border-green focus:ring-2 focus:ring-green/20"
           />
 

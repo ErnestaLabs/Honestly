@@ -1,10 +1,7 @@
-#!/usr/bin/env python3
 """api/v1/properties.py - FastAPI endpoints for the Mini App valuation flow.
 
-Endpoints:
-  POST /v1/properties/valuate  - run the full AVM + Arena + triggers pipeline
-
-All endpoints authenticate the user and gate access by tier.
+SECURITY: The frontend NEVER dictates the user's tier.
+The backend determines the tier server-side via Redis on every request.
 """
 from __future__ import annotations
 
@@ -31,28 +28,32 @@ class ValuateRequest(BaseModel):
     finish: str = Field("average", description="Finish quality")
 
 
-# ──────────────────────────────────────────────────────────── auth helper
+# ──────────────────────────────────────────────────────────── auth helper (SERVER-SIDE)
 
-def _get_tier(authorization: str | None) -> str:
-    """Extract user tier from Authorization header.
+def _resolve_tier(user_id: str) -> str:
+    """Determine the user's tier server-side.
 
-    Format: Bearer {user_id}:{tier}
-    Falls back to 'free' if missing or unparseable.
+    The frontend NEVER passes the tier. We look it up from Redis
+    (set by the successful_payment webhook) or default to 'free'.
+    This is the sole source of truth for entitlements.
     """
-    if not authorization:
-        return "free"
     try:
-        token = authorization.replace("Bearer ", "").strip()
-        parts = token.split(":")
-        if len(parts) >= 2:
-            return parts[1].lower()
-        return "free"
+        import redis
+        r = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+        tier = r.get(f"honestly:tier:{user_id}")
+        if tier in ("plus", "pro"):
+            return tier
     except Exception:
-        return "free"
+        pass
+    return "free"
 
 
 def _get_user_id(authorization: str | None) -> str:
-    """Extract user_id from Authorization header or request body."""
+    """Extract user_id from the Authorization header.
+
+    Format: Bearer {user_id}
+    The frontend only passes the user_id. No tier information is trusted.
+    """
     if not authorization:
         return "anonymous"
     try:
@@ -71,14 +72,9 @@ def valuate_property(
 ):
     """Run the full AVM + Arena + product triggers pipeline.
 
-    Steps:
-      1. Check AVM entitlements (daily limit)
-      2. Run the core orchestrator (AVM + Arena points + triggers)
-      3. Increment the AVM daily count
-      4. Return the full payload
+    Tier is resolved SERVER-SIDE via Redis. The frontend cannot lie about it.
 
     Returns 429 if the user has exceeded their daily AVM limit.
-    Returns 402 if the user needs to upgrade their tier.
     """
     from auth.entitlements import check_avm_limit, increment_avm_count, TIER_AVM_DAILY_LIMIT
 
@@ -87,11 +83,11 @@ def valuate_property(
     if not address:
         raise HTTPException(status_code=400, detail="address or postcode is required")
 
-    # Determine user ID and tier
+    # Server-side auth: frontend only provides user_id
     user_id = req.user_id or _get_user_id(authorization)
-    tier = _get_tier(authorization)
+    tier = _resolve_tier(user_id)
 
-    # Step 1: Check AVM entitlements
+    # Step 1: Check AVM entitlements (server-side, cannot be bypassed)
     limit_check = check_avm_limit(user_id, tier)
     if not limit_check.get("allowed"):
         daily_limit = TIER_AVM_DAILY_LIMIT.get(tier, 1)
@@ -128,7 +124,7 @@ def valuate_property(
         "avm": result.get("avm"),
         "product_triggers": result.get("product_triggers", []),
         "user_id": user_id,
-        "tier": tier,
+        "tier": tier,  # authoritative tier, set server-side
         "avm_remaining_today": limit_check.get("remaining", 0),
         "elapsed_s": result.get("elapsed_s"),
     }

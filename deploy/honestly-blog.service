@@ -1,0 +1,14 @@
+[Unit]
+Description=Honestly daily blog publish (one district per UK city)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/honestly
+EnvironmentFile=/opt/honestly/.env
+# Publishes one new district per city, persists each model+HTML to the DB, and rebuilds
+# the hubs/index/sitemap/feed. Idempotent for the day: re-running just advances the rotation.
+ExecStart=/usr/bin/python3 /opt/honestly/publish_daily.py
+StandardOutput=append:/var/log/honestly-blog.log
+StandardError=append:/var/log/honestly-blog.log

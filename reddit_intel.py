@@ -150,6 +150,74 @@ def _parse_scan_output(text: str) -> dict:
     return result
 
 
+_BROAD_LOCALITY_TERMS = {
+    "london", "greater london", "england", "wales", "scotland", "uk", "united kingdom",
+    "inner london", "outer london", "east london", "west london", "north london", "south london",
+}
+
+
+def _local_terms(area: str, postcode: str = "") -> list[str]:
+    """Exact locality terms required for a Reddit/context row to be shown.
+
+    Important: never accept a thread just because it says "London" or another broad region.
+    Whitechapel must not inherit Stratford chatter; Peckham must not inherit Walthamstow.
+    Use strong identifiers only: requested area, postcode district and ward/locality aliases.
+    """
+    terms = []
+    if area:
+        terms.append(str(area).lower())
+    if postcode:
+        parts = postcode.split()
+        if parts:
+            terms.append(parts[0].lower())  # postcode district, e.g. SE15 / E1 / M20
+        try:
+            import geo
+            g = geo.lookup(postcode)
+            for k in ("ward",):
+                v = (g.get(k) or "").strip()
+                if v:
+                    terms.append(v.lower())
+        except Exception:
+            pass
+    # High-signal aliases for locality names that appear in property chatter. Keep these
+    # micro-local, not borough/region-wide.
+    aliases = {
+        "se15": ["peckham", "nunhead"],
+        "peckham": ["se15", "nunhead"],
+        "e1": ["whitechapel", "stepney", "aldgate"],
+        "whitechapel": ["e1", "stepney", "aldgate"],
+    }
+    for t in list(terms):
+        terms.extend(aliases.get(t, []))
+    clean = []
+    for t in terms:
+        t = re.sub(r"\s+", " ", str(t).lower()).strip()
+        if len(t) >= 2 and t not in _BROAD_LOCALITY_TERMS:
+            clean.append(t)
+    return sorted(set(clean))
+
+
+def _term_matches(hay: str, term: str) -> bool:
+    term = str(term or "").lower().strip()
+    if not term:
+        return False
+    # Postcode districts and one-word neighbourhoods must match as their own token.
+    if re.fullmatch(r"[a-z]{1,2}\d[a-z]?", term):
+        return re.search(rf"(?<![a-z0-9]){re.escape(term)}(?![a-z0-9])", hay) is not None
+    return re.search(rf"(?<![a-z0-9]){re.escape(term)}(?![a-z0-9])", hay) is not None
+
+
+def _filter_local_threads(threads, terms):
+    if not terms:
+        return []
+    out = []
+    for t in threads or []:
+        hay = (t.get("title", "") + " " + t.get("quote", "")).lower()
+        if any(_term_matches(hay, term) for term in terms):
+            out.append(t)
+    return out
+
+
 def for_area(area: str, audience: str = "buyer", postcode: str = "") -> dict:
     """Get Reddit market intelligence for a UK area.
 
@@ -164,12 +232,9 @@ def for_area(area: str, audience: str = "buyer", postcode: str = "") -> dict:
     """
     keywords = []
 
-    # Area-specific keywords
-    if postcode:
-        area_parts = postcode.split()
-        if area_parts:
-            keywords.append(area_parts[0])  # postcode district
-    keywords.append(area)
+    # Area-specific keywords. These are the only acceptable threads after filtering too.
+    local_terms = _local_terms(area, postcode)
+    keywords.extend(local_terms[:4])
 
     # Audience-specific keywords
     if audience == "buyer":
@@ -195,12 +260,19 @@ def for_area(area: str, audience: str = "buyer", postcode: str = "") -> dict:
 
     if result and result.get("parsed"):
         parsed = result["parsed"]
+        local_threads = _filter_local_threads(parsed.get("threads", []), local_terms)
+        # If Hit found only broad London/property posts, omit the section. Irrelevant Reddit
+        # chatter is worse than no chatter.
+        if not local_threads:
+            return {}
+        parsed = dict(parsed, threads=local_threads)
         return {
             "sentiment": parsed.get("sentiment", "neutral"),
             "themes": parsed.get("themes", []),
-            "threads": parsed.get("threads", []),
-            "signal_count": parsed.get("signal_count", 0),
+            "threads": local_threads,
+            "signal_count": len(local_threads),
             "area": area,
+            "local_terms": local_terms,
         }
     return {}
 

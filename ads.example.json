@@ -1,0 +1,53 @@
+{
+  "_comment": "Copy to ads.json (or point $BLOG_ADS_FILE at a file) to book paid placements. The renderer in blog.py stamps the mandatory 'Advertisement'/'Sponsored' label (UK ASA / CAP Code) and forces rel='sponsored nofollow noopener' on every paid link (Google paid-link policy) - nothing in this file can suppress either. Set 'active': false to pull a booking without deleting it. A slot with no matching surface/position is simply never shown.",
+
+  "slots": [
+    {
+      "id": "acme-mortgages-q3",
+      "advertiser": "Acme Mortgages",
+      "active": true,
+      "surfaces": ["district:default", "study", "index"],
+      "positions": ["leaderboard", "footer"],
+      "headline": "Fee-free remortgage advice",
+      "body": "Whole-of-market brokers, no broker fee. Check your rate in two minutes.",
+      "url": "https://acme.example/remortgage?utm_source=honestly",
+      "image": "https://acme.example/img/banner-104x78.png"
+    },
+    {
+      "id": "northside-conveyancing",
+      "advertiser": "Northside Conveyancing",
+      "active": true,
+      "surfaces": ["hub:manchester", "district:M1"],
+      "positions": ["mid"],
+      "headline": "Fixed-fee Manchester conveyancing",
+      "body": "Local property solicitors. No-completion, no-fee.",
+      "url": "https://northside.example/quote",
+      "image": ""
+    },
+    {
+      "id": "paused-example",
+      "advertiser": "Someone Else",
+      "active": false,
+      "surfaces": ["study"],
+      "positions": ["footer"],
+      "headline": "This one is paused",
+      "body": "active:false keeps the booking on file but renders nothing.",
+      "url": "https://example.com"
+    }
+  ],
+
+  "featured_listings": {
+    "SE15": {
+      "id": "agentx-se15",
+      "advertiser": "Agent X",
+      "active": true,
+      "headline": "Featured: 2-bed warehouse conversion",
+      "price": 525000,
+      "beds": 2,
+      "type": "flat",
+      "address": "Bussey Building, SE15",
+      "portal": "Agent X",
+      "url": "https://agentx.example/listing/123"
+    }
+  }
+}

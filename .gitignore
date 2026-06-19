@@ -7,6 +7,16 @@ secrets*.json
 .vps_secret
 .vps_pw
 .vps_*
+.hmlr_query_token
+
+# Editor/tool scratch snapshots (e.g. bot.py.tmp.1560.<hash>)
+*.tmp.*
+
+# Persistence DB (store.py) - runtime data, never committed (training + legal live on the VPS)
+*.db
+*.db-wal
+*.db-shm
+honestly.db
 
 # Working/temp files
 _*.py
@@ -14,6 +24,28 @@ _*.json
 _*.html
 _*.txt
 _PRIVATE_*
+
+# Generated report/media artifacts - keep the data, not the rendered outputs
+*.pdf
+*.html
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.mp3
+*.mp4
+
+# Generated analysis / publish outputs
+graphify-out/
+.understand-anything/
+preview/
+out/
+_edgetmp/
+site/
+
+# Paid-ad bookings (ads.py) - live commercial inventory, never committed; ads.example.json is the schema
+ads.json
 
 # Generated intermediates (keep the .md sources + final .pdf)
 *_appraisal.html

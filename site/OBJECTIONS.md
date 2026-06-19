@@ -11,9 +11,9 @@ walkthrough, the map) lands in a chat you keep forever and can re-open any time.
 means payment runs through Telegram itself, so your card details never touch us.
 
 ## 2. "Do I have to pay? Do you want my card?"
-Your first valuation is free - the entire kit, not a teaser. No card, no account, nothing
-to cancel. If you want more later you pay in Telegram Stars and Telegram handles it; we
-never see a card number.
+Your valuation is free - the real figure, the strict sold comparables with their HM Land
+Registry links and the full local facts. No card, no account, nothing to cancel. If you want
+more later you pay in Telegram Stars and Telegram handles it; we never see a card number.
 
 ## 3. "Isn't this just another Zoopla estimate?"
 No. Zoopla and Rightmove hand you one black-box number from an algorithm you cannot

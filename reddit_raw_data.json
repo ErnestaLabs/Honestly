@@ -1,0 +1,90 @@
+{
+  "_meta": {
+    "source": "Hit MCP — hit_scan_evidence (data_source: live)",
+    "scan_ids": ["scan_1781746844450", "scan_1781768198471"],
+    "subreddits": ["HousingUK"],
+    "selection": "top recent threads (all <= ~3 days old) matching the Honestly ICP: valuation accuracy, overpricing, agent-valuation trust, sold-evidence pricing",
+    "bodies": "body_excerpt is the collector's truncated excerpt (~500 chars), not the full selftext",
+    "comments": "each comment 'quote' is the collector's keyword-matched excerpt (~250 chars, may end with an ellipsis); these are real top-of-thread community replies, not fabricated. Where a thread shows comments: [], none were captured.",
+    "recency_note": "age_hours = hours-since-post at scan time; every selected thread is within the recency window the task requires"
+  },
+  "posts": [
+    {
+      "id": "t3_1u8ma1r",
+      "subreddit": "HousingUK",
+      "title": "Estate agent called my withdrawal \"a made up excuse\" - is this attitude normal?",
+      "permalink": "https://www.reddit.com/r/HousingUK/comments/1u8ma1r/estate_agent_called_my_withdrawal_a_made_up/",
+      "score": 139,
+      "num_comments": 202,
+      "age_hours": 10.7,
+      "body_excerpt": "Long time lurker, first time buyer, and this whole process has left a bad taste in my mouth. We made an offer on a property and got into the conveyancing process. During the solicitor's enquiries stage, a few things came up: * An internal wall had been removed to create open plan living with no building regulations consent and no documentation, the seller said they weren't aware of any work being carried out. * A chimney breast had been removed. When we raised concerns the estate agent called my withdrawal 'a made up excuse'.",
+      "comments": [
+        {"id": "t1_os9bl6o", "quote": "Estate agent being salty because they’ll be missing out on a chunk of commission."},
+        {"id": "t1_os9c6x9", "quote": "Yeah, I actually pulled out for exactly the same reason. 3rd floor flat, they'd removed the fire protected egress route to make it all open plan. Incredibly against building regs and honestly kinda dangerous because it meant the only way of escaping was through fire."},
+        {"id": "t1_os9d46b", "quote": "You pulled out for very clear and valid reasons. \"Look on Google street view\" is not an appropriate response to your concerns. \"Ah yes there is an indemnity and/or legal paperwork for that\" IS an appropriate response."},
+        {"id": "t1_os9me8w", "quote": "Yeah an indemnity policy isn't going to save you when you're trapped and your only means of escape is on fire."},
+        {"id": "t1_os9blsx", "quote": "You owe the liars nothing. Their response shows their professionalism if you can call taking pictures and popping a few signs up a profession. I’d leave a review of the estate agent with a picture of their response."},
+        {"id": "t1_os9d9b2", "quote": "You do not need to explain or justify why you are dropping out of a purchase. It is generally polite to explain briefly why, as this does impact the sellers. But that is a courtesy. Once you have given that feedback I would stop interacting with the estate agent."},
+        {"id": "t1_os9bvh2", "quote": "It's rude. They're an estate agent, par for the course, professionalism not the priority. Ignore them."}
+      ]
+    },
+    {
+      "id": "t3_1u7o5yc",
+      "subreddit": "HousingUK",
+      "title": "Another why is my house not selling post.",
+      "permalink": "https://www.reddit.com/r/HousingUK/comments/1u7o5yc/another_why_is_my_house_not_selling_post/",
+      "score": 0,
+      "num_comments": 80,
+      "age_hours": 35.75,
+      "body_excerpt": "So has been on the market since end of Feb. Have had plenty of viewings but no offers - feedback is not helpful - they don’t want an end terrace or they have offered on another property. Nothing I can really do anything about. House is empty because we actually moved out 3 years ago and had to rent it out in the interim so that we could proceed on our current home. Ad is getting about a 6% click through rate via the stats that estate agent shares - apparently this is quite good?",
+      "comments": [
+        {"id": "t1_os1sw5y", "quote": "It is overpriced, which I know isn't great to hear. Your agent isn't being honest with you."},
+        {"id": "t1_os1wyx4", "quote": "Mid terrace are selling at 230ish on the street that need complete renovation though. That's why it's priced as it is. I wanted to originally price at £240 but estate agents ensured we could get the £250. Had 5 different estate agents out and all valued at £250k."},
+        {"id": "t1_os2pv3j", "quote": "Then why would 5 different estate agents value it at 250k - I can only go by what the so called experts tell me. I’m not an estate agent so I don’t know."},
+        {"id": "t1_os54puj", "quote": "Estate agents are supposed to be the ones who know what they are on about. All I can do is take their advice. If they had said market at £200 I would have marketed at £200k. But they didn’t so here we are."},
+        {"id": "t1_os1tbl3", "quote": "There doesn't seem to be a shortage of 3+ bedroom properties listed for less than your asking price. My advice would be to go on rightmove and look at what similar properties are listed for. I think you'll find that you're probably overpriced."},
+        {"id": "t1_os5cw53", "quote": "Any sort of overpricing will add friction to a sale, as a lot of the OPs on this sub are finding, asking why their properties aren’t selling."}
+      ]
+    },
+    {
+      "id": "t3_1u7ed9x",
+      "subreddit": "HousingUK",
+      "title": "House isn't selling",
+      "permalink": "https://www.reddit.com/r/HousingUK/comments/1u7ed9x/house_isnt_selling/",
+      "score": 0,
+      "num_comments": 63,
+      "age_hours": 41.62,
+      "body_excerpt": "I listed initially in February 2026 at £220,000 with a different estate agent and had around 10-15 viewings. I had a couple offers come in around 185/190k. Then the war kicked off and interest died down. The property was then reduced to £200,000 and since then a handful of viewings and an offer at £185k which I reluctantly accepted but then later the seller pulled out citing he liked another house as the reason. 3 doors away sold less than a year ago for £227,500 granted it had a slightly bigger plot.",
+      "comments": [
+        {"id": "t1_orzwvoh", "quote": "Bathroom and kitchen are dated so people will factor in replacing them, hence the offers you've received... I'd just reduce the price."}
+      ]
+    },
+    {
+      "id": "t3_1u6w4ie",
+      "subreddit": "HousingUK",
+      "title": "First time buyer - bidding war",
+      "permalink": "https://www.reddit.com/r/HousingUK/comments/1u6w4ie/first_time_buyer_bidding_war/",
+      "score": 13,
+      "num_comments": 53,
+      "age_hours": 56.73,
+      "body_excerpt": "30 year old female, solo first time buyer, England. I’m utilising Halifax’s new £5000 deposit mortgage, which is locked in at 5.89% APR for five years. I went to view a flat and really liked it. 1960’s ex council property in the city of Bath. The estate agent says there is another offer and is pushing me into a bidding war.",
+      "comments": [
+        {"id": "t1_orvxhz2", "quote": "Don’t go on gut. Go on what the property is worth & will likely be valued at by the bank. Look at recent historic sales data, from sources that pull Land Registry data, NOT from Zoopla or Rightmove. Don’t go above what you think it’s worth."},
+        {"id": "t1_orwa76t", "quote": "Just go to Rightmove, click 'Sold Prices' and enter the street name or postcode. It'll show you actual transaction prices, not asking prices."},
+        {"id": "t1_orw7n0l", "quote": "Estate agents are masters at telling lies. If the seller is paying them a percentage rather than a fixed fee commission you can join the dots. Are you sure there is actually another offer? They might just be creating some pressure on you to raise your offer."},
+        {"id": "t1_orx6wfe", "quote": "Estate agents are there to try and get as much money for the seller as they can. Sometimes you'll see a property listed for far above its value. It won't get many viewings and you're normally bidding under."}
+      ]
+    },
+    {
+      "id": "t3_1u8qavr",
+      "subreddit": "HousingUK",
+      "title": "Anyone fancy offering their opinion on why I’ve only had two viewings on my house?",
+      "permalink": "https://www.reddit.com/r/HousingUK/comments/1u8qavr/anyone_fancy_offering_their_opinion_on_why_ive/",
+      "score": 3,
+      "num_comments": 17,
+      "age_hours": 2.09,
+      "body_excerpt": "Estate agent promised it would be an easy sell and the area/location is normally very popular and houses do have a high value here in this area. We got five valuations ranging from easy 500K to possibly just doable 600K so we went in the middle at 550K. So far just two bites. Is it the photos? The market? Mortgage rates? The house? The decor? Something else?!! Going a bit mad second guessing ourselves.",
+      "comments": []
+    }
+  ]
+}

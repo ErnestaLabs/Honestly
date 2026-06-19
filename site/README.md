@@ -165,15 +165,13 @@ normal greeting.
 
 ## Free-valuation abuse
 
-The funnel cannot be used to farm free valuations: it carries no entitlement and
-grants nothing. The "first valuation free" gate lives entirely in the bot, keyed
-to the Telegram user id (`entitlements.json` -> `first_done`, set only on a
-successful delivery). After the free taste the bot requires membership or a
-credit. A deep link is strictly safer than a web form here - it forces a real
-Telegram identity (a phone number) per free taste. The only residual vector is a
-user creating multiple Telegram accounts, which the bot's identity gate already
-makes high-friction; tightening that further is a bot-side product decision, not
-a funnel change.
+There is nothing to farm: the free Lite valuation is unlimited - free forever, by design.
+It is the lead magnet and the permanent public asset, not a one-time taste. What is paid is
+the PRO upgrade (the decision layer), in Telegram Stars. `entitlements.json` -> `first_done`
+only marks a user's first touch, keyed to the Telegram user id (set on a successful delivery),
+and varies first-touch copy / testimonial timing - it is NOT a paywall after one use. A deep
+link still forces a real Telegram identity, useful for the Pro funnel and abuse-resistance
+generally; tightening that further is a bot-side product decision, not a funnel change.
 
 ### 3. iconify web component (once, e.g. in `index.html`)
 

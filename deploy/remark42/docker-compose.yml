@@ -1,0 +1,31 @@
+# Remark42 - self-hosted, open-source (MIT) comment engine for the blog.
+#
+# Readers comment with NO account (anonymous), or sign in with their own Google/GitHub/email/
+# Telegram identity if they want one. It's OUR server (this container), not a SaaS or third
+# party, so the discussion - and the ad slot beside it - stays 100% ours. Comments live in an
+# embedded BoltDB file under ./var; nothing leaves the box.
+#
+# All config (including the live secrets) is read from ./.env, which is gitignored. This file
+# is safe to commit - it contains no secrets. See env.sample for every variable and README.md
+# for the full stand-up (DNS, nginx, OAuth apps, and wiring the blog to it).
+services:
+  remark42:
+    image: umputun/remark42:latest
+    container_name: remark42
+    hostname: remark42
+    restart: always
+    # Bind to localhost only. The host's nginx terminates TLS for comments.usehonestly.co.uk
+    # and proxies to this port - the container itself speaks plain HTTP on 8080 internally.
+    ports:
+      - "127.0.0.1:8081:8080"
+    env_file:
+      - .env
+    volumes:
+      # BoltDB store + backups. `mkdir -p var/db var/backup` and chown to uid 1001 (the image's
+      # "app" user) once, before the first `up`, or Bolt can't create its files.
+      - ./var:/srv/var
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
