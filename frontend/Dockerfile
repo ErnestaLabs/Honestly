@@ -1,10 +1,10 @@
 # ────────────────────────────────────────────────────────
 # Honestly Frontend — React Vite → Nginx
-# Multi-stage: build with node:18-alpine, serve with nginx:alpine
+# Multi-stage: build with node:22-alpine, serve with nginx:alpine
 # ────────────────────────────────────────────────────────
 
 # ── Build stage ─────────────────────────────────────────
-FROM node:18-alpine AS build
+FROM node:22-alpine AS build
 
 WORKDIR /app
 
