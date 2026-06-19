@@ -31,8 +31,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 # Install ONLY runtime system deps (much smaller than build deps)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpq5 \
-    libgdal34 \
+    libpq-dev \
+    libgdal36 \
     ca-certificates \
     curl \
     && rm -rf /var/lib/apt/lists/*
