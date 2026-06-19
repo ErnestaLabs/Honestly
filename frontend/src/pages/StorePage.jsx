@@ -139,11 +139,11 @@ export default function StorePage() {
 
       {/* ── Credit Balance (from CloudStorage) ─────────── */}
       <div style={{
-        background: 'linear-gradient(135deg, #007aff, #5856d6)',
-        borderRadius: 16,
+        background: 'var(--brand-dark)',
+        borderRadius: 8,
         padding: '20px',
         marginBottom: 20,
-        color: '#fff',
+        color: 'var(--brand-cream)',
       }}>
         <div style={{ fontSize: 12, opacity: 0.8, textTransform: 'uppercase', letterSpacing: 1 }}>
           Your Credit Balance
