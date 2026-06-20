@@ -118,28 +118,6 @@ input, button, select, textarea, .ui-text {
 
 /* ── Confidence gauge ────────────────────────────────── */
 
-/* Tribute pill button */
-.tribute-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 8px 18px;
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 12px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  white-space: nowrap;
-  background: var(--brand-dark);
-  color: var(--brand-cream);
-}
-
-.tribute-pill:active {
-  transform: scale(0.96);
-}
-
 .gauge-track {
   width: 100%;
   height: 6px;

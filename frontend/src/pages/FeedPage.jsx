@@ -1,195 +1,152 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getVibe, getLeaderboard, getRoom } from '../api';
 import { loadCreditBalance } from '../utils/tgStorage';
-
-const MOCK_EVENTS = [
-  { type: 'unlock', user: 'Alex', postcode: 'SW16', product: 'The Lowball Counter-Email', icon: '😡', time: '2m ago' },
-  { type: 'unlock', user: 'Sam', postcode: 'E1', product: 'The Deal Autopsy', icon: '😰', time: '4m ago' },
-  { type: 'value', user: 'Jordan', postcode: 'M1', type_label: 'Flat', value: '£285k', time: '7m ago' },
-  { type: 'unlock', user: 'Riley', postcode: 'N22', product: 'Planning Permission Oracle', icon: '😴', time: '12m ago' },
-  { type: 'value', user: 'Taylor', postcode: 'SE15', type_label: 'Terraced House', value: '£620k', time: '18m ago' },
-  { type: 'unlock', user: 'Morgan', postcode: 'B1', product: 'The Gentrification Radar', icon: '💰', time: '23m ago' },
-  { type: 'value', user: 'Casey', postcode: 'LS1', type_label: 'Semi-Detached', value: '£340k', time: '31m ago' },
-  { type: 'unlock', user: 'Avery', postcode: 'SW16', product: 'Council Tax Challenger', icon: '😡', time: '38m ago' },
-  { type: 'arena', user: 'Quinn', postcode: 'SW16', score: '+10', time: '45m ago' },
-  { type: 'unlock', user: 'Jamie', postcode: 'EH1', product: 'Syndicate Street Map', icon: '💰', time: '51m ago' },
-  { type: 'value', user: 'Drew', postcode: 'CF10', type_label: 'Flat', value: '£195k', time: '1h ago' },
-  { type: 'unlock', user: 'Blake', postcode: 'G1', product: 'Neighbor Extension Blueprint', icon: '🔥', time: '1h ago' },
-  { type: 'arena', user: 'Skyler', postcode: 'N22', score: '+5', time: '1h ago' },
-  { type: 'unlock', user: 'Reese', postcode: 'BS1', product: 'Leasehold Trap X-Ray', icon: '😰', time: '1h ago' },
-  { type: 'value', user: 'Harper', postcode: 'OX1', type_label: 'Detached', value: '£890k', time: '2h ago' },
-  { type: 'unlock', user: 'Sage', postcode: 'M1', product: 'The Architect\'s Vision', icon: '💰', time: '2h ago' },
-  { type: 'unlock', user: 'Emery', postcode: 'SE15', product: 'The Stealth Listing Sniper', icon: '🔥', time: '2h ago' },
-  { type: 'arena', user: 'Rowan', postcode: 'SW16', score: '+3', time: '3h ago' },
-  { type: 'value', user: 'Finley', postcode: 'E17', type_label: 'Terraced House', value: '£475k', time: '3h ago' },
-  { type: 'unlock', user: 'Parker', postcode: 'N1', product: 'Council Tax Challenger', icon: '😡', time: '4h ago' },
-];
-
-function formatPrice(n) {
-  if (!n) return '';
-  return '\u00a3' + Number(n).toLocaleString('en-GB');
-}
 
 export default function FeedPage() {
   const navigate = useNavigate();
-  const [creditBalance, setCreditBalance] = useState(0);
-  const [postcode, setPostcode] = useState('');
-  const [vibe, setVibe] = useState(null);
-  const [leaderboard, setLeaderboard] = useState([]);
+  const [balance, setBalance] = useState(0);
+  const [recent, setRecent] = useState(null);
 
   useEffect(() => {
     window.Telegram?.WebApp?.expand?.();
-    loadCreditBalance().then(b => setCreditBalance(b || 0));
-    // Try to get postcode from last AVM
+    loadCreditBalance().then(b => setBalance(b || 0));
     try {
       const avm = JSON.parse(sessionStorage.getItem('honestly_last_avm') || '{}');
-      if (avm.avm?.postcode) setPostcode(avm.avm.postcode);
+      if (avm.avm) setRecent(avm.avm);
     } catch {}
   }, []);
 
-  const handleValuate = () => {
-    window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('light');
-    navigate('/');
-  };
-
-  const handleTopUp = () => {
-    window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('medium');
-    navigate('/store');
-  };
-
-  const renderEvent = (e, i) => {
-    if (e.type === 'unlock') {
-      return (
-        <div key={i} className="feed-card">
-          <div className="avatar" style={{ background: 'var(--brand-green)', color: 'white' }}>
-            {e.user[0]}
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <span className="ui-text" style={{ fontSize: 13, lineHeight: 1.4 }}>
-              <strong>{e.user}</strong> in <strong>{e.postcode}</strong> just unlocked<br />
-              <span style={{ color: 'var(--brand-green)', fontWeight: 500 }}>{e.product}</span>
-            </span>
-          </div>
-          <span style={{ fontSize: 18 }}>{e.icon}</span>
-        </div>
-      );
-    }
-    if (e.type === 'value') {
-      return (
-        <div key={i} className="feed-card">
-          <div className="avatar">🏠</div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <span className="ui-text" style={{ fontSize: 13, lineHeight: 1.4 }}>
-              <strong>{e.user}</strong> in <strong>{e.postcode}</strong> just valued a<br />
-              <span style={{ color: 'var(--brand-dark)', fontWeight: 500 }}>{e.type_label} · {e.value}</span>
-            </span>
-          </div>
-          <span style={{ fontSize: 11, color: 'var(--brand-muted)', whiteSpace: 'nowrap' }}>{e.time}</span>
-        </div>
-      );
-    }
-    if (e.type === 'arena') {
-      return (
-        <div key={i} className="feed-card">
-          <div className="avatar" style={{ background: '#d89a32', color: 'white' }}>🏆</div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <span className="ui-text" style={{ fontSize: 13, lineHeight: 1.4 }}>
-              <strong>{e.user}</strong> earned <strong>{e.score}</strong> Arena points<br />
-              in <strong>{e.postcode}</strong> leaderboard
-            </span>
-          </div>
-          <span style={{ fontSize: 11, color: 'var(--brand-muted)', whiteSpace: 'nowrap' }}>{e.time}</span>
-        </div>
-      );
-    }
-    return null;
-  };
-
   return (
     <div style={{ padding: '0 0 100px' }}>
-      {/* ── Top Bar ────────────────────────────────────── */}
+      {/* Header */}
       <div style={{
-        position: 'sticky', top: 0, zIndex: 40,
-        background: 'var(--brand-cream)',
-        borderBottom: '1px solid var(--brand-line)',
-        padding: '12px 16px',
+        padding: '16px 20px',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        borderBottom: '1px solid var(--brand-line)',
       }}>
+        <span style={{ fontFamily: '"Fraunces", Georgia, serif', fontWeight: 600, fontSize: 18, color: 'var(--brand-ink)' }}>
+          Honestly
+        </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div className="avatar" style={{ width: 36, height: 36, background: 'var(--brand-dark)', color: 'var(--brand-cream)', fontWeight: 700 }}>
-            H
-          </div>
-          <div>
-            <div style={{ fontFamily: '"Fraunces", Georgia, serif', fontWeight: 600, fontSize: 15, color: 'var(--brand-ink)' }}>
-              Honestly
-            </div>
-            <div className="brand-label" style={{ fontSize: 8, color: 'var(--brand-muted)', letterSpacing: '0.18em' }}>
-              Live Feed
-            </div>
-          </div>
-        </div>
-        <button className="credit-pill" onClick={handleTopUp}>
-          <span style={{ opacity: 0.7 }}>⚡</span>
-          {'\u00a3'}{creditBalance.toFixed(2)}
-          <span className="plus-btn">+</span>
-        </button>
-      </div>
-
-      {/* ── Live Ticker ────────────────────────────────── */}
-      <div style={{ padding: '12px 16px' }}>
-        <div className="brand-label" style={{ fontSize: 10, color: 'var(--brand-muted)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--brand-green)', animation: 'pulse 2s infinite' }} />
-          LIVE · Community Activity
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {MOCK_EVENTS.slice(0, 10).map((e, i) => renderEvent(e, i))}
-        </div>
-
-        {/* ── Vibe + Leaderboard section ──────────────── */}
-        {postcode && (
-          <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div className="brand-hair" style={{ margin: '4px 0' }} />
-            <div className="brand-label" style={{ fontSize: 10, color: 'var(--brand-muted)' }}>
-              📍 {postcode} · Community
-            </div>
-            <div className="feed-card" style={{ justifyContent: 'space-between' }}>
-              <span className="ui-text" style={{ fontSize: 13 }}>Vibe Score</span>
-              <span style={{ fontFamily: '"Fraunces", Georgia, serif', fontSize: 18, fontWeight: 600, color: 'var(--brand-green)' }}>
-                {vibe?.vibe_score || '--'}
-              </span>
-            </div>
-            <div className="feed-card" style={{ justifyContent: 'center' }}>
-              <span style={{ fontSize: 14 }}>💬</span>
-              <span className="ui-text" style={{ fontSize: 13 }}>Enter {postcode} Room</span>
-            </div>
-          </div>
-        )}
-
-        {/* ── More events (scroll for more) ────────────── */}
-        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8, opacity: 0.7 }}>
-          {MOCK_EVENTS.slice(10, 20).map((e, i) => renderEvent(e, i + 10))}
+          <span className="ui-text" style={{ fontSize: 13, color: 'var(--brand-muted)' }}>
+            {'\u00a3'}{balance.toFixed(2)}
+          </span>
+          <button
+            onClick={() => navigate('/store')}
+            style={{
+              width: 22, height: 22, borderRadius: '50%',
+              background: 'var(--brand-green)', color: '#fff',
+              border: 'none', fontSize: 14, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: 0,
+            }}
+          >
+            +
+          </button>
         </div>
       </div>
 
-      {/* ── Floating CTA ──────────────────────────────── */}
-      <div className="floating-cta">
+      {/* Hero */}
+      <div style={{ padding: '48px 20px 36px', textAlign: 'center' }}>
+        <h1 style={{
+          fontFamily: '"Fraunces", Georgia, serif',
+          fontWeight: 500, fontSize: 30,
+          color: 'var(--brand-ink)',
+          letterSpacing: '-0.02em',
+          lineHeight: 1.15,
+          margin: '0 0 12px',
+        }}>
+          Your property's price,<br />
+          <span style={{ color: 'var(--brand-green)' }}>proved</span>
+        </h1>
+        <p className="ui-text" style={{
+          fontSize: 14, color: 'var(--brand-muted)',
+          lineHeight: 1.6, margin: '0 auto 28px',
+          maxWidth: 260,
+        }}>
+          Get a free valuation backed by HM Land Registry sold prices. 60 seconds, no sign-up.
+        </p>
         <button
-          onClick={handleValuate}
-          className="unlock-button"
-          style={{ boxShadow: '0 4px 24px rgba(14, 39, 71, 0.4)', fontSize: 16 }}
+          onClick={() => navigate('/')}
+          style={{
+            padding: '14px 36px', borderRadius: 8,
+            background: 'var(--brand-dark)', color: 'var(--brand-cream)',
+            border: 'none', fontSize: 15, fontWeight: 500, cursor: 'pointer',
+            letterSpacing: '-0.01em',
+          }}
         >
-          🔍 Value a Property
+          Value a Property
         </button>
+      </div>
+
+      {/* Stats */}
+      <div style={{ padding: '0 20px', display: 'flex', gap: 10, marginBottom: 24 }}>
+        {[
+          { n: '880K+', l: 'Sold records' },
+          { n: '10', l: 'Data tools' },
+          { n: '60s', l: 'Valuation time' },
+        ].map(s => (
+          <div key={s.l} style={{
+            flex: 1, padding: '12px 8px', textAlign: 'center',
+            border: '1px solid var(--brand-line)', borderRadius: 8,
+          }}>
+            <div style={{ fontFamily: '"Fraunces", Georgia, serif', fontSize: 18, fontWeight: 600, color: 'var(--brand-green)' }}>
+              {s.n}
+            </div>
+            <div className="ui-text" style={{ fontSize: 10, color: 'var(--brand-muted)', marginTop: 2 }}>{s.l}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Recent */}
+      {recent && (
+        <div style={{ padding: '0 20px' }}>
+          <div className="ui-text" style={{ fontSize: 11, color: 'var(--brand-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8 }}>
+            Recent valuation
+          </div>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 12,
+            padding: '12px 14px',
+            border: '1px solid var(--brand-line)', borderRadius: 8,
+          }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 8,
+              background: 'var(--brand-dark)', color: 'var(--brand-cream)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 12, fontWeight: 600,
+              fontFamily: '"Fraunces", Georgia, serif',
+            }}>
+              {'\u00a3'}
+            </div>
+            <div style={{ flex: 1 }}>
+              <div className="ui-text" style={{ fontSize: 13, fontWeight: 500, color: 'var(--brand-ink)' }}>
+                {recent.address?.slice(0, 35)}
+              </div>
+              <div className="ui-text" style={{ fontSize: 11, color: 'var(--brand-muted)' }}>
+                {'\u00a3'}{Number(recent.central).toLocaleString('en-GB')}
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/report')}
+              style={{
+                padding: '6px 14px', borderRadius: 6,
+                background: 'var(--brand-dark)', color: 'var(--brand-cream)',
+                border: 'none', fontSize: 11, fontWeight: 500, cursor: 'pointer',
+              }}
+            >
+              Open
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Footer */}
+      <div style={{ padding: '24px 20px' }}>
+        <div style={{ height: 1, background: 'var(--brand-line)', marginBottom: 10 }} />
+        <p className="ui-text" style={{ fontSize: 10, color: 'var(--brand-muted)', lineHeight: 1.6, textAlign: 'center' }}>
+          Data from HM Land Registry, EPC Register, and ONS. Automated valuation, not a formal survey.
+        </p>
       </div>
     </div>
   );
 }
-
-// Pulse animation for LIVE dot
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-`;
-document.head.appendChild(style);
