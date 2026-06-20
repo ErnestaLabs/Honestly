@@ -19,14 +19,14 @@ export default function ProductSheet({ product, valuationContext, onClose, onCom
         window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('success');
         setDone(true);
         if (res.remaining_credits_gbp !== undefined) await saveCreditBalance(res.remaining_credits_gbp);
-        setTimeout(() => onComplete?.(res), 1000);
+        setTimeout(() => onComplete?.(res), 800);
         return;
       }
     } catch (err) {
       if (err.response?.status === 402) {
         // Fall through to Stars
       } else if (err.response?.status === 403) {
-        setError('Requires higher subscription tier');
+        setError('Requires higher tier');
         window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('error');
         setLoading(false); return;
       } else {
@@ -45,7 +45,7 @@ export default function ProductSheet({ product, valuationContext, onClose, onCom
         if (status === 'paid') {
           window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('success');
           setDone(true);
-          setTimeout(() => onComplete?.({ ok: true }), 1000);
+          setTimeout(() => onComplete?.({ ok: true }), 800);
         } else if (status === 'cancelled') {
           setError('Cancelled');
           window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('warning');
@@ -67,48 +67,48 @@ export default function ProductSheet({ product, valuationContext, onClose, onCom
       <div className="sheet-backdrop" onClick={loading ? null : () => onClose?.()} />
       <div className="sheet" style={{ background: 'var(--brand-cream)' }}>
         <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 4px' }}>
-          <div style={{ width: 32, height: 3, borderRadius: 2, background: 'var(--brand-line)', opacity: 0.5 }} />
+          <div style={{ width: 28, height: 3, borderRadius: 2, background: 'var(--brand-line)', opacity: 0.4 }} />
         </div>
-        <div style={{ padding: '8px 24px 28px' }}>
+        <div style={{ padding: '4px 24px 24px' }}>
           {done ? (
-            <div style={{ textAlign: 'center', padding: '24px 0' }}>
+            <div style={{ textAlign: 'center', padding: '20px 0' }}>
               <div style={{
-                width: 48, height: 48, borderRadius: 24,
+                width: 44, height: 44, borderRadius: 22,
                 background: 'rgba(21,128,127,0.1)', color: 'var(--brand-green)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 22, margin: '0 auto 12px',
+                fontSize: 20, margin: '0 auto 10px',
               }}>
                 {'\u2713'}
               </div>
-              <h2 style={{ fontFamily: '"Fraunces", Georgia, serif', fontSize: 18, fontWeight: 600, margin: 0, color: 'var(--brand-ink)' }}>
-                Purchased
+              <h2 style={{ fontFamily: '"Fraunces", Georgia, serif', fontSize: 17, fontWeight: 600, margin: 0, color: 'var(--brand-ink)' }}>
+                Unlocked
               </h2>
             </div>
           ) : (
             <>
-              <p className="ui-text" style={{ fontSize: 11, color: 'var(--brand-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', textAlign: 'center', marginBottom: 14 }}>
-                Purchase Report
+              <p className="ui-text" style={{ fontSize: 10, color: 'var(--brand-muted)', textTransform: 'uppercase', letterSpacing: '0.12em', textAlign: 'center', marginBottom: 10 }}>
+                Unlock insight
               </p>
               <h2 style={{
                 fontFamily: '"Fraunces", Georgia, serif',
-                fontSize: 18, fontWeight: 600, textAlign: 'center',
-                margin: '0 0 16px', color: 'var(--brand-ink)',
+                fontSize: 17, fontWeight: 600, textAlign: 'center',
+                margin: '0 0 14px', color: 'var(--brand-ink)',
               }}>
                 {product.title || product.name || product.id}
               </h2>
               <div style={{
                 background: 'var(--brand-paper)', border: '1px solid var(--brand-line)',
-                borderRadius: 8, padding: '14px 16px', marginBottom: 16,
+                borderRadius: 6, padding: '12px 14px', marginBottom: 14,
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               }}>
-                <span className="ui-text" style={{ fontSize: 12, color: 'var(--brand-muted)' }}>Price</span>
-                <span style={{ fontFamily: '"Fraunces", Georgia, serif', fontSize: 18, fontWeight: 600, color: 'var(--brand-ink)' }}>
+                <span className="ui-text" style={{ fontSize: 11, color: 'var(--brand-muted)' }}>Price</span>
+                <span style={{ fontFamily: '"Fraunces", Georgia, serif', fontSize: 17, fontWeight: 600, color: 'var(--brand-ink)' }}>
                   {'\u00a3'}{price.toFixed(2)}
                 </span>
               </div>
               {error && (
                 <div className="ui-text" style={{
-                  background: 'rgba(199,58,58,0.08)', borderRadius: 6, padding: 8,
+                  background: 'rgba(199,58,58,0.08)', borderRadius: 4, padding: 8,
                   marginBottom: 10, fontSize: 11, color: '#c73a3a', textAlign: 'center',
                 }}>
                   {error}
@@ -117,22 +117,16 @@ export default function ProductSheet({ product, valuationContext, onClose, onCom
               <button
                 onClick={handlePurchase}
                 disabled={loading}
-                className="purchase-button"
+                style={{
+                  width: '100%', padding: 13, borderRadius: 6, border: 'none',
+                  fontSize: 14, fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer',
+                  background: 'var(--brand-dark)', color: 'var(--brand-cream)',
+                  opacity: loading ? 0.6 : 1,
+                }}
               >
-                {loading ? (
-                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                    <span style={{
-                      display: 'inline-block', width: 14, height: 14,
-                      border: '2px solid var(--brand-cream)', borderTopColor: 'transparent',
-                      borderRadius: '50%', animation: 'spin 0.8s linear infinite',
-                    }} />
-                    Processing
-                  </span>
-                ) : (
-                  `Purchase \u2014 \u00a3${price.toFixed(2)}`
-                )}
+                {loading ? 'Processing\u2026' : `Unlock \u2014 \u00a3${price.toFixed(2)}`}
               </button>
-              <p className="ui-text" style={{ textAlign: 'center', color: 'var(--brand-muted)', fontSize: 12, marginTop: 12, cursor: 'pointer' }} onClick={() => onClose?.()}>
+              <p className="ui-text" style={{ textAlign: 'center', color: 'var(--brand-muted)', fontSize: 11, marginTop: 10, cursor: 'pointer' }} onClick={() => onClose?.()}>
                 Cancel
               </p>
             </>
