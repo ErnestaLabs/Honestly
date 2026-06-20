@@ -1,94 +1,147 @@
 @import "tailwindcss";
 
-/* ── Honestly Brand Identity ───────────────────────────
-   Extracted from usehonestly.co.uk landing page.
-   Cream/paper background, dark navy CTAs, teal-green accent.
-   Font: Fraunces for display, system-ui for body.
-   Glass-panel cards, sharp typography, premium appraisal feel.
+/* ── Honestly Premium Theme ────────────────────────────
+   Dark, sleek, glassmorphism. Revolut/Monzo/Apple Wallet inspired.
+   Background: #0a0a0f (deep almost-black)
+   Cards: glass panels with backdrop-blur + subtle borders
+   Typography: Inter for UI, Fraunces for display values
    ───────────────────────────────────────────────────── */
 
-/* ── Brand CSS variables (Telegram Mini App compatible) ── */
 :root {
-  /* Brand palette */
-  --brand-cream: #f6f3ec;
-  --brand-paper: #fbf9f4;
-  --brand-ink: #1c1a16;
-  --brand-muted: #6b6557;
-  --brand-green: #15807f;
-  --brand-dark: #0e2747;
-  --brand-terra: #2aa39a;
-  --brand-gold: #d89a32;
-  --brand-line: #e7e1d4;
-  --brand-tg: #229ED9;
-  --brand-pale: #e7eef0;
+  /* Deep dark background (like Revolut) */
+  --bg-deep: #0a0a0f;
+  --bg-surface: #12121a;
+  --bg-glass: rgba(255, 255, 255, 0.04);
+  --bg-glass-hover: rgba(255, 255, 255, 0.07);
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --border-glass-hover: rgba(255, 255, 255, 0.14);
 
-  /* Map TG theme → Brand (with TG fallback for dark mode compat) */
-  --tg-bg: var(--tg-theme-bg-color, var(--brand-cream));
-  --tg-text: var(--tg-theme-text-color, var(--brand-ink));
-  --tg-hint: var(--tg-theme-hint-color, var(--brand-muted));
+  /* Brand palette (dark-adjusted) */
+  --brand-cream: #f0ede6;
+  --brand-ink: #f0ede6;
+  --brand-muted: rgba(240, 237, 230, 0.45);
+  --brand-green: #34d399;
+  --brand-dark: #0a0a0f;
+  --brand-terra: #2dd4bf;
+  --brand-gold: #fbbf24;
+  --brand-line: rgba(255, 255, 255, 0.08);
+  --brand-paper: rgba(255, 255, 255, 0.04);
+
+  /* Emotion colours (dark-adjusted) */
+  --color-anger: #f87171;
+  --color-fomo: #fbbf24;
+  --color-greed: #34d399;
+  --color-fear: #fcd34d;
+  --color-laziness: #60a5fa;
+
+  /* TG variable mapping */
+  --tg-bg: var(--bg-deep);
+  --tg-text: var(--brand-ink);
+  --tg-hint: var(--brand-muted);
   --tg-link: var(--brand-green);
-  --tg-button: var(--brand-dark);
-  --tg-button-text: var(--brand-cream);
-  --tg-secondary-bg: var(--tg-theme-secondary-bg-color, var(--brand-paper));
-  --tg-section-bg: var(--tg-theme-section-bg-color, var(--brand-paper));
-  --tg-section-separator: var(--brand-line);
+  --tg-button: var(--brand-green);
+  --tg-button-text: var(--bg-deep);
+  --tg-secondary-bg: var(--bg-surface);
+  --tg-section-bg: var(--bg-surface);
+  --tg-section-separator: var(--border-glass);
   --tg-accent: var(--brand-green);
-  --tg-header-bg: var(--tg-theme-header-bg-color, var(--brand-cream));
-  --tg-bottom-nav-bg: var(--brand-cream);
-  --tg-destructive: #c73a3a;
-
-  /* Emotion colours (brand-tinted) */
-  --color-anger: #c73a3a;
-  --color-fomo: #d89a32;
-  --color-greed: #15807f;
-  --color-fear: #d4a017;
-  --color-laziness: #229ED9;
 }
 
-/* ── Base styles ─────────────────────────────────────── */
+/* ── Base ────────────────────────────────────────────── */
 body {
-  background: var(--tg-bg);
-  color: var(--tg-text);
-  font-family: "Fraunces", Georgia, "Times New Roman", serif;
+  background: var(--bg-deep);
+  color: var(--brand-ink);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   padding: 0;
 }
 
-/* System font for UI elements (buttons, inputs, labels) */
-input, button, select, textarea, .ui-text {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-feature-settings: "ss01", "cv01";
+/* Fraunces for display values only */
+.display {
+  font-family: "Fraunces", Georgia, "Times New Roman", serif;
 }
 
-/* ── Selection ────────────────────────────────────────── */
 ::selection {
   background: var(--brand-green);
-  color: var(--brand-cream);
+  color: var(--bg-deep);
 }
 
-/* ── TG MainButton override ──────────────────────────── */
-.tg-main-button-override {
-  position: fixed;
-  bottom: 72px;
-  left: 16px;
-  right: 16px;
-  z-index: 50;
+/* ── Glass card ──────────────────────────────────────── */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  border-radius: 16px;
 }
 
-/* ── Glass panel (matching landing page) ─────────────── */
-.glass-panel {
-  background: rgba(246, 243, 236, 0.82);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+.glass:active {
+  transform: scale(0.98);
+  background: var(--bg-glass-hover);
 }
 
-/* ── Bottom sheet backdrop ───────────────────────────── */
+/* ── Glass card (slightly elevated) ──────────────────── */
+.glass-elevated {
+  background: var(--bg-glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-glass);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Primary button ──────────────────────────────────── */
+.btn-primary {
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: linear-gradient(135deg, var(--brand-green), #10b981);
+  color: var(--bg-deep);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Feed card ────────────────────────────────────────── */
+.feed-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.15s ease;
+}
+
+.feed-card:active {
+  transform: scale(0.98);
+  background: var(--bg-glass-hover);
+}
+
+/* ── Bottom sheet ────────────────────────────────────── */
 .sheet-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(14, 39, 71, 0.4);
+  background: rgba(0, 0, 0, 0.6);
   z-index: 100;
   animation: fadeIn 0.2s ease;
 }
@@ -98,12 +151,13 @@ input, button, select, textarea, .ui-text {
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--brand-paper);
-  border-radius: 16px 16px 0 0;
+  background: var(--bg-surface);
+  border-radius: 24px 24px 0 0;
   z-index: 101;
-  animation: slideUp 0.3s ease;
+  animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   max-height: 80vh;
   overflow-y: auto;
+  border-top: 1px solid var(--border-glass);
 }
 
 @keyframes fadeIn {
@@ -116,12 +170,11 @@ input, button, select, textarea, .ui-text {
   to { transform: translateY(0); }
 }
 
-/* ── Confidence gauge ────────────────────────────────── */
-
+/* ── Gauge ────────────────────────────────────────────── */
 .gauge-track {
   width: 100%;
-  height: 6px;
-  background: var(--brand-line);
+  height: 5px;
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -132,244 +185,48 @@ input, button, select, textarea, .ui-text {
   transition: width 0.6s ease;
 }
 
-/* ── Product trigger cards ───────────────────────────── */
+/* ── Product card ─────────────────────────────────────── */
 .product-card {
-  border-radius: 8px;
-  border: 1px solid var(--brand-line);
-  transition: all 0.15s ease;
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass);
+  border-radius: 14px;
+  padding: 12px 14px;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .product-card:active {
   transform: scale(0.98);
+  background: var(--bg-glass-hover);
 }
 
-/* ── Tribute locked content card ───────────────────── */
-
-.blurred-content {
-  filter: blur(8px);
-  -webkit-filter: blur(8px);
-  pointer-events: none;
-  user-select: none;
-}
-
-.lock-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  z-index: 2;
-  background: rgba(246, 243, 236, 0.15);
-  backdrop-filter: blur(2px);
-}
-
-.locked-card {
-  position: relative;
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--brand-paper);
-  border: 1px solid var(--brand-line);
-  cursor: pointer;
-  transition: transform 0.15s ease;
-}
-
-.locked-card:active {
-  transform: scale(0.98);
-}
-
-/* Tribute-style pill button */
-.tribute-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 12px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  white-space: nowrap;
-}
-
-.tribute-pill:active {
-  transform: scale(0.96);
-}
-
-/* Glowing unlock button */
-.unlock-button {
-  width: 100%;
-  padding: 18px;
-  border-radius: 12px;
-  border: none;
-  font-size: 17px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background: linear-gradient(135deg, var(--brand-dark), #1a3a6b);
-  color: var(--brand-cream);
-  box-shadow: 0 4px 20px rgba(14, 39, 71, 0.3);
-}
-
-.unlock-button:active {
-  transform: scale(0.98);
-  box-shadow: 0 2px 10px rgba(14, 39, 71, 0.2);
-}
-
-.unlock-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* Tribute menu row */
-.tribute-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--brand-line);
-  cursor: pointer;
-  transition: background 0.1s ease;
-}
-
-.tribute-row:last-child {
-  border-bottom: none;
-}
-
-.tribute-row:active {
-  background: rgba(21, 128, 127, 0.04);
-  margin: 0 -16px;
-  padding-left: 16px;
-  padding-right: 16px;
-  border-radius: 4px;
-}
-
-/* Live feed card */
-.feed-card {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  background: var(--brand-paper);
-  border: 1px solid var(--brand-line);
-  border-radius: 10px;
-  transition: all 0.15s ease;
-}
-
-/* Credit balance pill */
-.credit-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px 6px 10px;
-  background: var(--brand-dark);
-  color: var(--brand-cream);
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 13px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-.credit-pill .plus-btn {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--brand-green);
-  color: white;
-  border: none;
-  font-size: 14px;
-  line-height: 1;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-}
-
-/* Floating CTA */
-.floating-cta {
-  position: fixed;
-  bottom: 80px;
-  left: 16px;
-  right: 16px;
-  z-index: 50;
-}
-
-/* Avatar placeholder */
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--brand-line);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-.brand-card {
-  background: var(--brand-paper);
-  border: 1px solid var(--brand-line);
-  border-radius: 8px;
-  box-shadow: 0 1px 2px rgba(14, 39, 71, 0.05), 0 18px 40px rgba(14, 39, 71, 0.12);
-}
-
-/* ── CTA button (matches landing page .btn-primary) ──── */
-.brand-cta {
-  background: var(--brand-dark);
-  color: var(--brand-cream);
-  border-radius: 8px;
-  font-weight: 600;
-  padding: 14px 24px;
-  border: none;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-.brand-cta:hover {
-  opacity: 0.9;
-}
-
-.brand-cta:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ── Green accent button (secondary CTAs) ────────────── */
-.brand-cta-green {
-  background: var(--brand-green);
-  color: var(--brand-cream);
-  border-radius: 8px;
-  font-weight: 600;
-  padding: 14px 24px;
-  border: none;
-  cursor: pointer;
-}
-
-/* ── Uppercase document labels ───────────────────────── */
-.brand-label {
+/* ── Uppercase label ─────────────────────────────────── */
+.label {
+  font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.26em;
-  font-weight: 600;
-  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--brand-muted);
+  font-weight: 500;
 }
 
-/* ── Hairline dividers ───────────────────────────────── */
-.brand-hair {
-  background: var(--brand-line);
-  height: 1px;
-  border: none;
+/* ── Animations ──────────────────────────────────────── */
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Scrollbar ───────────────────────────────────────── */
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.65); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Scrollbar ────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 0;
   height: 0;
