@@ -33,41 +33,33 @@ export default function FeedPage() {
   }, []);
 
   return (
-    <div style={{ paddingBottom: 120 }}>
-      {/* ── Sticky Top Bar ────────────────────────────── */}
+    <div style={{ paddingBottom: 120, background: 'var(--bg-muted)', minHeight: '100vh' }}>
+      {/* ── Top Bar ────────────────────────────────────── */}
       <div style={{
-        position: 'sticky', top: 0, zIndex: 40,
-        background: 'var(--bg-deep)',
-        borderBottom: '1px solid var(--border-glass)',
-        padding: '14px 20px',
+        background: 'var(--bg)', padding: '14px 20px',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        borderBottom: '1px solid var(--border-light)',
       }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: 10,
-          background: 'linear-gradient(135deg, var(--brand-green), #10b981)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#0a0a0f', fontWeight: 700, fontSize: 14,
-        }}>
-          H
-        </div>
+        <span style={{ fontFamily: '"Fraunces", Georgia, serif', fontWeight: 600, fontSize: 18, color: 'var(--text-primary)' }}>
+          Honestly
+        </span>
         <div style={{
           display: 'flex', alignItems: 'center', gap: 8,
-          background: 'var(--bg-glass)',
-          border: '1px solid var(--border-glass)',
-          borderRadius: 999, padding: '6px 14px 6px 12px',
+          background: 'var(--bg-muted)', borderRadius: 999,
+          padding: '5px 12px 5px 10px',
         }}>
-          <span style={{ fontSize: 13, color: 'var(--brand-green)' }}>⚡</span>
-          <span style={{ fontSize: 14, fontWeight: 600, letterSpacing: '-0.02em' }}>
+          <span style={{ fontSize: 13, color: 'var(--brand)' }}>⚡</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
             {'\u00a3'}{balance.toFixed(2)}
           </span>
           <button
             onClick={() => { window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('medium'); navigate('/store'); }}
             style={{
               width: 20, height: 20, borderRadius: '50%',
-              background: 'linear-gradient(135deg, var(--brand-green), #10b981)',
-              color: '#0a0a0f', border: 'none', fontSize: 13, cursor: 'pointer',
+              background: 'var(--brand)', color: '#fff',
+              border: 'none', fontSize: 13, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: 0, fontWeight: 700,
+              padding: 0, fontWeight: 600,
             }}
           >
             +
@@ -76,33 +68,31 @@ export default function FeedPage() {
       </div>
 
       {/* ── Hero ───────────────────────────────────────── */}
-      <div style={{ padding: '36px 24px 24px', textAlign: 'center' }}>
-        <p className="label" style={{ marginBottom: 8 }}>Property Intelligence</p>
+      <div style={{ padding: '40px 20px 24px', textAlign: 'center' }}>
         <h1 style={{
           fontFamily: '"Fraunces", Georgia, serif', fontWeight: 600, fontSize: 28,
-          color: 'var(--brand-ink)', letterSpacing: '-0.03em',
-          margin: '0 0 6px', lineHeight: 1.1,
+          color: 'var(--text-primary)', letterSpacing: '-0.02em',
+          margin: '0 0 6px', lineHeight: 1.15,
         }}>
           Your property's price,<br />
-          <span style={{ color: 'var(--brand-green)' }}>proved</span>
+          <span style={{ color: 'var(--brand)' }}>proved</span>
         </h1>
-        <p style={{
-          fontSize: 13, color: 'var(--brand-muted)',
-          margin: '0 auto 24px', maxWidth: 240, lineHeight: 1.6,
-        }}>
+        <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '0 auto 24px', maxWidth: 240, lineHeight: 1.5 }}>
           Free valuations backed by HM Land Registry. See what others are discovering.
         </p>
+        <button
+          onClick={() => navigate('/')}
+          className="btn-primary"
+        >
+          Value a Property 🏠
+        </button>
       </div>
 
       {/* ── Live Activity ─────────────────────────────── */}
       <div style={{ padding: '0 20px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{
-          width: 6, height: 6, borderRadius: '50%',
-          background: 'var(--brand-green)',
-          animation: 'livePulse 2s ease-in-out infinite',
-        }} />
-        <span className="label" style={{ fontSize: 11 }}>Live Activity</span>
-        <span style={{ flex: 1, height: 1, background: 'var(--border-glass)' }} />
+        <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--brand)', animation: 'livePulse 2s ease-in-out infinite' }} />
+        <span className="section-label" style={{ margin: 0 }}>Live Activity</span>
+        <span style={{ flex: 1, height: 1, background: 'var(--border-light)' }} />
       </div>
 
       {/* ── Feed ──────────────────────────────────────── */}
@@ -115,7 +105,7 @@ export default function FeedPage() {
           >
             <div style={{
               width: 36, height: 36, borderRadius: '50%',
-              background: event.type === 'unlock' ? 'rgba(52,211,153,0.12)' : event.type === 'value' ? 'rgba(255,255,255,0.05)' : 'rgba(251,191,36,0.12)',
+              background: event.type === 'unlock' ? 'rgba(21,128,127,0.1)' : event.type === 'value' ? 'var(--bg-muted)' : 'rgba(217,119,6,0.1)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 15, flexShrink: 0,
             }}>
@@ -123,24 +113,24 @@ export default function FeedPage() {
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               {event.type === 'unlock' && (
-                <div style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--brand-ink)' }}>
+                <div style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--text-primary)' }}>
                   <strong>{event.user}</strong> in <strong>{event.postcode}</strong> unlocked<br />
-                  <span style={{ color: 'var(--brand-green)', fontWeight: 500 }}>{event.product}</span>
+                  <span style={{ color: 'var(--brand)', fontWeight: 500 }}>{event.product}</span>
                 </div>
               )}
               {event.type === 'value' && (
-                <div style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--brand-ink)' }}>
+                <div style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--text-primary)' }}>
                   <strong>{event.user}</strong> in <strong>{event.postcode}</strong> valued a<br />
-                  <span style={{ fontWeight: 500 }}>{event.typeLabel}</span>
+                  <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{event.typeLabel}</span>
                 </div>
               )}
               {event.type === 'arena' && (
-                <div style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--brand-ink)' }}>
+                <div style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--text-primary)' }}>
                   <strong>{event.user}</strong> earned Arena points in <strong>{event.postcode}</strong>
                 </div>
               )}
             </div>
-            <span style={{ fontSize: 10, color: 'var(--brand-muted)', flexShrink: 0 }}>
+            <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>
               {event.time}
             </span>
           </div>
@@ -153,9 +143,9 @@ export default function FeedPage() {
         animation: 'fadeSlideIn 0.5s ease 0.4s both',
       }}>
         <button
-          onClick={() => { window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('light'); navigate('/'); }}
+          onClick={() => navigate('/')}
           className="btn-primary"
-          style={{ padding: 16, fontSize: 15 }}
+          style={{ width: '100%' }}
         >
           Value a Property 🏠
         </button>

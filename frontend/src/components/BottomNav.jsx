@@ -18,10 +18,8 @@ export default function BottomNav() {
   return (
     <nav style={{
       position: 'fixed', bottom: 0, left: 0, right: 0,
-      background: 'rgba(10,10,15,0.92)',
-      backdropFilter: 'blur(24px)',
-      WebkitBackdropFilter: 'blur(24px)',
-      borderTop: '1px solid var(--border-glass)',
+      background: '#fff',
+      borderTop: '1px solid #e5e7eb',
       display: 'flex', justifyContent: 'space-around',
       padding: '6px 0 20px', zIndex: 90,
     }}>
@@ -38,10 +36,9 @@ export default function BottomNav() {
             style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
               background: 'none', border: 'none',
-              color: active ? 'var(--brand-green)' : 'var(--brand-muted)',
+              color: active ? '#15807f' : '#9ca3af',
               fontSize: 10, fontWeight: active ? 600 : 400,
               cursor: 'pointer', padding: '4px 16px',
-              letterSpacing: '0.03em',
             }}
           >
             <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">

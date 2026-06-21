@@ -1,110 +1,101 @@
 @import "tailwindcss";
 
-/* ── Honestly Premium Theme ────────────────────────────
-   Dark, sleek, glassmorphism. Revolut/Monzo/Apple Wallet inspired.
-   Background: #0a0a0f (deep almost-black)
-   Cards: glass panels with backdrop-blur + subtle borders
-   Typography: Inter for UI, Fraunces for display values
+/* ── Honestly Native Light Theme ───────────────────────
+   Apple Human Interface Guidelines / Material Design 3.
+   White backgrounds, crisp typography, brand colors as accents only.
    ───────────────────────────────────────────────────── */
 
 :root {
-  /* Deep dark background (like Revolut) */
-  --bg-deep: #0a0a0f;
-  --bg-surface: #12121a;
-  --bg-glass: rgba(255, 255, 255, 0.04);
-  --bg-glass-hover: rgba(255, 255, 255, 0.07);
-  --border-glass: rgba(255, 255, 255, 0.08);
-  --border-glass-hover: rgba(255, 255, 255, 0.14);
+  /* Native Apple/Google palette */
+  --bg: #ffffff;
+  --bg-surface: #ffffff;
+  --bg-muted: #f8f9fa;
+  --bg-card: #ffffff;
 
-  /* Brand palette (dark-adjusted) */
-  --brand-cream: #f0ede6;
-  --brand-ink: #f0ede6;
-  --brand-muted: rgba(240, 237, 230, 0.45);
-  --brand-green: #34d399;
-  --brand-dark: #0a0a0f;
-  --brand-terra: #2dd4bf;
-  --brand-gold: #fbbf24;
-  --brand-line: rgba(255, 255, 255, 0.08);
-  --brand-paper: rgba(255, 255, 255, 0.04);
+  /* Brand colors (accents only) */
+  --brand: #15807f;
+  --brand-dark: #0e2747;
+  --brand-light: rgba(21, 128, 127, 0.08);
 
-  /* Emotion colours (dark-adjusted) */
-  --color-anger: #f87171;
-  --color-fomo: #fbbf24;
-  --color-greed: #34d399;
-  --color-fear: #fcd34d;
-  --color-laziness: #60a5fa;
+  /* Text hierarchy */
+  --text-primary: #1c1a16;
+  --text-secondary: #6b6557;
+  --text-tertiary: #9ca3af;
+  --text-inverse: #ffffff;
+
+  /* Borders & separation */
+  --border: #e5e7eb;
+  --border-light: #f3f4f6;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03);
+
+  /* Emotion colours (soft pastel for light bg) */
+  --color-anger: #dc2626;
+  --color-fomo: #d97706;
+  --color-greed: var(--brand);
+  --color-fear: #ca8a04;
+  --color-laziness: #2563eb;
 
   /* TG variable mapping */
-  --tg-bg: var(--bg-deep);
-  --tg-text: var(--brand-ink);
-  --tg-hint: var(--brand-muted);
-  --tg-link: var(--brand-green);
-  --tg-button: var(--brand-green);
-  --tg-button-text: var(--bg-deep);
-  --tg-secondary-bg: var(--bg-surface);
-  --tg-section-bg: var(--bg-surface);
-  --tg-section-separator: var(--border-glass);
-  --tg-accent: var(--brand-green);
+  --tg-bg: var(--bg);
+  --tg-text: var(--text-primary);
+  --tg-hint: var(--text-secondary);
+  --tg-link: var(--brand);
+  --tg-button: var(--brand);
+  --tg-button-text: var(--text-inverse);
+  --tg-secondary-bg: var(--bg-muted);
+  --tg-section-separator: var(--border-light);
+  --tg-accent: var(--brand);
 }
 
 /* ── Base ────────────────────────────────────────────── */
 body {
-  background: var(--bg-deep);
-  color: var(--brand-ink);
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg-muted);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   margin: 0;
   padding: 0;
 }
 
-/* Fraunces for display values only */
 .display {
   font-family: "Fraunces", Georgia, "Times New Roman", serif;
 }
 
 ::selection {
-  background: var(--brand-green);
-  color: var(--bg-deep);
+  background: var(--brand-light);
+  color: var(--brand);
 }
 
-/* ── Glass card ──────────────────────────────────────── */
-.glass {
-  background: var(--bg-glass);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-glass);
+/* ── Card ────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
   border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s ease;
 }
 
-.glass:active {
+.card:active {
   transform: scale(0.98);
-  background: var(--bg-glass-hover);
 }
 
-/* ── Glass card (slightly elevated) ──────────────────── */
-.glass-elevated {
-  background: var(--bg-glass);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--border-glass);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-/* ── Primary button ──────────────────────────────────── */
+/* ── Button primary ──────────────────────────────────── */
 .btn-primary {
-  width: 100%;
-  padding: 16px;
-  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 28px;
+  border-radius: 999px;
   border: none;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
-  background: linear-gradient(135deg, var(--brand-green), #10b981);
-  color: var(--bg-deep);
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--brand);
+  color: var(--text-inverse);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .btn-primary:active {
@@ -118,13 +109,32 @@ body {
   transform: none;
 }
 
+/* ── Button outline ──────────────────────────────────── */
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 28px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.btn-outline:active {
+  transform: scale(0.97);
+}
+
 /* ── Feed card ────────────────────────────────────────── */
 .feed-card {
-  background: var(--bg-glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
+  background: var(--bg-card);
   border-radius: 14px;
+  box-shadow: var(--shadow-sm);
   padding: 12px 14px;
   display: flex;
   align-items: center;
@@ -134,14 +144,13 @@ body {
 
 .feed-card:active {
   transform: scale(0.98);
-  background: var(--bg-glass-hover);
 }
 
 /* ── Bottom sheet ────────────────────────────────────── */
 .sheet-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.3);
   z-index: 100;
   animation: fadeIn 0.2s ease;
 }
@@ -151,13 +160,12 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--bg-surface);
-  border-radius: 24px 24px 0 0;
+  background: var(--bg);
+  border-radius: 20px 20px 0 0;
   z-index: 101;
   animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   max-height: 80vh;
   overflow-y: auto;
-  border-top: 1px solid var(--border-glass);
 }
 
 @keyframes fadeIn {
@@ -174,7 +182,7 @@ body {
 .gauge-track {
   width: 100%;
   height: 5px;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--border-light);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -187,11 +195,9 @@ body {
 
 /* ── Product card ─────────────────────────────────────── */
 .product-card {
-  background: var(--bg-glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-glass);
+  background: var(--bg-card);
   border-radius: 14px;
+  box-shadow: var(--shadow-sm);
   padding: 12px 14px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -199,16 +205,22 @@ body {
 
 .product-card:active {
   transform: scale(0.98);
-  background: var(--bg-glass-hover);
 }
 
-/* ── Uppercase label ─────────────────────────────────── */
-.label {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--brand-muted);
-  font-weight: 500;
+/* ── Section label ────────────────────────────────────── */
+.section-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+/* ── Stat card (inline metric) ────────────────────────── */
+.stat-card {
+  background: var(--bg-muted);
+  border-radius: 12px;
+  padding: 10px 8px;
+  text-align: center;
 }
 
 /* ── Animations ──────────────────────────────────────── */

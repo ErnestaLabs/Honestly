@@ -24,13 +24,13 @@ export default function ProductSheet({ product, valuationContext, onClose, onCom
       }
     } catch (err) {
       if (err.response?.status === 402) {
-        // Fall through to Stars
+        // Fall through
       } else if (err.response?.status === 403) {
         setError('Requires higher tier');
         window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('error');
         setLoading(false); return;
       } else {
-        setError(err.response?.data?.detail?.message || err.message || 'Failed');
+        setError(err.response?.data?.detail?.message || err.message);
         window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred?.('error');
         setLoading(false); return;
       }
@@ -66,45 +66,46 @@ export default function ProductSheet({ product, valuationContext, onClose, onCom
       <div className="sheet-backdrop" onClick={loading ? null : () => onClose?.()} />
       <div className="sheet">
         <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
-          <div style={{ width: 32, height: 4, borderRadius: 2, background: 'var(--border-glass)' }} />
+          <div style={{ width: 32, height: 4, borderRadius: 2, background: 'var(--border)' }} />
         </div>
         <div style={{ padding: '8px 24px 32px' }}>
           {done ? (
             <div style={{ textAlign: 'center', padding: '24px 0' }}>
               <div style={{
                 width: 48, height: 48, borderRadius: 24,
-                background: 'rgba(52,211,153,0.15)', color: 'var(--brand-green)',
+                background: 'var(--brand-light)', color: 'var(--brand)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 22, margin: '0 auto 12px',
               }}>
                 {'\u2713'}
               </div>
-              <h2 className="display" style={{ fontSize: 18, fontWeight: 600, margin: 0, color: 'var(--brand-ink)' }}>
+              <h2 className="display" style={{ fontSize: 18, fontWeight: 600, margin: 0, color: 'var(--text-primary)' }}>
                 Unlocked
               </h2>
             </div>
           ) : (
             <>
-              <p className="label" style={{ textAlign: 'center', marginBottom: 10 }}>Purchase Report</p>
+              <p className="section-label" style={{ textAlign: 'center', marginBottom: 8 }}>Purchase report</p>
               <h2 className="display" style={{
                 fontSize: 17, fontWeight: 600, textAlign: 'center',
-                margin: '0 0 16px', color: 'var(--brand-ink)',
+                margin: '0 0 16px', color: 'var(--text-primary)',
               }}>
                 {product.title || product.name || product.id}
               </h2>
-              <div className="glass" style={{
-                padding: '14px 16px', marginBottom: 16, borderRadius: 12,
+              <div style={{
+                background: 'var(--bg-muted)', borderRadius: 12,
+                padding: '14px 16px', marginBottom: 16,
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
               }}>
-                <span style={{ fontSize: 12, color: 'var(--brand-muted)' }}>Price</span>
-                <span className="display" style={{ fontSize: 18, fontWeight: 600, color: 'var(--brand-green)', letterSpacing: '-0.02em' }}>
+                <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Price</span>
+                <span className="display" style={{ fontSize: 18, fontWeight: 600, color: 'var(--brand)' }}>
                   {'\u00a3'}{price.toFixed(2)}
                 </span>
               </div>
               {error && (
                 <div style={{
-                  background: 'rgba(248,113,113,0.1)', borderRadius: 8, padding: 8,
-                  marginBottom: 10, fontSize: 11, color: '#f87171', textAlign: 'center',
+                  background: 'rgba(220,38,38,0.08)', borderRadius: 8, padding: 8,
+                  marginBottom: 10, fontSize: 12, color: '#dc2626', textAlign: 'center',
                 }}>
                   {error}
                 </div>
@@ -113,12 +114,13 @@ export default function ProductSheet({ product, valuationContext, onClose, onCom
                 onClick={handlePurchase}
                 disabled={loading}
                 className="btn-primary"
+                style={{ width: '100%' }}
               >
                 {loading ? (
                   <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
                     <span style={{
                       display: 'inline-block', width: 14, height: 14,
-                      border: '2px solid #0a0a0f', borderTopColor: 'transparent',
+                      border: '2px solid #fff', borderTopColor: 'transparent',
                       borderRadius: '50%', animation: 'spin 0.8s linear infinite',
                     }} />
                     Processing
@@ -127,7 +129,7 @@ export default function ProductSheet({ product, valuationContext, onClose, onCom
                   `Unlock \u2014 \u00a3${price.toFixed(2)}`
                 )}
               </button>
-              <p style={{ textAlign: 'center', color: 'var(--brand-muted)', fontSize: 12, marginTop: 12, cursor: 'pointer' }} onClick={() => onClose?.()}>
+              <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 13, marginTop: 14, cursor: 'pointer' }} onClick={() => onClose?.()}>
                 Cancel
               </p>
             </>
