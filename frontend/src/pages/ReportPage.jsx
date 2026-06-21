@@ -9,12 +9,12 @@ function fmt(n) {
 }
 
 const PRODUCTS = [
-  { id: 'lowball_counter_email', title: 'Counter-Offer Letter', desc: 'A data-backed email for your estate agent, referencing your sold comparables. Ready to send.', price: 1.49 },
-  { id: 'council_tax_challenger', title: 'Council Tax Challenge', desc: 'A formal VOA letter comparing your floor area and EPC against neighbouring bands.', price: 2.99 },
-  { id: 'leasehold_trap_xray', title: 'Leasehold Cost Report', desc: 'Section 42 extension cost, ground rent schedule, and lender risk timeline.', price: 4.99 },
-  { id: 'planning_permission_oracle', title: 'Development Check', desc: 'Property-specific PD verdict: what you can build, volume limits, and conservation status.', price: 2.49 },
-  { id: 'gentrification_radar', title: 'Area Growth Report', desc: '5-year price forecast, development pipeline, and amenity score.', price: 2.99 },
-  { id: 'syndicate_street_map', title: 'Ownership Report', desc: 'LLC-held properties and off-market targets with mail-merge template.', price: 14.99 },
+  { id: 'lowball_counter_email', title: 'Are They Taking The Piss?', desc: 'Counter-offer email', price: 1.49 },
+  { id: 'council_tax_challenger', title: 'Council Tax Challenge', desc: 'Band comparison letter', price: 2.99 },
+  { id: 'leasehold_trap_xray', title: 'Leasehold Cost Report', desc: 'Section 42 extension estimate', price: 4.99 },
+  { id: 'planning_permission_oracle', title: 'Development Check', desc: 'PD rules for this property', price: 2.49 },
+  { id: 'gentrification_radar', title: 'Area Growth Report', desc: '5-year forecast', price: 2.99 },
+  { id: 'syndicate_street_map', title: 'Ownership Report', desc: 'LLC map + mail-merge', price: 14.99 },
 ];
 
 export default function ReportPage() {
@@ -31,13 +31,13 @@ export default function ReportPage() {
 
   if (!data) {
     return (
-      <div style={{ padding: '48px 20px', textAlign: 'center', background: 'var(--bg-muted)', minHeight: '100vh' }}>
-        <div className="card" style={{ padding: '32px 20px' }}>
-          <p className="section-label" style={{ marginBottom: 8 }}>No valuation yet</p>
-          <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 20 }}>
+      <div style={{ minHeight: '100vh', background: '#f8fafb', padding: '48px 16px', textAlign: 'center' }}>
+        <div className="card-premium" style={{ maxWidth: 448, margin: '0 auto' }}>
+          <span className="label-upper">No valuation yet</span>
+          <p style={{ fontSize: 14, color: '#64748b', marginTop: 12, marginBottom: 20 }}>
             Run a free valuation first.
           </p>
-          <button onClick={() => navigate('/')} className="btn-primary">
+          <button onClick={() => navigate('/')} className="btn-primary" style={{ padding: '12px 28px', fontSize: 14 }}>
             Value a Property
           </button>
         </div>
@@ -47,7 +47,8 @@ export default function ReportPage() {
 
   const a = data.avm || {};
   const cp = Math.min(100, Math.max(0, a.confidence_score || 0));
-  const gc = cp >= 80 ? '#15807f' : cp >= 60 ? '#2aa39a' : cp >= 40 ? '#d97706' : '#dc2626';
+  const gaugeColor = cp >= 80 ? '#15807f' : cp >= 60 ? '#2aa39a' : cp >= 40 ? '#fbbf24' : '#ef4444';
+  const gradeText = cp >= 80 ? 'Strong' : cp >= 60 ? 'Good' : cp >= 40 ? 'Fair' : 'Low';
   const ctx = {
     address: a.address, postcode: a.postcode, central: a.central,
     low: a.low, high: a.high, confidence_score: a.confidence_score,
@@ -56,119 +57,100 @@ export default function ReportPage() {
   };
 
   return (
-    <div style={{ background: 'var(--bg-muted)', minHeight: '100vh', paddingBottom: 80 }}>
-      {/* ── Header Card ────────────────────────────────── */}
-      <div style={{ padding: '20px 16px 12px' }}>
-        <div className="card" style={{ padding: '20px', textAlign: 'center' }}>
-          <p className="section-label" style={{ marginBottom: 2 }}>Free Valuation Report</p>
-          <p style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 14 }}>
-            {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-          </p>
-          <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 4 }}>
-            {a.address}
-          </p>
-          <h1 className="display" style={{
-            fontWeight: 600, fontSize: 36,
-            color: 'var(--brand)', letterSpacing: '-0.03em', lineHeight: 1,
-            margin: '0 0 4px',
-          }}>
-            {fmt(a.central)}
-          </h1>
-          <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 14 }}>
-            {fmt(a.low)} \u2013 {fmt(a.high)}
-          </p>
-          <div className="gauge-track" style={{ maxWidth: 200, margin: '0 auto' }}>
-            <div className="gauge-fill" style={{ width: `${cp}%`, background: gc }} />
-          </div>
-          <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>{cp}% confidence</p>
-        </div>
-      </div>
+    <div style={{ minHeight: '100vh', background: '#f8fafb', paddingBottom: 80 }}>
+      <div style={{ maxWidth: 448, margin: '0 auto', padding: '24px 16px' }}>
 
-      {/* ── Stats Row ──────────────────────────────────── */}
-      <div style={{ padding: '0 16px 12px', display: 'flex', gap: 8 }}>
-        {[
-          ['SQM', a.sqm || '\u2014'],
-          ['EPC', a.epc || '\u2014'],
-          ['TYPE', (a.type || '\u2014').slice(0, 4).toUpperCase()],
-          ['COMPS', a.n_comps || '\u2014'],
-        ].map(([l, v]) => (
-          <div key={l} className="stat-card" style={{ flex: 1 }}>
-            <div className="display" style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>{v}</div>
-            <p style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 2 }}>{l}</p>
+        {/* ── The Premium AVM Card ────────────────────── */}
+        <div className="card-premium">
+          {/* Address & Context */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+            <span className="label-upper">Assessed Market Value</span>
+            <h1 style={{ marginTop: 12, fontSize: 14, fontWeight: 500, color: '#64748b' }}>
+              {a.address}
+            </h1>
+            <p style={{ marginTop: 16, fontSize: 60, fontWeight: 700, letterSpacing: '-0.05em', color: '#0f172a' }}>
+              {fmt(a.central)}
+            </p>
+            <p style={{ marginTop: 8, fontSize: 14, fontWeight: 500, color: '#94a3b8' }}>
+              {fmt(a.low)} \u2013 {fmt(a.high)}
+            </p>
           </div>
-        ))}
-      </div>
 
-      {/* ── Comparables ────────────────────────────────── */}
-      <div style={{ padding: '0 16px 12px' }}>
-        <p className="section-label">Comparable sales</p>
-        {(a.evidence || []).length > 0 ? (
-          <div className="card" style={{ overflow: 'hidden', padding: 0 }}>
-            {(a.evidence || []).slice(0, 6).map((e, i) => (
-              <div key={i} style={{
-                display: 'flex', justifyContent: 'space-between', padding: '10px 14px',
-                borderBottom: i < 5 ? '1px solid var(--border-light)' : 'none',
-              }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {e.address || 'Unknown'}
+          {/* Confidence Gauge */}
+          <div style={{ marginTop: 32 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span className="label-upper">Confidence</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#334155' }}>
+                {gradeText} ({cp}/100)
+              </span>
+            </div>
+            <div className="gauge-track">
+              <div className="gauge-fill" style={{ width: `${cp}%`, background: gaugeColor }} />
+            </div>
+          </div>
+
+          {/* Separator */}
+          <div style={{ margin: '32px 0', height: 1, width: '100%', background: '#f1f5f9' }} />
+
+          {/* Comparable Sales */}
+          <div style={{ marginBottom: 16 }}>
+            <span className="label-upper" style={{ marginBottom: 12, display: 'block' }}>Comparable Sales</span>
+            {(a.evidence || []).length > 0 ? (
+              (a.evidence || []).slice(0, 6).map((e, i) => (
+                <div key={i} style={{
+                  display: 'flex', justifyContent: 'space-between', padding: '8px 0',
+                  borderTop: '1px solid #f1f5f9',
+                }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {e.address || 'Unknown'}
+                    </div>
+                    <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>
+                      {e.date?.slice(0, 7) || ''} \u00b7 {e.sqm || '?'} sqm
+                    </p>
                   </div>
-                  <p style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1 }}>
-                    {e.date?.slice(0, 7) || ''} \u00b7 {e.sqm || '?'} sqm
-                  </p>
+                  <div className="display" style={{ fontSize: 14, fontWeight: 600, color: '#0f172a', marginLeft: 8 }}>
+                    {fmt(e.price)}
+                  </div>
                 </div>
-                <div className="display" style={{ fontSize: 14, fontWeight: 600, color: 'var(--brand)', marginLeft: 8 }}>
-                  {fmt(e.price)}
+              ))
+            ) : (
+              <p style={{ fontSize: 13, color: '#94a3b8', textAlign: 'center', padding: '12px 0' }}>
+                No comparable sales data
+              </p>
+            )}
+          </div>
+
+          {/* Separator */}
+          <div style={{ margin: '16px 0', height: 1, width: '100%', background: '#f1f5f9' }} />
+
+          {/* Locked Upsells */}
+          <div className="label-upper" style={{ marginBottom: 12 }}>Professional Reports</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {PRODUCTS.map((r) => (
+              <div
+                key={r.id}
+                className="upsell-row"
+                onClick={() => { window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('light'); setSelected(r); }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 18 }}>{['😡','😡','😰','😴','💰','💰'][PRODUCTS.indexOf(r)]}</span>
+                  <div>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: '#1e293b' }}>{r.title}</p>
+                    <p style={{ fontSize: 11, color: '#94a3b8' }}>{r.desc}</p>
+                  </div>
                 </div>
+                <button
+                  className="btn-primary"
+                  onClick={(e) => { e.stopPropagation(); window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('light'); setSelected(r); }}
+                >
+                  {'\u00a3'}{r.price.toFixed(2)}
+                </button>
               </div>
             ))}
           </div>
-        ) : (
-          <div className="card" style={{ padding: '16px', textAlign: 'center' }}>
-            <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>No comparable sales data for this postcode.</p>
-          </div>
-        )}
-      </div>
-
-      {/* ── Professional Reports ────────────────────────── */}
-      <div style={{ padding: '0 16px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <p className="section-label" style={{ margin: 0 }}>Professional reports</p>
         </div>
-        <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 10, lineHeight: 1.4 }}>
-          Generated instantly for this property. Each is a complete, actionable document.
-        </p>
-        {PRODUCTS.map((r) => (
-          <div
-            key={r.id}
-            className="card"
-            style={{
-              display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8,
-              padding: '10px 12px', cursor: 'pointer',
-            }}
-            onClick={() => { window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('light'); setSelected(r); }}
-          >
-            <div style={{
-              width: 28, height: 28, borderRadius: 7,
-              background: 'var(--brand-light)', color: 'var(--brand)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 10, fontWeight: 700, flexShrink: 0,
-            }}>
-              R
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{r.title}</div>
-              <p style={{ fontSize: 10, color: 'var(--text-secondary)', lineHeight: 1.4, marginTop: 1 }}>
-                {r.desc}
-              </p>
-            </div>
-            <div className="display" style={{
-              fontSize: 13, fontWeight: 600, color: 'var(--brand)', flexShrink: 0,
-            }}>
-              {'\u00a3'}{r.price.toFixed(2)}
-            </div>
-          </div>
-        ))}
+
       </div>
 
       {selected && (
@@ -180,8 +162,8 @@ export default function ReportPage() {
         />
       )}
 
-      <div style={{ padding: '20px 16px', textAlign: 'center' }}>
-        <p style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
+      <div style={{ padding: '24px 16px', textAlign: 'center' }}>
+        <p style={{ fontSize: 10, color: '#94a3b8' }}>
           HM Land Registry \u00b7 EPC Register \u00b7 ONS
         </p>
       </div>

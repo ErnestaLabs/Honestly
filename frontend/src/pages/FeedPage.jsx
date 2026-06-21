@@ -33,30 +33,31 @@ export default function FeedPage() {
   }, []);
 
   return (
-    <div style={{ paddingBottom: 120, background: 'var(--bg-muted)', minHeight: '100vh' }}>
-      {/* ── Top Bar ────────────────────────────────────── */}
+    <div style={{ minHeight: '100vh', background: '#f8fafb', paddingBottom: 120 }}>
+      {/* Top Bar */}
       <div style={{
-        background: 'var(--bg)', padding: '14px 20px',
+        background: '#fff', padding: '14px 20px',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        borderBottom: '1px solid var(--border-light)',
+        borderBottom: '1px solid #f1f5f9',
       }}>
-        <span style={{ fontFamily: '"Fraunces", Georgia, serif', fontWeight: 600, fontSize: 18, color: 'var(--text-primary)' }}>
+        <span style={{ fontFamily: '"Fraunces", Georgia, serif', fontWeight: 600, fontSize: 18, color: '#0f172a' }}>
           Honestly
         </span>
         <div style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          background: 'var(--bg-muted)', borderRadius: 999,
+          display: 'flex', alignItems: 'center', gap: 6,
+          background: '#f8fafb', borderRadius: 999,
           padding: '5px 12px 5px 10px',
+          border: '1px solid #f1f5f9',
         }}>
-          <span style={{ fontSize: 13, color: 'var(--brand)' }}>⚡</span>
-          <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
+          <span style={{ fontSize: 13, color: '#334155' }}>⚡</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: '#0f172a' }}>
             {'\u00a3'}{balance.toFixed(2)}
           </span>
           <button
             onClick={() => { window.Telegram?.WebApp?.HapticFeedback?.impactOccurred?.('medium'); navigate('/store'); }}
             style={{
               width: 20, height: 20, borderRadius: '50%',
-              background: 'var(--brand)', color: '#fff',
+              background: '#0f172a', color: '#fff',
               border: 'none', fontSize: 13, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               padding: 0, fontWeight: 600,
@@ -67,35 +68,36 @@ export default function FeedPage() {
         </div>
       </div>
 
-      {/* ── Hero ───────────────────────────────────────── */}
+      {/* Hero */}
       <div style={{ padding: '40px 20px 24px', textAlign: 'center' }}>
         <h1 style={{
           fontFamily: '"Fraunces", Georgia, serif', fontWeight: 600, fontSize: 28,
-          color: 'var(--text-primary)', letterSpacing: '-0.02em',
+          color: '#0f172a', letterSpacing: '-0.02em',
           margin: '0 0 6px', lineHeight: 1.15,
         }}>
           Your property's price,<br />
-          <span style={{ color: 'var(--brand)' }}>proved</span>
+          <span style={{ color: '#334155' }}>proved</span>
         </h1>
-        <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '0 auto 24px', maxWidth: 240, lineHeight: 1.5 }}>
+        <p style={{ fontSize: 14, color: '#94a3b8', margin: '0 auto 24px', maxWidth: 240, lineHeight: 1.5 }}>
           Free valuations backed by HM Land Registry. See what others are discovering.
         </p>
         <button
           onClick={() => navigate('/')}
           className="btn-primary"
+          style={{ padding: '12px 28px', fontSize: 14 }}
         >
           Value a Property 🏠
         </button>
       </div>
 
-      {/* ── Live Activity ─────────────────────────────── */}
+      {/* Live Activity */}
       <div style={{ padding: '0 20px 10px', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--brand)', animation: 'livePulse 2s ease-in-out infinite' }} />
-        <span className="section-label" style={{ margin: 0 }}>Live Activity</span>
-        <span style={{ flex: 1, height: 1, background: 'var(--border-light)' }} />
+        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#0f172a', animation: 'livePulse 2s ease-in-out infinite' }} />
+        <span className="label-upper" style={{ fontSize: 11, margin: 0 }}>Live Activity</span>
+        <span style={{ flex: 1, height: 1, background: '#f1f5f9' }} />
       </div>
 
-      {/* ── Feed ──────────────────────────────────────── */}
+      {/* Feed */}
       <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {MOCK_FEED.map((event, i) => (
           <div
@@ -105,7 +107,7 @@ export default function FeedPage() {
           >
             <div style={{
               width: 36, height: 36, borderRadius: '50%',
-              background: event.type === 'unlock' ? 'rgba(21,128,127,0.1)' : event.type === 'value' ? 'var(--bg-muted)' : 'rgba(217,119,6,0.1)',
+              background: event.type === 'unlock' ? 'rgba(15,23,42,0.06)' : event.type === 'value' ? '#f8fafb' : 'rgba(245,158,11,0.1)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 15, flexShrink: 0,
             }}>
@@ -113,39 +115,38 @@ export default function FeedPage() {
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               {event.type === 'unlock' && (
-                <div style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--text-primary)' }}>
+                <div style={{ fontSize: 12, lineHeight: 1.5, color: '#334155' }}>
                   <strong>{event.user}</strong> in <strong>{event.postcode}</strong> unlocked<br />
-                  <span style={{ color: 'var(--brand)', fontWeight: 500 }}>{event.product}</span>
+                  <span style={{ color: '#0f172a', fontWeight: 500 }}>{event.product}</span>
                 </div>
               )}
               {event.type === 'value' && (
-                <div style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--text-primary)' }}>
+                <div style={{ fontSize: 12, lineHeight: 1.5, color: '#334155' }}>
                   <strong>{event.user}</strong> in <strong>{event.postcode}</strong> valued a<br />
-                  <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{event.typeLabel}</span>
+                  <span style={{ fontWeight: 500 }}>{event.typeLabel}</span>
                 </div>
               )}
               {event.type === 'arena' && (
-                <div style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--text-primary)' }}>
+                <div style={{ fontSize: 12, lineHeight: 1.5, color: '#334155' }}>
                   <strong>{event.user}</strong> earned Arena points in <strong>{event.postcode}</strong>
                 </div>
               )}
             </div>
-            <span style={{ fontSize: 10, color: 'var(--text-tertiary)', flexShrink: 0 }}>
+            <span style={{ fontSize: 10, color: '#94a3b8', flexShrink: 0 }}>
               {event.time}
             </span>
           </div>
         ))}
       </div>
 
-      {/* ── Floating CTA ──────────────────────────────── */}
+      {/* Floating CTA */}
       <div style={{
         position: 'fixed', bottom: 80, left: 16, right: 16, zIndex: 50,
-        animation: 'fadeSlideIn 0.5s ease 0.4s both',
       }}>
         <button
           onClick={() => navigate('/')}
           className="btn-primary"
-          style={{ width: '100%' }}
+          style={{ width: '100%', padding: 14, fontSize: 14 }}
         >
           Value a Property 🏠
         </button>

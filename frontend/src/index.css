@@ -1,59 +1,43 @@
-@import "tailwindcss";
-
-/* ── Honestly Native Light Theme ───────────────────────
-   Apple Human Interface Guidelines / Material Design 3.
-   White backgrounds, crisp typography, brand colors as accents only.
+/* ── Honestly — Hardcoded Premium UI ───────────────────
+   Slate palette, Apple-style cards, amber confidence.
+   Exact design from the reference implementation.
    ───────────────────────────────────────────────────── */
 
 :root {
-  /* Native Apple/Google palette */
-  --bg: #ffffff;
-  --bg-surface: #ffffff;
-  --bg-muted: #f8f9fa;
-  --bg-card: #ffffff;
+  /* Slate palette */
+  --slate-50: #f8fafb;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --white: #ffffff;
+  --amber-400: #fbbf24;
 
-  /* Brand colors (accents only) */
-  --brand: #15807f;
-  --brand-dark: #0e2747;
-  --brand-light: rgba(21, 128, 127, 0.08);
-
-  /* Text hierarchy */
-  --text-primary: #1c1a16;
-  --text-secondary: #6b6557;
-  --text-tertiary: #9ca3af;
-  --text-inverse: #ffffff;
-
-  /* Borders & separation */
-  --border: #e5e7eb;
-  --border-light: #f3f4f6;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03);
-
-  /* Emotion colours (soft pastel for light bg) */
-  --color-anger: #dc2626;
-  --color-fomo: #d97706;
-  --color-greed: var(--brand);
-  --color-fear: #ca8a04;
-  --color-laziness: #2563eb;
+  /* Emotion colours */
+  --color-anger: #ef4444;
+  --color-fomo: #f59e0b;
+  --color-greed: #15807f;
+  --color-fear: #eab308;
+  --color-laziness: #3b82f6;
 
   /* TG variable mapping */
-  --tg-bg: var(--bg);
-  --tg-text: var(--text-primary);
-  --tg-hint: var(--text-secondary);
-  --tg-link: var(--brand);
-  --tg-button: var(--brand);
-  --tg-button-text: var(--text-inverse);
-  --tg-secondary-bg: var(--bg-muted);
-  --tg-section-separator: var(--border-light);
-  --tg-accent: var(--brand);
+  --tg-bg: var(--slate-50);
+  --tg-text: var(--slate-900);
+  --tg-hint: var(--slate-400);
+  --tg-link: var(--slate-900);
+  --tg-button: var(--slate-900);
+  --tg-button-text: var(--white);
+  --tg-secondary-bg: var(--white);
+  --tg-section-separator: var(--slate-100);
+  --tg-accent: var(--slate-900);
 }
 
-/* ── Base ────────────────────────────────────────────── */
 body {
-  background: var(--bg-muted);
-  color: var(--text-primary);
+  background: var(--slate-50);
+  color: var(--slate-900);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   margin: 0;
@@ -64,16 +48,21 @@ body {
   font-family: "Fraunces", Georgia, "Times New Roman", serif;
 }
 
-::selection {
-  background: var(--brand-light);
-  color: var(--brand);
+/* ── Premium card ────────────────────────────────────── */
+.card-premium {
+  background: var(--white);
+  border-radius: 28px;
+  padding: 32px;
+  box-shadow: 0 10px 40px -15px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--slate-100);
 }
 
-/* ── Card ────────────────────────────────────────────── */
+/* ── Card (general) ──────────────────────────────────── */
 .card {
-  background: var(--bg-card);
+  background: var(--white);
   border-radius: 16px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--slate-100);
   transition: all 0.15s ease;
 }
 
@@ -86,21 +75,20 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 14px 28px;
+  padding: 10px 20px;
   border-radius: 999px;
   border: none;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
-  background: var(--brand);
-  color: var(--text-inverse);
+  background: var(--slate-900);
+  color: var(--white);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .btn-primary:active {
-  transform: scale(0.97);
-  opacity: 0.9;
+  transform: scale(0.95);
 }
 
 .btn-primary:disabled {
@@ -109,32 +97,12 @@ body {
   transform: none;
 }
 
-/* ── Button outline ──────────────────────────────────── */
-.btn-outline {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px 28px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  background: var(--bg-card);
-  color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-.btn-outline:active {
-  transform: scale(0.97);
-}
-
 /* ── Feed card ────────────────────────────────────────── */
 .feed-card {
-  background: var(--bg-card);
-  border-radius: 14px;
-  box-shadow: var(--shadow-sm);
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--slate-100);
   padding: 12px 14px;
   display: flex;
   align-items: center;
@@ -144,6 +112,46 @@ body {
 
 .feed-card:active {
   transform: scale(0.98);
+}
+
+/* ── Upsell row ──────────────────────────────────────── */
+.upsell-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--slate-50);
+  border: 1px solid var(--slate-100);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.upsell-row:active {
+  transform: scale(0.98);
+}
+
+/* ── Gauge ────────────────────────────────────────────── */
+.gauge-track {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--slate-100);
+  overflow: hidden;
+}
+
+.gauge-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+
+/* ── Label (uppercase) ────────────────────────────────── */
+.label-upper {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--slate-400);
 }
 
 /* ── Bottom sheet ────────────────────────────────────── */
@@ -160,7 +168,7 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--bg);
+  background: var(--white);
   border-radius: 20px 20px 0 0;
   z-index: 101;
   animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -178,52 +186,6 @@ body {
   to { transform: translateY(0); }
 }
 
-/* ── Gauge ────────────────────────────────────────────── */
-.gauge-track {
-  width: 100%;
-  height: 5px;
-  background: var(--border-light);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.gauge-fill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 0.6s ease;
-}
-
-/* ── Product card ─────────────────────────────────────── */
-.product-card {
-  background: var(--bg-card);
-  border-radius: 14px;
-  box-shadow: var(--shadow-sm);
-  padding: 12px 14px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.product-card:active {
-  transform: scale(0.98);
-}
-
-/* ── Section label ────────────────────────────────────── */
-.section-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-}
-
-/* ── Stat card (inline metric) ────────────────────────── */
-.stat-card {
-  background: var(--bg-muted);
-  border-radius: 12px;
-  padding: 10px 8px;
-  text-align: center;
-}
-
-/* ── Animations ──────────────────────────────────────── */
 @keyframes fadeSlideIn {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
@@ -238,7 +200,6 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* ── Scrollbar ────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 0;
   height: 0;
