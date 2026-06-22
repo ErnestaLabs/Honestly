@@ -11,6 +11,9 @@ redis>=5.0.0
 # HTTP client
 requests>=2.31.0
 
+# Process scheduling (daily blog automation)
+apscheduler>=3.10.0
+
 # Image processing
 Pillow>=10.0.0
 
