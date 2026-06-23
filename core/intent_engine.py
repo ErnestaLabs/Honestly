@@ -49,6 +49,12 @@ SCORE_CAP = 100
 # TTL for signal data (90 days)
 SIGNAL_TTL_S = 90 * 86400
 
+# Agent alert threshold (score >= this triggers push to agents)
+AGENT_ALERT_THRESHOLD = 80
+
+# Agent alert rate-limit window (48 hours — one alert per agent per property)
+AGENT_ALERT_COOLDOWN_S = 48 * 3600
+
 # Key prefixes
 _PREFIX_SIGNAL = "honestly:intent:signal:"
 _PREFIX_TIMELINE = "honestly:intent:timeline:"
@@ -131,12 +137,192 @@ def log_intent_signal(
         return False
 
 
+# ── Agent push alert (B2B) ────────────────────────────────────────────────
+# When a property's sell probability crosses AGENT_ALERT_THRESHOLD (80),
+# all Pro Agents subscribed to that postcode get a Telegram push.
+# Rate-limited: one alert per agent per property per 48 hours.
+
+_AGENT_ALERT_LOCK_PREFIX = "honestly:intent:agent_alert_lock:"
+_AGENT_SUB_PREFIX = "honestly:agent:sub:"
+
+AGENT_PUSH_THRESHOLD_DEFAULT = 80
+
+
+def _fire_agent_push_alerts(
+    postcode: str,
+    property_id: str,
+    score: int,
+    signals: list[dict],
+):
+    """Fire push notifications to Pro Agents subscribed to this postcode.
+
+    Runs in a background thread so it never blocks the score computation.
+    Each agent gets at most one alert per property per 48 hours.
+    """
+    try:
+        import threading
+        threading.Thread(
+            target=_do_agent_push,
+            args=(postcode, property_id, score, signals),
+            daemon=True,
+        ).start()
+    except Exception as e:
+        log.debug("Failed to spawn agent push thread: %s", e)
+
+
+def _do_agent_push(
+    postcode: str,
+    property_id: str,
+    score: int,
+    signals: list[dict],
+):
+    """Actual agent notification logic (runs in daemon thread)."""
+    try:
+        r = _redis()
+        bot_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+        if not bot_token:
+            return
+
+        # Find all Pro Agents subscribed to this postcode
+        agent_subscribers = r.smembers(f"{_AGENT_SUB_PREFIX}{postcode}")
+        if not agent_subscribers:
+            return
+
+        # Count unique users who engaged (for the message — no PII exposed)
+        unique_users = len(set(s.get("user_id", "?") for s in signals))
+        signal_labels = _summarise_signals(signals)
+
+        for agent_user_id in agent_subscribers:
+            agent_user_id = agent_user_id.strip()
+            if not agent_user_id:
+                continue
+
+            # Rate limit: 48h cooldown per agent per property
+            lock_key = f"{_AGENT_ALERT_LOCK_PREFIX}{agent_user_id}:{postcode}:{property_id}"
+            already_sent = r.get(lock_key)
+            if already_sent:
+                continue
+            r.setex(lock_key, AGENT_ALERT_COOLDOWN_S, "1")
+
+            # Build the push message — no PII
+            message = (
+            "\U0001f6a8 High Intent Alert!\n\n"
+                f"Property in {postcode} just hit a {score}% sell probability.\n\n"
+                f"Signals: {signal_labels}\n"
+                f"Unique engaged users: {unique_users}\n\n"
+                f"Check your Agent Dashboard for full details:"
+                f"https://usehonestly.co.uk/agent/intel?postcode={postcode}"
+            )
+
+            _send_telegram_message(bot_token, agent_user_id, message)
+
+    except Exception as e:
+        log.debug("Agent push failed: %s", e)
+
+
+def _summarise_signals(signals: list[dict]) -> str:
+    """Build a human-readable summary of the signal types."""
+    signal_types = [s.get("signal_type", "?") for s in signals]
+    label_map = {
+        SIGNAL_VALUATION_RUN: "valuation run",
+        SIGNAL_UPSELL_PURCHASED: "upsell purchased",
+        SIGNAL_RETURNED_7_DAYS: "returned within 7d",
+        SIGNAL_REPORT_DOWNLOADED: "report downloaded",
+    }
+    seen = set()
+    labels = []
+    for st in signal_types:
+        label = label_map.get(st, st)
+        if label not in seen:
+            seen.add(label)
+            labels.append(label)
+    return ", ".join(labels)
+
+
+def _send_telegram_message(bot_token: str, chat_id: str, text: str):
+    """Send a message via the Telegram Bot API."""
+    try:
+        import urllib.request
+        import urllib.parse
+
+        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        payload = urllib.parse.urlencode({
+            "chat_id": chat_id,
+            "text": text,
+            "parse_mode": "HTML",
+            "disable_web_page_preview": "true",
+        }).encode()
+
+        req = urllib.request.Request(
+            url, data=payload,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            result = json.loads(resp.read().decode())
+            if result.get("ok"):
+                log.debug("Agent push sent to %s", chat_id)
+            else:
+                log.debug("Agent push failed for %s: %s", chat_id, result)
+    except Exception as e:
+        log.debug("Telegram send failed: %s", e)
+
+
+# ── Agent subscription management ──────────────────────────────────────────
+def register_agent_postcode_subscription(agent_user_id: str, postcode: str) -> bool:
+    """Register a Pro Agent to receive push alerts for a postcode."""
+    try:
+        r = _redis()
+        r.sadd(f"{_AGENT_SUB_PREFIX}{postcode}", agent_user_id)
+        return True
+    except Exception as e:
+        log.warning("Failed to register agent sub: %s", e)
+        return False
+
+
+def unregister_agent_postcode_subscription(agent_user_id: str, postcode: str) -> bool:
+    """Remove an agent from a postcode's alert list."""
+    try:
+        r = _redis()
+        r.srem(f"{_AGENT_SUB_PREFIX}{postcode}", agent_user_id)
+        return True
+    except Exception as e:
+        log.warning("Failed to unregister agent sub: %s", e)
+        return False
+
+
+def get_agent_subscribed_postcodes(agent_user_id: str) -> list[str]:
+    """Return all postcodes an agent is subscribed to.
+
+    Scans Redis for sets containing this agent's ID.
+    """
+    postcodes = []
+    try:
+        r = _redis()
+        cursor = 0
+        while cursor is not None:
+            cursor, keys = r.scan(
+                cursor=cursor, match=f"{_AGENT_SUB_PREFIX}*", count=200
+            )
+            for key in keys:
+                if r.sismember(key, agent_user_id):
+                    pc = key.replace(_AGENT_SUB_PREFIX, "")
+                    postcodes.append(pc)
+            if cursor == 0:
+                break
+    except Exception as e:
+        log.warning("Failed to get agent subs: %s", e)
+    return postcodes
+
+
 # ── Score computation ──────────────────────────────────────────────────────
 def calculate_sell_probability(postcode: str, property_id: str) -> int:
     """Compute the 0–100 'Likely to Sell' score for a property.
 
     Reads all stored intent signals for the property and applies the
     scoring algorithm. The score is cached in Redis with a 1-hour TTL.
+
+    If the new score crosses AGENT_ALERT_THRESHOLD (80), fires push
+    notifications to all Pro Agents subscribed to this postcode.
 
     Args:
         postcode: Outcode (e.g. SW16).
@@ -199,6 +385,10 @@ def calculate_sell_probability(postcode: str, property_id: str) -> int:
         # Cache score with short TTL
         cache_key = _score_key(postcode, property_id)
         r.setex(cache_key, 3600, score)
+
+        # ── Fire agent push alert if score crosses threshold ─────────
+        if score >= AGENT_ALERT_THRESHOLD:
+            _fire_agent_push_alerts(postcode, property_id, score, parsed_signals)
 
         return score
 
