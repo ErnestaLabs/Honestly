@@ -74,6 +74,30 @@ async def _run_valuation_async(
     # ── Step 3: Derive product triggers ─────────────────────────────
     triggers = _derive_product_triggers(avm_result, user_tier)
 
+    # ── Step 4: Contextual affiliate offers (marketplace layer) ─────
+    marketplace_offers = []
+    if avm_result.get("ok"):
+        try:
+            from monetization.router import get_marketplace_offers
+            marketplace_offers = get_marketplace_offers(avm_result)
+        except Exception as e:
+            log.debug("Marketplace offers failed: %s", e)
+
+    # ── Step 5: Log intent signal (async, best-effort) ──────────────
+    postcode = avm_result.get("postcode", "")
+    if postcode and user_id != "anonymous":
+        try:
+            from core.intent_engine import log_intent_signal
+            log_intent_signal(
+                user_id=user_id,
+                postcode=postcode,
+                property_id=postcode,
+                signal_type="valuation_run",
+                metadata={"address": address},
+            )
+        except Exception as e:
+            log.debug("Intent signal logging failed: %s", e)
+
     elapsed = time.time() - t0
     log.info("Orchestrator completed for %s in %.1fs", address, elapsed)
 
@@ -81,6 +105,7 @@ async def _run_valuation_async(
         "ok": avm_result.get("ok", False),
         "avm": avm_result,
         "product_triggers": triggers,
+        "marketplace_offers": marketplace_offers,
         "user_id": user_id,
         "user_tier": user_tier,
         "elapsed_s": round(elapsed, 2),
