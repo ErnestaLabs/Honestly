@@ -92,7 +92,9 @@ services:
     ports:
       - "8001:8000"
 
-  # ── React Frontend (Nginx) ────────────────────────────
+  # ── React Frontend (Nginx) - INTERNAL ONLY ─────────────
+  # Port 80 is blocked. The Mini App sits behind the VPS nginx proxy
+  # at app.usehonestly.co.uk, accessed exclusively via Telegram.
   frontend:
     build:
       context: ./frontend
@@ -104,6 +106,5 @@ services:
     depends_on:
       - backend
     ports:
-      - "80:80"
-    # Optionally expose 443 if you have SSL configured
-    # - "443:443"
+      - "127.0.0.1:8081:80"
+      # Only reachable from localhost (nginx proxy) - not the open internet

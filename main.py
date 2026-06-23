@@ -4,19 +4,23 @@ Wires together all API v1 routers and serves as the uvicorn target
 for the Dockerised backend. The existing server.py stdlib server
 continues to work for backward compatibility.
 
-Automates the daily SEO blog generation via APScheduler (runs at 2 AM)
-with a Redis-backed distributed lock so only one uvicorn worker fires it.
+- Automates the daily SEO blog generation via APScheduler (2 AM)
+- Enforces Telegram-only access via initData middleware
+- Redis-backed distributed lock for single-scheduler semantics
 """
 from __future__ import annotations
 
+import hashlib
+import hmac
 import logging
 import os
 import subprocess
 import sys
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 # Import the v1 routers
 from api.v1.properties import router as properties_router
@@ -51,6 +55,122 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ── Telegram initData middleware ────────────────────────
+# All API requests must come from the Telegram client.
+# The bot token is loaded from env (set in .env / Docker env_file).
+# Exempt: health check, OpenAPI docs.
+
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+
+# Endpoints that don't need Telegram validation
+EXEMPT_PATHS = {"/health", "/docs", "/redoc", "/openapi.json", "/favicon.ico"}
+
+
+@app.middleware("http")
+async def telegram_initdata_middleware(request: Request, call_next):
+    """Reject requests that do not carry valid Telegram WebApp initData.
+
+    The Telegram Mini App passes initData in the URL hash. Nginx forwards
+    it as the X-Telegram-Init-Data header. We verify the HMAC-SHA256
+    signature using the bot token as the secret key.
+    """
+    path = request.url.path
+
+    # Allow exempt paths through
+    if path in EXEMPT_PATHS or path.startswith("/api/community/") or path.startswith("/api/properties/"):
+        pass  # still check below for validate endpoints
+
+    # Health check is always open
+    if path == "/health":
+        return await call_next(request)
+
+    # Get initData from header (set by nginx) or query param
+    init_data = request.headers.get("X-Telegram-Init-Data", "")
+    if not init_data:
+        init_data = request.query_params.get("initData", "")
+    if not init_data:
+        # Try to get from Telegram-Init-Data (standard header name)
+        init_data = request.headers.get("Telegram-Init-Data", "")
+
+    # If no initData and not an exempt path, block
+    if not init_data:
+        # Allow non-sensitive endpoints through (blog, public pages)
+        if path.startswith("/blog") or path == "/sitemap.xml" or path == "/robots.txt":
+            return await call_next(request)
+        # Everything else (API) requires Telegram
+        return JSONResponse(
+            status_code=403,
+            content={"ok": False, "reason": "Telegram-only. Access via @usehonestly_bot"},
+        )
+
+    # Validate initData signature
+    if TELEGRAM_BOT_TOKEN and _validate_telegram_init_data(init_data):
+        return await call_next(request)
+    elif not TELEGRAM_BOT_TOKEN:
+        # No token configured = dev mode, pass through
+        return await call_next(request)
+    else:
+        return JSONResponse(
+            status_code=403,
+            content={"ok": False, "reason": "Invalid Telegram session"},
+        )
+
+
+def _validate_telegram_init_data(init_data: str) -> bool:
+    """Validate Telegram WebApp initData HMAC-SHA256 signature.
+
+    The initData string looks like:
+      query_id=...&auth_date=...&hash=...&user=...
+
+    Algorithm:
+      1. Extract the 'hash' field.
+      2. Sort remaining fields alphabetically.
+      3. Join with \\n into a data-check-string.
+      4. Compute HMAC-SHA256 of data-check-string using
+         HMAC-SHA256('WebAppData', bot_token) as the secret.
+      5. Compare computed hash == extracted hash (constant-time).
+    """
+    import urllib.parse
+
+    try:
+        params = urllib.parse.parse_qs(init_data, keep_blank_values=True)
+    except Exception:
+        return False
+
+    # Extract the hash
+    hash_values = params.pop("hash", None)
+    if not hash_values:
+        return False
+    received_hash = hash_values[0]
+
+    # Build data-check-string: all other fields sorted alphabetically
+    # Each field is key=value, joined by \\n
+    sorted_keys = sorted(params.keys())
+    data_check_parts = []
+    for key in sorted_keys:
+        # Take the last value for each key (like Telegram does)
+        val = params[key][-1]
+        data_check_parts.append(f"{key}={val}")
+    data_check_string = "\\n".join(data_check_parts)
+
+    # Compute secret: HMAC-SHA256("WebAppData", bot_token)
+    secret_key = hmac.new(
+        b"WebAppData",
+        TELEGRAM_BOT_TOKEN.encode("utf-8"),
+        hashlib.sha256,
+    ).digest()
+
+    # Compute expected hash
+    computed_hash = hmac.new(
+        secret_key,
+        data_check_string.encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+
+    # Constant-time compare
+    return hmac.compare_digest(computed_hash, received_hash)
+
 
 # ── Register routers ────────────────────────────────────
 app.include_router(properties_router, prefix="/api")
