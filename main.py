@@ -26,6 +26,7 @@ from fastapi.responses import JSONResponse
 from api.v1.properties import router as properties_router
 from api.v1.products import router as products_router
 from api.v1.community import router as community_router
+from api.v1.alerts import router as alerts_router
 
 # ── APScheduler (daily blog automation) ─────────────────
 HERE = Path(__file__).resolve().parent
@@ -176,6 +177,7 @@ def _validate_telegram_init_data(init_data: str) -> bool:
 app.include_router(properties_router, prefix="/api")
 app.include_router(products_router, prefix="/api")
 app.include_router(community_router, prefix="/api")
+app.include_router(alerts_router, prefix="/api")
 
 
 # ── Health check ────────────────────────────────────────
@@ -211,6 +213,30 @@ def run_daily_blog():
         log.warning("Daily blog generation timed out after 10 minutes")
     except Exception as exc:
         log.warning("Daily blog generation error: %s", exc)
+
+
+# ── Daily alert check job ───────────────────────────────
+def run_daily_alerts():
+    """Check all tracked properties for market momentum shifts > 2%.
+
+    Runs daily at 08:00 UTC via APScheduler. Enqueues Telegram
+    notifications for affected properties. Each notification link
+    drives the user back to the app, generating a returned_7_days
+    intent signal.
+    """
+    try:
+        from core.alerts_engine import check_daily_alerts
+        n = check_daily_alerts()
+        log.info("Daily alert check: %d alerts enqueued", n)
+
+        # Also dispatch any queued notifications
+        from core.alerts_engine import pop_and_send_notifications
+        sent = pop_and_send_notifications(batch_size=100)
+        if sent:
+            log.info("Daily alert check: %d notifications sent", sent)
+
+    except Exception as exc:
+        log.warning("Daily alert check error: %s", exc)
 
 
 # ── Scheduler lock (prevent duplicate workers) ──────────
@@ -283,8 +309,16 @@ def _init_blog_scheduler():
             replace_existing=True,
             name="Daily SEO Blog Generation",
         )
+        scheduler.add_job(
+            func=run_daily_alerts,
+            trigger=CronTrigger(hour=8, minute=0),
+            id="daily_alert_check",
+            replace_existing=True,
+            name="Daily Price Alert Check",
+        )
         scheduler.start()
         log.info("Daily blog scheduler started (02:00 UTC)")
+        log.info("Daily alert check scheduler started (08:00 UTC)")
 
         # Store on app state for graceful shutdown
         app.state.scheduler = scheduler

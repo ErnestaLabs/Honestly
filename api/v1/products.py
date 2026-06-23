@@ -170,6 +170,7 @@ def purchase_product(
       3. Balance check via DECRBY (atomic, no race)
       4. Execute the product engine
       5. If execution fails: INCRBY to refund (rollback)
+      6. Fire intent signal (upsell_purchased) in background
 
     Returns 402 if insufficient credits (server-side check).
     Returns 403 if tier access denied.
@@ -289,6 +290,9 @@ def purchase_product(
             "refunded_gbp": effective_cost_gbp,
         })
 
+    # ── Fire intent signal (fire-and-forget, background thread) ───
+    _fire_purchase_intent_signal(user_id, req.product_id, req.valuation_context)
+
     final_balance_pence = 0
     if redis_client:
         try:
@@ -305,6 +309,37 @@ def purchase_product(
         "discount_pct": discount_pct,
         "remaining_credits_gbp": round(final_balance_pence / 100, 2) if redis_client else None,
     }
+
+
+def _fire_purchase_intent_signal(user_id: str, product_id: str, ctx: dict):
+    """Fire an upsell_purchased intent signal in a background thread."""
+    postcode = ctx.get("postcode", "") or ""
+    if not postcode or not user_id:
+        return
+    try:
+        import threading
+        threading.Thread(
+            target=_do_log_purchase_signal,
+            args=(user_id, postcode, product_id),
+            daemon=True,
+        ).start()
+    except Exception as e:
+        log.debug("Failed to fire purchase intent signal: %s", e)
+
+
+def _do_log_purchase_signal(user_id: str, postcode: str, product_id: str):
+    """Actual Redis write for the purchase signal."""
+    try:
+        from core.intent_engine import log_intent_signal
+        log_intent_signal(
+            user_id=user_id,
+            postcode=postcode,
+            property_id=postcode,
+            signal_type="upsell_purchased",
+            metadata={"product_id": product_id},
+        )
+    except Exception:
+        pass
 
 
 # ──────────────────────────────────────────────────────────── create invoice endpoint

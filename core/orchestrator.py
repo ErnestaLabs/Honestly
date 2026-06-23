@@ -83,11 +83,35 @@ async def _run_valuation_async(
         except Exception as e:
             log.debug("Marketplace offers failed: %s", e)
 
-    # ── Step 5: Log intent signal (async, best-effort) ──────────────
+    # ── Step 5: Log intent signal (fire-and-forget) ───────────────
+    # Runs in a background thread so it never blocks the valuation response.
     postcode = avm_result.get("postcode", "")
     if postcode and user_id != "anonymous":
-        try:
-            from core.intent_engine import log_intent_signal
+        _fire_intent_signal(user_id, postcode, address)
+
+
+def _fire_intent_signal(user_id: str, postcode: str, address: str):
+    """Log a valuation_run intent signal in a background task.
+
+    Wrapped in asyncio.to_thread + create_task so it runs on the
+    thread pool without blocking the request handler.
+    """
+    try:
+        from core.intent_engine import log_intent_signal
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            asyncio.create_task(
+                asyncio.to_thread(
+                    log_intent_signal,
+                    user_id=user_id,
+                    postcode=postcode,
+                    property_id=postcode,
+                    signal_type="valuation_run",
+                    metadata={"address": address},
+                )
+            )
+        else:
+            # Fallback: synchronous call (shouldn't happen in prod)
             log_intent_signal(
                 user_id=user_id,
                 postcode=postcode,
@@ -95,8 +119,8 @@ async def _run_valuation_async(
                 signal_type="valuation_run",
                 metadata={"address": address},
             )
-        except Exception as e:
-            log.debug("Intent signal logging failed: %s", e)
+    except Exception as e:
+        log.debug("Intent signal fire failed: %s", e)
 
     elapsed = time.time() - t0
     log.info("Orchestrator completed for %s in %.1fs", address, elapsed)
