@@ -507,5 +507,48 @@ class TestCoefficientOfVariation(unittest.TestCase):
         self.assertAlmostEqual(cv, 0.2, places=2)
 
 
+class TestCompFilter(unittest.TestCase):
+    """Emergency fix: 91sqm comps must be rejected for a 67sqm subject."""
+
+    def test_rejects_oversized_comps(self):
+        """91 sqm comps are 35.8% larger than 67 sqm subject — hard reject via weight penalty."""
+        subject_sqm = 67.0
+        comps = [
+            {"address": "Near Flat A", "price": 725000, "date": "2026-02-01", "sqm": 65, "dist": 0.1, "ptype": "flat", "postcode": "E1 6AF"},
+            {"address": "Near Flat B", "price": 740000, "date": "2026-03-01", "sqm": 68, "dist": 0.1, "ptype": "flat", "postcode": "E1 6AG"},
+            {"address": "Near Flat C", "price": 750000, "date": "2026-01-15", "sqm": 70, "dist": 0.15, "ptype": "flat", "postcode": "E1 6AA"},
+            {"address": "Oversized A", "price": 830000, "date": "2025-09-10", "sqm": 91, "dist": 0.15, "ptype": "terraced_house", "postcode": "E1 6AC"},
+            {"address": "Oversized B", "price": 815000, "date": "2025-12-01", "sqm": 91, "dist": 0.2, "ptype": "terraced_house", "postcode": "E1 6AD"},
+            {"address": "Medium A", "price": 795000, "date": "2025-11-01", "sqm": 77, "dist": 0.1, "ptype": "terraced_house", "postcode": "E1 6AB"},
+        ]
+        v = UKQuantValuator(
+            subject_address="67sqm Test Flat, E1",
+            subject_sqm=subject_sqm,
+            subject_epc="C",
+            subject_last_sold_price=None,
+            subject_last_sold_date=None,
+            subject_lat=51.52,
+            subject_lng=-0.06,
+            strict_comps=comps,
+        )
+        prepared = v._prepare_comps()
+        # 91sqm comps (35.8% delta) should have ~70% weight penalty
+        for c in prepared:
+            sqm = c.get("sqm")
+            base_w = _weight(c["_dist_miles"], c["_months"])
+            if sqm == 91:
+                self.assertLess(c["_weight"], base_w * 0.5,
+                    f"91sqm comp weight {c['_weight']:.3f} should be < {base_w*0.5:.3f} (base {base_w:.3f})")
+            elif sqm == 77:
+                # 14.9% delta — mild penalty (0.7x)
+                self.assertAlmostEqual(c["_weight"], base_w * 0.7, 1,
+                    f"77sqm comp (14.9% delta) should have mild penalty")
+            elif sqm in (65, 68, 70):
+                # <10% delta — no penalty
+                self.assertAlmostEqual(c["_weight"], base_w, 1,
+                    f"{sqm}sqm comp should not be penalized")
+        print(f"  PASS: {len(prepared)} comps prepared, oversized comps penalized")
+
+
 if __name__ == "__main__":
     unittest.main()

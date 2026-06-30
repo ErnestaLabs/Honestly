@@ -935,24 +935,28 @@ def _finish_disclosure(sig, tier):
             f"number, with its source, never inside it.")
 
 def _wizard_steps(aud):
-    """The questions, in order. 'opts' = tap choices; 'num' = type a figure (skippable).
-    The single old 'condition' question is now the condition sub-survey (see above)."""
+    """The questions, in order. Beds/baths first (factual comp filter inputs),
+    then condition sub-survey, then audience-specific questions."""
     cond  = _condition_steps()
     inv   = {"field": "investment",
              "q": "Is this an <b>investment</b> property (not your main home)?",
              "opts": [("Yes", "1"), ("No", "0")]}
+    beds  = {"field": "beds", "num": True,
+             "q": "How many <b>bedrooms</b> does the property have? Type a number (e.g. <code>2</code>) or tap Skip."}
+    baths = {"field": "baths", "num": True,
+             "q": "How many <b>bathrooms</b>? Type a number (e.g. <code>1</code>) or tap Skip."}
     if aud == "vendor":
-        return [*cond, inv,
+        return [beds, baths, *cond, inv,
                 {"field": "quoted", "num": True,
                  "q": "Has an agent <b>quoted you a figure</b>? Type it "
                       "(e.g. <code>525000</code>) and I'll check it against the sold "
                       "evidence, or tap Skip."}]
     if aud == "buyer":
-        return [*cond,
+        return [beds, baths, *cond,
                 {"field": "asking", "num": True,
                  "q": "What's the <b>asking price</b>? Type it (e.g. <code>525000</code>) "
                       "and I'll show your headroom over the evidence, or tap Skip."}]
-    return [*cond, inv]          # agent
+    return [beds, baths, *cond, inv]          # agent
 
 def wizard_start(chat, uid):
     pend = PENDING.get(uid)

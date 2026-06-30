@@ -256,8 +256,16 @@ class UKQuantValuator:
             price = c.get("price", 0)
             sqm = c.get("sqm")
             psm = price / sqm if sqm and sqm > 0 else None
-            # Weight
+            # Weight with size penalty: comps at extreme size edge get heavily penalized
             w = _weight(dist, months)
+            # Size penalty: comps >10% size difference get progressive penalty
+            if self.subject_sqm and sqm and sqm > 0:
+                size_delta = abs(sqm - self.subject_sqm) / self.subject_sqm
+                if size_delta > 0.10:
+                    # 10-15% delta: mild penalty (0.7x)
+                    # 15%+ delta: heavy penalty (0.3x)
+                    size_penalty = 0.3 if size_delta > 0.15 else 0.7
+                    w *= size_penalty
 
             enriched = dict(c)
             enriched["_months"] = months

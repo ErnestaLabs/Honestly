@@ -203,13 +203,13 @@ _LITE_WINDOWS = (12, 24)
 _LITE_MIN_COMPS = 5
 _LITE_MIN_STRICT_COMPS = 5
 _LITE_BASE_RADIUS_M = 805       # ~0.5 miles ideal/default comparable radius
-_LITE_EXPANDED_RADIUS_M = 1609  # ~1 mile fallback only when 0.5mi/12mo has no usable same-type sales
+_LITE_EXPANDED_RADIUS_M = 1207  # ~0.75 miles absolute max (never 1 mile in dense urban areas)
 _LITE_MAX_COMP_RADIUS_M = 805
-_LITE_MAX_EXPANDED_COMP_RADIUS_M = 1609
+_LITE_MAX_EXPANDED_COMP_RADIUS_M = 1207
 _LITE_SIMILAR_PRICE_PCT = 0.30  # comparable must sit within +/-30% of the anchor price
-_LITE_AREA_TOLERANCE_STRICT = 0.20   # default: floor area within 20%
-_LITE_AREA_TOLERANCE_RELAXED = 0.35  # relaxed: when strict pool < 5 after first pass, area within 35%
-_LITE_AREA_TOLERANCE_WIDE = 0.50    # wide: last-resort rescue, area within 50%
+_LITE_AREA_TOLERANCE_STRICT = 0.15   # default: floor area within 15% (hard cap)
+_LITE_AREA_TOLERANCE_RELAXED = 0.20  # relaxed: when strict < 5, area within 20%
+_LITE_AREA_TOLERANCE_WIDE = 0.25    # wide: last-resort rescue, area within 25% (never exceed)
 # Recency as weight (never an HPI price move): a recent sale dictates the figure harder
 # than an older sale, but anything over 24 months is not valuation evidence.
 def _lite_weight(date_str):
@@ -1045,15 +1045,22 @@ def lite_value(address, beds=None, baths=1, finish="average", investment=False, 
                 out.append(s0)
         return out
 
-    # Pass 1: strict gate (6 months, 20% area, official area only)
+    # Pass 1: strict gate (6 months, 15% area, official area only)
     strict_comps = _strict_comparable_rows(used)
     if len(strict_comps) < _LITE_MIN_STRICT_COMPS:
         strict_recency_months = 12
         strict_recency_extended = True
         strict_recency_reason = "fewer than 5 strict comparables inside 6 months; extended to 12 months"
-        # Pass 2: extend recency to 12 months
         strict_comps = _strict_comparable_rows(used)
-    # Pass 3: expand radius to 1 mile and retry (if not already expanded)
+    # Pass 2: extend recency to 24 months before touching radius
+    if len(strict_comps) < _LITE_MIN_STRICT_COMPS and not strict_recency_extended:
+        strict_recency_months = 12
+        strict_recency_extended = True
+    if len(strict_comps) < _LITE_MIN_STRICT_COMPS:
+        strict_recency_months = 24
+        strict_recency_reason = "fewer than 5 strict comparables inside 12 months; extended to 24 months"
+        strict_comps = _strict_comparable_rows(used)
+    # Pass 3: expand radius to 0.75 miles (never 1 mile) as last resort
     if len(strict_comps) < _LITE_MIN_STRICT_COMPS and not radius_expanded:
         expanded_sales, expanded_pmap = _load_sales(_LITE_EXPANDED_RADIUS_M)
         expanded_sales, epc_source = _attach_epc_floor_areas(expanded_sales, expanded_pmap.keys())
@@ -1063,7 +1070,7 @@ def lite_value(address, beds=None, baths=1, finish="average", investment=False, 
             if sx.get("beds") is None and sx.get("sqm"):
                 sx["beds"] = _infer_beds_from_area(sx.get("pdtype") or pdtype, sx.get("sqm"))
                 sx["beds_source"] = "Honestly size/type inference"
-            area_ok = _area_match(subject_sqm, sx.get("sqm"), tolerance=0.20) if sx.get("floor_area_official") else False
+            area_ok = _area_match(subject_sqm, sx.get("sqm"), tolerance=0.15) if sx.get("floor_area_official") else False
             sx["area_match"] = area_ok if subject_sqm and sx.get("sqm") else None
             if subject_sqm and sx.get("sqm"):
                 sx["size_delta_pct"] = round((float(sx["sqm"]) - float(subject_sqm)) / float(subject_sqm) * 100, 1)
@@ -1071,8 +1078,8 @@ def lite_value(address, beds=None, baths=1, finish="average", investment=False, 
             used = expanded_used
             sales = expanded_sales
             radius_expanded = True
-            expansion_reason = "0.5-mile strict comparable gate returned fewer than 5; expanded to 1 mile and reapplied the same gates"
-            geography_label = "within up to 1 mile because the 0.5-mile strict comparable gate returned fewer than 5"
+            expansion_reason = "0.5-mile strict comparable gate returned fewer than 5 after extending to 24 months; expanded to 0.75 miles maximum"
+            geography_label = "within up to 0.75 miles because the 0.5-mile strict comparable gate returned fewer than 5 after 24-month window"
             same_size_official = _area_matches(used) if subject_sqm else []
             if same_size_official and not (seed_history_model or {}).get("central"):
                 price_anchor = statistics.median([sx["price"] for sx in same_size_official])
