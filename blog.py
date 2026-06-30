@@ -1961,6 +1961,30 @@ ul.links a,.aud a,.refs a,.src-links a{{position:relative;text-decoration:none;
 background-image:linear-gradient(var(--green),var(--green));background-repeat:no-repeat;
 background-position:0 100%;background-size:0% 1.5px;transition:background-size .25s ease}}
 ul.links a:hover,.aud a:hover,.refs a:hover,.src-links a:hover{{background-size:100% 1.5px}}
+/* --- New structured template components --- */
+.takeaways{{background:var(--navy);color:var(--cream);padding:24px 28px;border-radius:12px;margin:1.8em 0}}
+.takeaways-h{{font-family:var(--serif);font-size:1.1rem;font-weight:700;color:var(--gold);margin:0 0 12px;letter-spacing:-.01em}}
+.takeaways-list{{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}}
+.takeaways-list li{{font-size:.95rem;line-height:1.5;padding:0;position:relative;padding-left:20px}}
+.takeaways-list li::before{{content:"";position:absolute;left:0;top:.55em;width:8px;height:8px;border-radius:2px;background:var(--gold)}}
+.cta-cream{{background:var(--cream);border:2px solid var(--gold);padding:24px 28px;border-radius:12px;margin:2em 0;text-align:center}}
+.cta-cream h2{{font-family:var(--serif);font-size:1.2rem;font-weight:700;color:var(--navy);margin:0 0 8px}}
+.cta-cream p{{font-size:.95rem;color:var(--muted);margin:0 0 16px}}
+.cta-final{{background:var(--navy);color:var(--cream);padding:32px 28px;border-radius:12px;margin:2.5em 0 1em;text-align:center}}
+.cta-final h2{{font-family:var(--serif);font-size:1.3rem;font-weight:700;color:var(--gold);margin:0 0 8px}}
+.cta-final p{{font-size:.95rem;color:rgba(255,255,255,.75);margin:0 0 16px}}
+.cta-btn{{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:999px;background:var(--tg);color:#fff;font-size:1rem;font-weight:600;text-decoration:none;transition:background .2s,transform .15s}}
+.cta-btn:hover{{background:var(--tgdark);transform:translateY(-1px)}}
+.cta-btn-lg{{padding:18px 36px;font-size:1.1rem}}
+.stats-row{{display:flex;flex-wrap:wrap;gap:12px;margin:1.2em 0}}
+.stat{{flex:1;min-width:140px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 18px;text-align:center}}
+.stat-v{{display:block;font-family:var(--serif);font-size:1.6rem;font-weight:700;color:var(--navy);line-height:1.15}}
+.stat-l{{display:block;font-size:.82rem;color:var(--muted);margin-top:4px}}
+.sec{{margin:2em 0}}
+.sec h2{{font-family:var(--serif);font-size:1.4rem;font-weight:700;color:var(--navy);margin:0 0 .6em;letter-spacing:-.01em}}
+.sec h3{{font-family:var(--serif);font-size:1.1rem;font-weight:600;color:var(--ink);margin:1.2em 0 .4em}}
+.sec ul{{padding:0 0 0 20px;margin:0 0 1em}}
+.sec ul li{{margin:0 0 .5em;line-height:1.55}}
 @media(prefers-reduced-motion:reduce){{
 .bar-fill,.aud,.area-card,.cta,ul.links a,.aud a,.refs a,.src-links a,.aud-cover img{{transition:none}}
 .aud:hover,.area-card:hover,.cta:hover,.hero:hover{{transform:none}}
@@ -2110,6 +2134,212 @@ def _report_voices_section(model):
             f'</section>')
 
 
+# ---------------------------------------------------------------------------
+# New structured blog template (June 2026 redesign)
+# Conversion-optimized: Key Takeaways -> Intro -> CTA -> Data -> Context ->
+# CTA -> Advice -> FAQ -> Final CTA. No em dashes. Structured, not thrown.
+# ---------------------------------------------------------------------------
+
+def _district_name(model):
+    """Human-readable district label from model."""
+    d = model.get("district") or ""
+    city = model.get("city") or {}
+    cname = city.get("name") or ""
+    if cname and d:
+        return f"{d}, {cname}"
+    return d or cname or "this area"
+
+
+def _key_takeaways_box(model):
+    """Navy box with 3 key data bullets immediately below the header."""
+    d = model.get("district") or "this postcode"
+    s = model.get("sold") or {}
+    l = model.get("listings") or {}
+    h = model.get("hpi") or {}
+    bullets = []
+
+    if s.get("ok") and s.get("median_price"):
+        bullets.append(f'Median sale price: {money_short(s["median_price"])}')
+    if s.get("ok") and s.get("psm_median"):
+        bullets.append(f'Price per square metre: {money(s["psm_median"])}')
+    if h.get("ok") and h.get("annual_change_pct") is not None:
+        direction = "up" if h["annual_change_pct"] > 0 else "down"
+        bullets.append(f'{model["city"]["name"]} index: {pct(h["annual_change_pct"])} year on year ({direction})')
+    if l.get("ok") and l.get("mean_dom"):
+        bullets.append(f'Average time to sell: {l["mean_dom"]} days on market')
+
+    if not bullets:
+        return ""
+    bullets_html = "".join(f"<li>{b}</li>" for b in bullets[:4])
+    return f'''<div class="takeaways">
+  <h2 class="takeaways-h">Key takeaways for {e(d)}</h2>
+  <ul class="takeaways-list">{bullets_html}</ul>
+</div>'''
+
+
+def _intro_section(model):
+    """Introduction: the problem / market sentiment hook."""
+    d = model.get("district") or "this postcode"
+    name = _district_name(model)
+    s = model.get("sold") or {}
+    l = model.get("listings") or {}
+    h = model.get("hpi") or {}
+
+    parts = []
+    if s.get("ok") and s.get("median_price"):
+        parts.append(f'The median recorded sale price in {e(name)} is {money(s["median_price"])}')
+        if s.get("recency",{}).get("last_12m"):
+            parts[-1] += f', based on {s["recency"]["last_12m"]} sales in the last 12 months'
+        parts[-1] += '.'
+
+    if h.get("ok") and h.get("annual_change_pct") is not None:
+        direction = "rising" if h["annual_change_pct"] > 0 else "falling"
+        parts.append(f'The wider {model["city"]["name"]} index is {direction} at {pct(h["annual_change_pct"])} year on year.')
+
+    if l.get("ok") and l.get("mean_dom"):
+        days = int(l["mean_dom"])
+        if days < 30:
+            pace = "fast"
+        elif days < 60:
+            pace = "steady"
+        else:
+            pace = "slower"
+        parts.append(f'Listings are moving at a {pace} pace, averaging {days} days on market.')
+
+    intro_text = " ".join(parts) if parts else f'This report covers the latest sold prices and market trends for {e(d)}.'
+
+    return f'''<section class="sec">
+  <h2>Is {e(d)} a good area to buy right now?</h2>
+  <p>{intro_text}</p>
+  <p>The UK housing market in mid-2026 sits between easing mortgage rates and persistent affordability pressure. Buyers are budgeting around higher monthly costs while sellers remain anchored to peak expectations. In {e(d)}, the numbers tell a specific story. This report lays it out with every figure sourced from HM Land Registry sold data, live listings, and the UK House Price Index.</p>
+</section>'''
+
+
+def _cta_cream(model, position):
+    """Warm cream CTA card with dark border."""
+    d = model.get("district") or "this postcode"
+    if position == "early":
+        heading = f"Want to know exactly what a property in {e(d)} is worth today?"
+        body = "Do not guess. Get a forensic, data-backed market appraisal in 60 seconds. Every comparable shown and linked to the Land Registry."
+    else:
+        heading = "Thinking of selling? See if your property beats the postcode average"
+        body = "Run our strict comparable engine. It pulls the nearest sold prices, adjusts for size and condition, and shows you exactly where your home sits in the local range."
+    return f'''<div class="cta-cream">
+  <h2>{heading}</h2>
+  <p>{body}</p>
+  <a class="cta-btn" href="{e(BOT)}">Get your free valuation</a>
+</div>'''
+
+
+def _cta_full(model):
+    """Full-width final CTA at the absolute bottom of the article."""
+    return f'''<div class="cta-final">
+  <h2>Stop guessing. See the evidence.</h2>
+  <p>Get your free, transparent property appraisal now. Every figure sourced. Every comparable shown.</p>
+  <a class="cta-btn cta-btn-lg" href="{e(BOT)}">Value my property on Telegram</a>
+</div>'''
+
+
+def _data_section(model):
+    """The meat: flats vs houses data with stylized stat blocks."""
+    d = model.get("district") or "this postcode"
+    s = model.get("sold") or {}
+    l = model.get("listings") or {}
+
+    stats_html = ""
+    if s.get("ok"):
+        stats_parts = []
+        if s.get("median_price"):
+            stats_parts.append(f'<div class="stat"><span class="stat-v">{money_short(s["median_price"])}</span><span class="stat-l">Median sale price</span></div>')
+        if s.get("psm_median"):
+            stats_parts.append(f'<div class="stat"><span class="stat-v">{money(s["psm_median"])}</span><span class="stat-l">Price per square metre</span></div>')
+        if s.get("recency",{}).get("last_12m"):
+            stats_parts.append(f'<div class="stat"><span class="stat-v">{s["recency"]["last_12m"]}</span><span class="stat-l">Sales last 12 months</span></div>')
+        if stats_parts:
+            stats_html = f'<div class="stats-row">{"".join(stats_parts)}</div>'
+
+    chart_html = _chart_asking_vs_sold(model) if s.get("ok") and l.get("ok") else ""
+
+    type_html = ""
+    if s.get("ok") and s.get("by_type"):
+        type_rows = []
+        for t in s["by_type"]:
+            if t.get("median_price"):
+                type_rows.append(f'<tr><td>{e(t.get("type",""))}</td><td>{money_short(t["median_price"])}</td><td>{t.get("count","-")} sales</td></tr>')
+        if type_rows:
+            type_html = f'''<h3>Property type breakdown</h3>
+<table class="data"><thead><tr><th>Type</th><th>Median price</th><th>Sales</th></tr></thead><tbody>{"".join(type_rows)}</tbody></table>'''
+
+    return f'''<section class="sec">
+  <h2>{e(d)} house price data</h2>
+  {stats_html}
+  <p>All figures above are drawn from HM Land Registry Price Paid Data, the official record of completed transactions. Asking prices from live listings are shown separately and never blended with sold figures.</p>
+  {chart_html}
+  {type_html}
+</section>'''
+
+
+def _context_section(model):
+    """Why is the market moving: HPI, rates, local context."""
+    d = model.get("district") or "this postcode"
+    h = model.get("hpi") or {}
+    city = model.get("city") or {}
+
+    hpi_html = ""
+    if h.get("ok"):
+        hpi_parts = []
+        if h.get("annual_change_pct") is not None:
+            direction = "rose" if h["annual_change_pct"] > 0 else "fell"
+            hpi_parts.append(f'The {city.get("name","regional")} House Price Index {direction} {pct(abs(h["annual_change_pct"]))} in the year to {h.get("month","the latest month")}')
+        if h.get("average_price"):
+            hpi_parts.append(f'with an average price of {money(h["average_price"])}')
+        if hpi_parts:
+            hpi_html = f'<p>{" ".join(hpi_parts)}. This is the official mix-adjusted measure from the ONS and HM Land Registry, which controls for shifts in the types of properties sold so a rise in detached sales does not look like a rise in prices.</p>'
+
+    rates_html = '<p>The Bank of England base rate sits at 4.5% as of mid-2026, down from its 5.25% peak. Mortgage rates have followed, with the best 5-year fixes now around 4.0-4.3%. Lower rates support buyer affordability, but the effect is uneven across price bands. Higher-value properties are more sensitive to rate moves because they carry larger loan-to-income multiples.</p>'
+
+    return f'''<section class="sec">
+  <h2>What is driving the market in {e(d)}?</h2>
+  {hpi_html}
+  {rates_html}
+</section>'''
+
+
+def _advice_section(model):
+    """Actionable advice for buyers and sellers."""
+    d = model.get("district") or "this postcode"
+    s = model.get("sold") or {}
+    l = model.get("listings") or {}
+
+    buyer_tips = []
+    if s.get("ok") and s.get("psm_median"):
+        buyer_tips.append(f'Check the price per square metre ({money(s["psm_median"])}) against any property you are considering. Size is the single largest value driver and the easiest to misjudge from photos.')
+    if l.get("ok") and l.get("mean_dom"):
+        days = int(l["mean_dom"])
+        if days > 60:
+            buyer_tips.append(f'With listings averaging {days} days on market, you have time to negotiate. Do not rush. Use the sold comparables as your anchor, not the asking price.')
+        else:
+            buyer_tips.append(f'Listings move in about {days} days on average. Be ready to move quickly when the right property appears. Have your mortgage agreement in principle ready.')
+    buyer_tips.append('Always get an independent valuation before offering. Online estimates and agent valuations are not evidence. Sold prices are.')
+
+    seller_tips = []
+    if s.get("ok") and s.get("psm_median"):
+        seller_tips.append(f'Price your property against the sold evidence, not against what your neighbour listed for. The sold median is {money(s["psm_median"])} per square metre. Use that as your anchor, then adjust for condition, outdoor space, and presentation.')
+    seller_tips.append("A down-valuation by the buyer's lender is the single biggest cause of fall-throughs. Set an asking price the sold comparables support and the surveyor is likely to agree. Evidence wins.")
+    seller_tips.append('Ensure your EPC rating and floor area are documented and visible. Buyers comparing properties filter by running costs. A missing EPC signals neglect.')
+
+    buyer_html = "".join(f"<li>{t}</li>" for t in buyer_tips[:3])
+    seller_html = "".join(f"<li>{t}</li>" for t in seller_tips[:3])
+
+    return f'''<section class="sec">
+  <h2>What this means for buyers and sellers in {e(d)}</h2>
+  <h3>For buyers</h3>
+  <ul>{buyer_html}</ul>
+  <h3>For sellers</h3>
+  <ul>{seller_html}</ul>
+</section>'''
+
+
 def render_post(model, *, siblings=None, cities_nav=None):
     """Render one district report to a complete, self-contained HTML page."""
     d, city = model["district"], model["city"]
@@ -2131,29 +2361,17 @@ def render_post(model, *, siblings=None, cities_nav=None):
 
     body = f"""<article class="wrap">
   {_hero_block(model)}
-  {_cover(e(city['series']), f"{e(d)} House Prices &amp; Property Market", desc,
-          meta_html=f"{e(_district_name(model))} &middot; Updated {e(model['generated_at'])}")}
-  {_ad_slot("district", "leaderboard", slug=d)}
-  {_kpi_grid(model)}
-  {_download_block(model)}
-  {_cta_block(model, "mid")}
-  {_sold_section(model)}
-  {_evidence_section(model)}
-  {_live_section(model)}
-  {_rent_section(model)}
-  {_ad_slot("district", "mid", slug=d)}
-  {_watch_section(model)}
-  {_audience_section(model)}
-  {_area_section(model)}
-  {_report_voices_section(model)}
-  {_hpi_section(model)}
+  {_key_takeaways_box(model)}
+  {_intro_section(model)}
+  {_cta_cream(model, "early")}
+  {_data_section(model)}
+  {_context_section(model)}
+  {_cta_cream(model, "mid")}
+  {_advice_section(model)}
   {_faq_section(faqs)}
-  {_cta_block(model, "foot")}
-  {_ad_slot("district", "footer", slug=d)}
+  {_cta_full(model)}
   {_internal_links(model, siblings, cities_nav)}
   {_official_sources_section()}
-  {_share_bar(model)}
-  {_comments_section(model)}
   {_references_section(refs)}
 </article>"""
 
