@@ -2682,13 +2682,14 @@ def _study_jsonld(study, faqs):
 def _study_faqs(study):
     a = study["agg"]
     faqs = []
+    ds, df = a.get("dom_slowest") or {}, a.get("dom_fastest") or {}
     faqs.append((
         "Which UK city centre is slowest to sell a flat?",
         f"Of the {a['n_districts']} city-centre districts tracked, "
-        f"{a['dom_slowest']['city']} {a['dom_slowest']['district']} is slowest at "
-        f"{a['dom_slowest']['mean_dom']} days on the market on average, while "
-        f"{a['dom_fastest']['city']} {a['dom_fastest']['district']} is fastest at "
-        f"{a['dom_fastest']['mean_dom']} days."))
+        f"{ds.get('city','N/A')} {ds.get('district','')} is slowest at "
+        f"{ds.get('mean_dom','N/A')} days on the market on average, while "
+        f"{df.get('city','N/A')} {df.get('district','')} is fastest at "
+        f"{df.get('mean_dom','N/A')} days."))
     faqs.append((
         "Why do asking prices sit below sold prices in some city centres?",
         f"In {a['neg_gap_count']} of {a['n_districts']} districts the median asking price is "
@@ -2773,7 +2774,7 @@ def render_study(study, *, cities_nav=None, hero=None):
     refs = study.get("references") or []
     jsonld = _study_jsonld(study, faqs)
 
-    ds, st = a["dom_slowest"], a.get("stuck_top")
+    ds, df, st = a.get("dom_slowest") or {}, a.get("dom_fastest") or {}, a.get("stuck_top") or {}
     body = f"""<article class="wrap">
   {_hero_figure(hero)}
   <header class="report-head">
@@ -2815,9 +2816,9 @@ def render_study(study, *, cities_nav=None, hero=None):
   </section>
 
   <section id="dom"><h2>1. How long a city-centre flat takes to sell</h2>
-  <p>As of {brand.DATESTR}, the spread is stark. {e(ds['city'])} {e(ds['district'])} averages
-  {ds['mean_dom']} days on the market; {e(a['dom_fastest']['city'])}
-  {e(a['dom_fastest']['district'])} turns over in {a['dom_fastest']['mean_dom']}. Time on
+  <p>As of {brand.DATESTR}, the spread is stark. {e(ds.get('city','N/A'))} {e(ds.get('district',''))} averages
+  {ds.get('mean_dom','N/A')} days on the market; {e(df.get('city','N/A'))}
+  {e(df.get('district',''))} turns over in {df.get('mean_dom','N/A')}. Time on
   market is the cleanest read on liquidity - how quickly a realistic asking price finds a
   buyer.</p>
   {dom_tbl}</section>
