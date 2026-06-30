@@ -858,86 +858,45 @@ def _parse_money(s):
         return None
     return v if 1000 <= v <= 100_000_000 else (v if v == 0 else None)
 
-# --- condition sub-survey -------------------------------------------------------
-# Two same-size homes are NOT worth the same: one with marble bathrooms and a stone
-# kitchen sits above a plain neighbour. We refuse to flatten that into a single tap.
-# Instead we ask a few quick condition signals and DERIVE the finish tier from them.
-# The derived tier is the ONLY condition input that moves the figure, and it moves it
-# exactly through the engine's existing finish_quality path (appraise.valuation queries
-# the AVM at average/high/very_high, and discounts below that for needs_modernising /
-# needs_renovation). No new multiplier, fully traceable, and disclosed back to the user.
-FINISH_TIERS = ("needs_renovation", "needs_modernising", "average", "high", "very_high")
+# --- condition input (realistic, single-question) --------------------------------
+# The market sets the ceiling. Condition discounts tired properties; it never
+# pushes a refurbished home above the comp median. Over-renovation does not print money.
+CONDITION_TIERS = {
+    1: {"label": "Tired / Unmodernised", "finish": "needs_modernising", "adjustment": -0.05},
+    2: {"label": "Standard / Lived-in",    "finish": "average",           "adjustment": 0.0},
+    3: {"label": "Newly Refurbished",      "finish": "high",              "adjustment": 0.0},
+}
 
-def _condition_steps():
-    """The condition sub-survey: overall state (the floor) plus three quality signals
-    that lift a liveable home up the finish ladder. Values are small integers we score."""
-    return [
-        {"field": "c_state", "q": "Overall, what <b>condition</b> is it in?",
-         "opts": [("Needs full renovation", "0"), ("Dated, needs work", "1"),
-                  ("Average, liveable", "2"), ("Well presented", "3"),
-                  ("Refurbished throughout", "4")]},
-        {"field": "c_kitchen", "q": "The <b>kitchen</b>?",
-         "opts": [("Original / basic", "0"), ("Modern, mid-range", "1"),
-                  ("High-end (stone tops, integrated)", "2")]},
-        {"field": "c_bath", "q": "The <b>bathrooms</b>?",
-         "opts": [("Dated", "0"), ("Modern, mid-range", "1"),
-                  ("Luxury (marble / stone, underfloor)", "2")]},
-        {"field": "c_premium",
-         "q": "Any <b>premium materials</b> - marble, hardwood, bespoke joinery?",
-         "opts": [("Standard throughout", "0"), ("Some premium", "1"),
-                  ("Premium throughout", "2")]},
-    ]
-
-_FINISH_LABEL = {"needs_renovation": "FULL-RENOVATION", "needs_modernising": "NEEDS-MODERNISING",
-                 "average": "AVERAGE", "high": "HIGH-SPEC", "very_high": "PREMIUM"}
-
-def derive_finish(ans):
-    """Map the condition signals to one of the engine's five finish tiers, deterministically.
-
-    state 0/1 floor the home at needs_renovation / needs_modernising regardless of fittings
-    (you do not get high-spec credit for a gut job). From 'liveable' up, what lifts the tier
-    is GENUINELY high-end elements (a kitchen/bathroom/materials answer of 'high-end' or
+def _condition_step():
+    """Single condition question: 1 = Tired, 2 = Standard, 3 = Refurbished."""
+    return {"field": "condition_tier",
+            "q": "How would you rate the <b>condition</b>?",
+            "opts": [(CONDITION_TIERS[1]["label"], "1"),
+                     (CONDITION_TIERS[2]["label"], "2"),
+                     (CONDITION_TIERS[3]["label"], "3")]}
     'luxury' = 2), not merely modern ones: two or more high-end elements -> very_high, one ->
-    high, none -> average (mid-range fittings are what an average home already has). A full
-    refurbishment is at least high spec. Returns (tier, disclosure_or_None). An explicit
-    finish already on the answers (landing handoff, direct pick) is respected untouched -
-    this only derives when the sub-survey was actually used."""
-    if ans.get("finish") in FINISH_TIERS:
-        return ans["finish"], None
-    sig = {k: ans.get(k) for k in ("c_state", "c_kitchen", "c_bath", "c_premium")}
-    if all(v is None for v in sig.values()):
-        return "average", None                       # no signals -> safe, unmoved default
-    state = sig["c_state"] if sig["c_state"] is not None else 2
-    if state <= 1:
-        tier = "needs_renovation" if state == 0 else "needs_modernising"
+def _condition_result(ans):
+    """Map the single condition_tier answer to finish and disclosure.
+    Tier 1 (Tired): -5% adjustment, finish=needs_modernising
+    Tier 2 (Standard): no adjustment, finish=average
+    Tier 3 (Refurbished): no adjustment, finish=high, tighter upper bound"""
+    tier = int(ans.get("condition_tier") or 2)
+    if tier not in CONDITION_TIERS:
+        tier = 2
+    info = CONDITION_TIERS[tier]
+    adj = info["adjustment"]
+    label = info["label"]
+    if adj < 0:
+        disc = f"Tired condition: applying {int(abs(adj)*100)}% discount to valuation. Unmodernised homes sell below the comp median."
+    elif tier == 3:
+        disc = "Refurbished condition: central value anchored at the comp median (renovation does not push above market evidence). Upper range tightened."
     else:
-        high_end = sum(1 for f in ("c_kitchen", "c_bath", "c_premium") if sig.get(f) == 2)
-        tier = "very_high" if high_end >= 2 else ("high" if high_end == 1 else "average")
-        if state == 4 and tier == "average":         # a full refurbishment is at least high
-            tier = "high"
-    return tier, _finish_disclosure(sig, tier)
-
-def _finish_disclosure(sig, tier):
-    """Plain-English line naming the signals that set the tier, and stating - truthfully -
-    that this is the one condition input that moves the figure."""
-    bits = []
-    if sig.get("c_kitchen") == 2: bits.append("a high-end kitchen")
-    if sig.get("c_bath") == 2:    bits.append("luxury bathrooms")
-    if sig.get("c_premium") == 2: bits.append("premium materials throughout")
-    elif sig.get("c_premium") == 1: bits.append("some premium materials")
-    if sig.get("c_state") == 4:   bits.append("a full refurbishment")
-    elif sig.get("c_state") == 0: bits.append("a full renovation needed")
-    elif sig.get("c_state") == 1: bits.append("dated finishes")
-    detail = f" ({', '.join(bits)})" if bits else ""
-    return (f"📐 Condition read{detail}: valuing this at the <b>{_FINISH_LABEL[tier]}</b> "
-            f"finish tier. That is the one condition input that moves your figure - it "
-            f"prices the model at that finish level. Everything else sits beside the "
-            f"number, with its source, never inside it.")
+        disc = "Standard condition: central value is the comp median. No adjustment."
+    return info["finish"], disc
 
 def _wizard_steps(aud):
-    """The questions, in order. Beds/baths first (factual comp filter inputs),
-    then condition sub-survey, then audience-specific questions."""
-    cond  = _condition_steps()
+    """The questions, in order. Beds/baths first, then condition, then audience-specific."""
+    cond  = _condition_step()
     inv   = {"field": "investment",
              "q": "Is this an <b>investment</b> property (not your main home)?",
              "opts": [("Yes", "1"), ("No", "0")]}
@@ -946,17 +905,17 @@ def _wizard_steps(aud):
     baths = {"field": "baths", "num": True,
              "q": "How many <b>bathrooms</b>? Type a number (e.g. <code>1</code>) or tap Skip."}
     if aud == "vendor":
-        return [beds, baths, *cond, inv,
+        return [beds, baths, cond, inv,
                 {"field": "quoted", "num": True,
                  "q": "Has an agent <b>quoted you a figure</b>? Type it "
                       "(e.g. <code>525000</code>) and I'll check it against the sold "
                       "evidence, or tap Skip."}]
     if aud == "buyer":
-        return [beds, baths, *cond,
+        return [beds, baths, cond,
                 {"field": "asking", "num": True,
                  "q": "What's the <b>asking price</b>? Type it (e.g. <code>525000</code>) "
                       "and I'll show your headroom over the evidence, or tap Skip."}]
-    return [beds, baths, *cond, inv]          # agent
+    return [beds, baths, cond, inv]          # agent
 
 def wizard_start(chat, uid):
     pend = PENDING.get(uid)
@@ -1001,11 +960,9 @@ def _store_answer(uid, field, raw):
     elif field in ("beds", "baths"):
         try: ans[field] = int(raw)
         except ValueError: pass
-    elif field in ("c_state", "c_kitchen", "c_bath", "c_premium"):
+    elif field == "condition_tier":
         try: ans[field] = int(raw)
         except ValueError: pass
-    elif field == "finish":                          # direct pick / landing handoff
-        if raw in FINISH_TIERS: ans[field] = raw
     elif field == "investment":
         ans[field] = (raw == "1")
     elif field in ("asking", "quoted", "deposit", "income"):
@@ -1026,7 +983,7 @@ def _wizard_finish(chat, uid):
     pend.pop("await", None)
     aud = pend["audience"]
     ans = pend.get("answers", {})
-    tier, disclosure = derive_finish(ans)            # condition signals -> one finish tier
+    tier, disclosure = _condition_result(ans)       # single condition tier -> finish + disclosure
     ans["finish"] = tier
     if disclosure:
         say(chat, disclosure)                        # glass box: show why, before we value

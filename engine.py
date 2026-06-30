@@ -437,26 +437,24 @@ _HISTORY_FINISH_FACTORS = {
 
 
 def _lite_finish_prices(raw_med, raw_q1, raw_q3, finish):
-    """Condition-adjust Lite prices without pretending condition is a public fact.
+    """Condition-adjust Lite prices. The market sets the ceiling.
 
-    The user-provided condition signal moves the range. Average uses the raw comparable
-    centre. High finish lifts the median toward the upper evidence. Very-high uses the
-    upper evidence as the anchor. This mirrors the Cronin appraisal logic without using
-    the subject's old sale as a comp.
+    Standard/average: central is the comp median. No adjustment.
+    Refurbished/high: central stays at median. Upper range tightened (+5% max)
+      because a premium finish ensures the property hits the top of the band.
+    Tired/unmodernised: discount applied. Central drops 5% below median.
+    Renovation does not print money. Over-renovation does not push above comps.
     """
     f = (finish or "average").strip().lower()
     raw_q1 = raw_q1 if raw_q1 is not None else raw_med * 0.92
     raw_q3 = raw_q3 if raw_q3 is not None else raw_med * 1.08
-    if f == "needs_renovation":
+    if f in ("needs_renovation",):
         low, central, high = raw_q1 * 0.88, raw_med * 0.90, raw_med * 0.98
-    elif f == "needs_modernising":
-        low, central, high = raw_q1 * 0.94, raw_med * 0.96, raw_q3
-    elif f == "high":
-        low = raw_med * 1.05
-        high = max(raw_q3, raw_med * 1.14)
-        central = (low + high) / 2
-    elif f == "very_high":
-        low, central, high = raw_med * 1.08, max(raw_q3, raw_med * 1.16), max(raw_q3 * 1.04, raw_med * 1.22)
+    elif f in ("needs_modernising",):
+        low, central, high = raw_q1 * 0.94, raw_med * 0.95, raw_q3
+    elif f in ("high", "very_high"):
+        # Refurbished: central stays at comp median. Upper bound tightened.
+        low, central, high = raw_q1, raw_med, min(raw_q3, raw_med * 1.05)
     else:
         low, central, high = raw_q1, raw_med, raw_q3
     return low, central, high

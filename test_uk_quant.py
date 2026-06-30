@@ -550,5 +550,25 @@ class TestCompFilter(unittest.TestCase):
         print(f"  PASS: {len(prepared)} comps prepared, oversized comps penalized")
 
 
+class TestConditionRealism(unittest.TestCase):
+    """Condition never pushes central value above the comp median."""
+
+    def test_refurbished_does_not_exceed_median(self):
+        from engine import _lite_finish_prices
+        raw_med, raw_q1, raw_q3 = 500000, 460000, 540000
+        # Standard: central = median
+        _, central_std, _ = _lite_finish_prices(raw_med, raw_q1, raw_q3, "average")
+        self.assertEqual(central_std, raw_med)
+        # Refurbished: central = median (same as standard)
+        _, central_high, high_upper = _lite_finish_prices(raw_med, raw_q1, raw_q3, "high")
+        self.assertEqual(central_high, raw_med, "Refurbished must not push central above comp median")
+        # Refurbished: upper bound tightened
+        self.assertLess(high_upper, raw_q3, "Refurbished upper bound should be tighter than raw Q3")
+        # Tired: discount applied
+        _, central_tired, _ = _lite_finish_prices(raw_med, raw_q1, raw_q3, "needs_modernising")
+        self.assertLess(central_tired, raw_med, "Tired condition must discount below median")
+        print(f"  PASS: std={central_std}, refurb={central_high} (upper={high_upper}), tired={central_tired}")
+
+
 if __name__ == "__main__":
     unittest.main()
