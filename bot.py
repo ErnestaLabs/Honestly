@@ -977,7 +977,15 @@ def _ask_step(chat, uid):
     head = f"<i>Question {i+1} of {len(steps)}</i>\n"
     if step.get("num"):
         pend["await"] = step["field"]
-        kb = [[{"text": "Skip", "callback_data": f"q:{step['field']}:skip"}]]
+        # Number buttons for tap-friendly input (beds 1-5, baths 1-3, else keyboard)
+        if step["field"] == "beds":
+            btns = [{"text": str(n), "callback_data": f"q:beds:{n}"} for n in range(1, 6)]
+        elif step["field"] == "baths":
+            btns = [{"text": str(n), "callback_data": f"q:baths:{n}"} for n in range(1, 4)]
+        else:
+            btns = []
+        btns.append({"text": "Skip", "callback_data": f"q:{step['field']}:skip"})
+        kb = [btns[i:i+3] for i in range(0, len(btns), 3)]
         return say(chat, head + step["q"], keyboard=kb)
     pend.pop("await", None)
     btns = [{"text": lab, "callback_data": f"q:{step['field']}:{val}"} for lab, val in step["opts"]]
