@@ -2697,12 +2697,13 @@ def _study_faqs(study):
         f"market today is smaller and cheaper than the trailing two years of completed sales, "
         f"so the two medians measure different homes. Asking prices are vendor expectation, not "
         f"evidence of value."))
+    pt, pb = a.get("psm_top") or {}, a.get("psm_bottom") or {}
     faqs.append((
         "What is the most expensive UK city centre per square metre?",
-        f"{a['psm_top']['city']} {a['psm_top']['district']} is the most expensive at "
-        f"{money(a['psm_top']['psm_median'])} per square metre of recorded sales; "
-        f"{a['psm_bottom']['city']} {a['psm_bottom']['district']} is the most affordable at "
-        f"{money(a['psm_bottom']['psm_median'])} per square metre."))
+        f"{pt.get('city','N/A')} {pt.get('district','')} is the most expensive at "
+        f"{money(pt.get('psm_median',0))} per square metre of recorded sales; "
+        f"{pb.get('city','N/A')} {pb.get('district','')} is the most affordable at "
+        f"{money(pb.get('psm_median',0))} per square metre."))
     faqs.append((
         "Where does this data come from?",
         f"Sold prices and price per square metre are {_study_authorities(study)} data, the "
@@ -2841,10 +2842,10 @@ def render_study(study, *, cities_nav=None, hero=None):
 
   <section id="psm"><h2>4. Price per square metre, city by city</h2>
   <p>Headline prices mislead because they mix flat sizes. Price per square metre is the honest
-  cross-city comparison. It runs from {money(a['psm_top']['psm_median'])}/m² in
-  {e(a['psm_top']['city'])} {e(a['psm_top']['district'])} to
-  {money(a['psm_bottom']['psm_median'])}/m² in {e(a['psm_bottom']['city'])}
-  {e(a['psm_bottom']['district'])} - roughly {a['psm_spread_x']} times.</p>
+  cross-city comparison. It runs from {money((pt or {}).get('psm_median',0))}/m² in
+  {e((pt or {}).get('city','N/A'))} {e((pt or {}).get('district',''))} to
+  {money((pb or {}).get('psm_median',0))}/m² in {e((pb or {}).get('city','N/A'))}
+  {e((pb or {}).get('district',''))} - roughly {a['psm_spread_x']} times.</p>
   {psm_tbl}</section>
 
   {_ad_slot("study", "mid")}
