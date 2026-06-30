@@ -1392,14 +1392,14 @@ def _jsonld(model, faqs, refs):
 
 # ----------------------------------------------------------------- page shell
 def _fonts():
-    """The report type system: Georgia (a system serif, no web font needed) for headings and
-    figures - exactly what report.py (Times) and appraise.interactive_chart (Georgia) use - and
-    Inter for body text, the clean sans proxy for the PDF's Helvetica. Fraunces is gone: it was
-    the display serif that read as a SaaS landing, not a research-house appraisal."""
+    """The report type system: Fraunces for headings (brand serif, matching the landing page)
+    and Inter for body text, the clean sans proxy for the PDF's Helvetica."""
     return ('<link rel="preconnect" href="https://fonts.googleapis.com">'
             '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
             '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?'
-            'family=Inter:wght@400;500;600;700&display=swap">')
+            'family=Inter:wght@400;500;600;700&'
+            'family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500;1,9..144,600&'
+            'display=swap">')
 
 
 _CN_PIN = ('<svg class="cn-pin" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">'
@@ -1522,7 +1522,7 @@ def _css():
 --gold:{H['gold']};--cream:{H['cream']};--paper:{H['paper']};--ink:{H['ink']};
 --muted:{H['muted']};--line:{H['line']};--pale:{H['pale']};--sand:{H['sand']};
 --tg:#229ED9;--tgdark:#1b88bd;
---serif:Georgia,"Times New Roman","Iowan Old Style",serif;
+--serif:"Fraunces",Georgia,"Times New Roman","Iowan Old Style",serif;
 --sans:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
 --glass:rgba(255,255,255,.72);--glassln:rgba(255,255,255,.9)}}
 *{{box-sizing:border-box}}
