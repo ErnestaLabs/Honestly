@@ -94,8 +94,7 @@
     /* --- /design-review quick wins --- */
     /* FONT-001: body font stack with Inter (not system-ui) */
     .font-sans, body { font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-    /* RESP-001: responsive hero heading with clamp */
-    h1.font-display { font-size: clamp(2.25rem, 6vw, 5.4rem) !important; }
+    /* RESP-001: responsive hero heading — Tailwind breakpoints already handle this */
     /* SLOP-001: subdue aurora blobs */
     .aurora-blob { opacity: 0.35 !important; }
     @media (prefers-reduced-motion: reduce) { .aurora-blob, .hero-aurora::before, .hero-aurora::after { animation: none !important; } }
@@ -130,6 +129,13 @@
     }
     .seal::before {
       content: ""; position: absolute; inset: 4px; border: 1px solid var(--gold); border-radius: 9999px; opacity: 0.55;
+    }
+
+    /* Redact door number in sample report — blurs the specific house number */
+    .redact {
+      filter: blur(5px); -webkit-filter: blur(5px);
+      user-select: none; -webkit-user-select: none; pointer-events: none;
+      letter-spacing: 0.04em;
     }
 
     .data-bar { background: linear-gradient(180deg, #2a8a72, var(--dark)); }
@@ -243,6 +249,24 @@
       display: inline-block; background: var(--green); color: var(--cream);
       font-size: 9px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase;
       padding: 3px 9px; border-radius: 999px; margin-bottom: 0.6rem;
+    }
+
+    /* Mobile comparison cards — all four competitors visible at once, no scroll */
+    .cmp-mobile { display: none; }
+    @media (max-width: 639px) {
+      .cmp-wrap { display: none; }
+      .cmp-mobile { display: flex; flex-direction: column; gap: 10px; }
+      .cmp-mcard {
+        display: grid; grid-template-columns: 1fr auto auto auto auto auto;
+        align-items: center; gap: 6px; padding: 12px 14px;
+        border-radius: 12px; background: var(--paper);
+        border: 1px solid var(--line); font-size: 12px;
+      }
+      .cmp-mcard.feat-m { background: rgba(21,128,127,0.07); border-color: var(--green); box-shadow: inset 2px 0 0 var(--green); }
+      .cmp-mcard .mc-name { font-family: "Fraunces", Georgia, serif; font-size: 13px; font-weight: 600; color: var(--dark); white-space: nowrap; }
+      .cmp-mcard .mc-sub { font-size: 10px; color: var(--muted); }
+      .cmp-mcard .mc-icon { display: flex; justify-content: center; font-size: 16px; }
+      .cmp-mcard .mc-label { font-size: 9px; color: var(--muted); text-align: center; line-height: 1.1; }
     }
 
     /* ============================================================
@@ -812,7 +836,7 @@
 
               <div class="mt-4 flex items-baseline justify-between gap-3">
                 <div>
-                  <div class="font-display text-[0.95rem] font-medium text-dark">24 Wolves Lane, London N22</div>
+                  <div class="font-display text-[0.95rem] font-medium text-dark"><span class="redact" aria-hidden="true">24</span> Wolves Lane, London N22</div>
                   <div class="mt-0.5 text-[11px] font-medium text-muted">Ref. HN-024 &middot; vendor view</div>
                 </div>
                 <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-green text-cream">
@@ -1013,7 +1037,7 @@
               <span class="inline-flex items-center gap-1.5"><iconify-icon icon="solar:link-bold" class="text-base text-terra"></iconify-icon> Every figure traceable to its source</span>
             </div>
             <p class="mt-6 max-w-sm text-[13px] font-medium leading-relaxed text-cream/45">
-              Worked on the sample report - 24 Wolves Lane, N22.
+              Worked on the sample report - <span class="redact" aria-hidden="true">24</span> Wolves Lane, N22.
             </p>
           </div>
 
@@ -1321,6 +1345,60 @@
           </table>
         </div>
 
+        <!-- Mobile: stacked comparison cards — all competitors visible at once -->
+        <div class="cmp-mobile mt-6 reveal rd-1">
+          <!-- Honestly (featured) -->
+          <div class="cmp-mcard feat-m">
+            <div><span class="mc-name">Honestly</span><br><span class="mc-sub">on Telegram</span></div>
+            <div class="mc-icon cmp-yes"><iconify-icon icon="solar:check-circle-bold" role="img" aria-label="Yes"></iconify-icon></div>
+            <div class="mc-icon cmp-yes"><iconify-icon icon="solar:check-circle-bold" role="img" aria-label="Yes"></iconify-icon></div>
+            <div class="mc-icon cmp-yes"><iconify-icon icon="solar:check-circle-bold" role="img" aria-label="Yes"></iconify-icon></div>
+            <div class="mc-icon cmp-yes"><iconify-icon icon="solar:check-circle-bold" role="img" aria-label="Yes"></iconify-icon></div>
+            <div class="mc-icon cmp-yes"><iconify-icon icon="solar:check-circle-bold" role="img" aria-label="Yes"></iconify-icon></div>
+            <div class="mc-icon cmp-yes"><iconify-icon icon="solar:check-circle-bold" role="img" aria-label="Yes"></iconify-icon></div>
+          </div>
+          <!-- Online estimate -->
+          <div class="cmp-mcard">
+            <div><span class="mc-name">Zoopla</span><br><span class="mc-sub">Rightmove</span></div>
+            <div class="mc-icon cmp-yes"><iconify-icon icon="solar:check-circle-bold" role="img" aria-label="Yes"></iconify-icon></div>
+            <div class="mc-icon cmp-no"><iconify-icon icon="solar:close-circle-linear" role="img" aria-label="No"></iconify-icon></div>
+            <div class="mc-icon cmp-yes"><iconify-icon icon="solar:check-circle-bold" role="img" aria-label="Yes"></iconify-icon></div>
+            <div class="mc-icon cmp-yes"><iconify-icon icon="solar:check-circle-bold" role="img" aria-label="Yes"></iconify-icon></div>
+            <div class="mc-icon cmp-yes"><iconify-icon icon="solar:check-circle-bold" role="img" aria-label="Yes"></iconify-icon></div>
+            <div class="mc-icon cmp-part"><iconify-icon icon="solar:minus-circle-linear" role="img" aria-label="Partly"></iconify-icon></div>
+          </div>
+          <!-- Estate agent -->
+          <div class="cmp-mcard">
+            <div><span class="mc-name">Estate agent</span><br><span class="mc-sub">free valuation</span></div>
+            <div class="mc-icon cmp-part"><iconify-icon icon="solar:minus-circle-linear" role="img" aria-label="Partly"></iconify-icon></div>
+            <div class="mc-icon cmp-no"><iconify-icon icon="solar:close-circle-linear" role="img" aria-label="No"></iconify-icon></div>
+            <div class="mc-icon cmp-no"><iconify-icon icon="solar:close-circle-linear" role="img" aria-label="No"></iconify-icon></div>
+            <div class="mc-icon cmp-yes"><iconify-icon icon="solar:check-circle-bold" role="img" aria-label="Yes"></iconify-icon></div>
+            <div class="mc-icon cmp-no"><iconify-icon icon="solar:close-circle-linear" role="img" aria-label="No"></iconify-icon></div>
+            <div class="mc-icon cmp-no"><iconify-icon icon="solar:close-circle-linear" role="img" aria-label="No"></iconify-icon></div>
+          </div>
+          <!-- Pro tools -->
+          <div class="cmp-mcard">
+            <div><span class="mc-name">Hometrack</span><br><span class="mc-sub">Sprift</span></div>
+            <div class="mc-icon cmp-yes"><iconify-icon icon="solar:check-circle-bold" role="img" aria-label="Yes"></iconify-icon></div>
+            <div class="mc-icon cmp-yes"><iconify-icon icon="solar:check-circle-bold" role="img" aria-label="Yes"></iconify-icon></div>
+            <div class="mc-icon cmp-yes"><iconify-icon icon="solar:check-circle-bold" role="img" aria-label="Yes"></iconify-icon></div>
+            <div class="mc-icon cmp-no"><iconify-icon icon="solar:close-circle-linear" role="img" aria-label="No"></iconify-icon></div>
+            <div class="mc-icon cmp-yes"><iconify-icon icon="solar:check-circle-bold" role="img" aria-label="Yes"></iconify-icon></div>
+            <div class="mc-icon cmp-no"><iconify-icon icon="solar:close-circle-linear" role="img" aria-label="No"></iconify-icon></div>
+          </div>
+          <!-- Column labels -->
+          <div class="cmp-mcard" style="background:transparent;border-color:transparent;grid-template-columns:1fr auto auto auto auto auto;">
+            <div class="mc-label" style="font-weight:600;color:var(--ink);font-size:10px;">Feature</div>
+            <div class="mc-label">Sold<br>data</div>
+            <div class="mc-label">See<br>evidence</div>
+            <div class="mc-label">No<br>inflation</div>
+            <div class="mc-label">Free<br>first</div>
+            <div class="mc-label">~60<br>seconds</div>
+            <div class="mc-label">No<br>account</div>
+          </div>
+        </div>
+
         <p class="reveal rd-2 mt-6 text-[12px] font-medium leading-relaxed text-muted">
           Comparison reflects the standard, publicly available version of each option. Sold-price data throughout is HM Land Registry.
         </p>
@@ -1532,7 +1610,7 @@
           Give me an address and tell me who you are. I'll run it through the sold evidence and show you exactly how I got there - your first valuation is free.
         </div>
         <div class="fld mb-4">
-          <input id="hermes-address" type="text" autocomplete="off" placeholder="e.g. 24 Wolves Lane, London N22" />
+          <input id="hermes-address" type="text" autocomplete="off" placeholder="e.g. Wolves Lane, London N22" />
           <label for="hermes-address">Property address</label>
         </div>
         <div class="label mb-1.5 text-[9px] text-green">I am a</div>
@@ -1754,7 +1832,7 @@
     (function () {
       var term = document.getElementById("engineTerm");
       if (!term) return;
-      var cmd = 'honestly appraise "24 Wolves Lane, N22"';
+      var cmd = 'honestly appraise "Wolves Lane, N22"';
       var typeEl = term.querySelector(".t-type");
       var lines = Array.prototype.slice.call(term.querySelectorAll(".t-line[data-t]"))
         .filter(function (l) { return l.getAttribute("data-t") !== "cmd"; });
