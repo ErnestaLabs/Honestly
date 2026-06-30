@@ -1398,7 +1398,7 @@ def _fonts():
             '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
             '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?'
             'family=Inter:wght@400;500;600;700&'
-            'family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500;1,9..144,600&'
+            'family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,600&'
             'display=swap">')
 
 
@@ -1706,7 +1706,7 @@ animation:glow-drift 38s ease-in-out infinite}}
 .rh-body{{position:relative;z-index:2}}
 .kicker{{font-size:.74rem;font-weight:700;letter-spacing:1.7px;text-transform:uppercase;
 color:var(--green);margin:0 0 .6em}}
-h1{{font-family:var(--serif);font-optical-sizing:auto;font-weight:600;font-size:2.7rem;
+h1{{font-family:var(--serif);font-optical-sizing:auto;font-weight:700;font-size:2.7rem;
 line-height:1.07;letter-spacing:-.012em;color:var(--navy);margin:0 0 .3em}}
 .dateline{{font-size:.84rem;font-weight:500;color:var(--muted);margin:0 0 1.2em;
 border-bottom:1px solid var(--line);padding-bottom:1.1em;letter-spacing:.2px}}
@@ -1730,14 +1730,14 @@ color:var(--muted);margin-top:6px}}
 .hub-range{{font-size:1.04rem;color:#2b2925;margin:.2em 0 1.6em}}
 .hub-range strong{{color:var(--navy);font-weight:600}}
 
-h2{{font-family:var(--serif);font-optical-sizing:auto;font-weight:600;
+h2{{font-family:var(--serif);font-optical-sizing:auto;font-weight:700;
 font-size:1.62rem;line-height:1.2;letter-spacing:-.015em;color:var(--navy);
 margin:2.7em 0 .7em;padding-top:1.4em;border-top:1px solid var(--line);position:relative}}
 /* report.py idiom: a short green accent rule sitting on the section hairline */
 h2::before{{content:"";position:absolute;top:-1px;left:0;width:48px;height:3px;
 background:var(--green);border-radius:2px}}
 h2 .pulse-dot{{vertical-align:middle;margin-right:.5em}}
-h3{{font-family:var(--serif);font-optical-sizing:auto;font-weight:600;font-size:1.2rem;
+h3{{font-family:var(--serif);font-optical-sizing:auto;font-weight:700;font-size:1.2rem;
 color:var(--navy);margin:1.5em 0 .4em}}
 .meta{{color:var(--muted);font-size:.88rem;margin:.2em 0 1.2em}}
 .answer{{font-family:var(--sans);font-size:1.16rem;line-height:1.62;
