@@ -1,5 +1,5 @@
 [Unit]
-Description=Honestly daily blog publish (one district per UK city)
+Description=Honestly blog batch publish (3 passes per cycle, 24 articles total)
 After=network-online.target
 Wants=network-online.target
 
@@ -7,8 +7,6 @@ Wants=network-online.target
 Type=oneshot
 WorkingDirectory=/opt/honestly
 EnvironmentFile=/opt/honestly/.env
-# Publishes one new district per city, persists each model+HTML to the DB, and rebuilds
-# the hubs/index/sitemap/feed. Idempotent for the day: re-running just advances the rotation.
-ExecStart=/usr/bin/python3 /opt/honestly/publish_daily.py
+ExecStart=/bin/bash /opt/honestly/deploy/honestly-batch-publish.sh
 StandardOutput=append:/var/log/honestly-blog.log
 StandardError=append:/var/log/honestly-blog.log
