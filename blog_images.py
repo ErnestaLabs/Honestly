@@ -525,6 +525,7 @@ BRAND = {
 }
 
 CHART_DIR = Path(__file__).resolve().parent / 'site' / 'img' / 'charts'
+CHART_WEB_PREFIX = '/img/charts/'
 CHART_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -626,12 +627,12 @@ def attach_charts(model):
     if s.get('ok') and s.get('median_price') and l.get('ok') and l.get('asking_median'):
         p = chart_asking_vs_sold(slug, district, s['median_price'], l['asking_median'])
         if p:
-            charts['asking_vs_sold'] = '/' + str(Path(p).relative_to(CHART_DIR.parent))
+            charts['asking_vs_sold'] = CHART_WEB_PREFIX + Path(p).name
 
     if s.get('ok') and s.get('by_type'):
         p = chart_sold_by_type(slug, district, s['by_type'])
         if p:
-            charts['sold_by_type'] = '/' + str(Path(p).relative_to(CHART_DIR.parent))
+            charts['sold_by_type'] = CHART_WEB_PREFIX + Path(p).name
 
     if charts:
         model['charts'] = charts

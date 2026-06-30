@@ -1938,6 +1938,9 @@ animation:pulse-ring 1.9s cubic-bezier(.4,0,.2,1) infinite}}
 backdrop-filter:blur(12px) saturate(1.06);border:1px solid var(--glassln);border-radius:12px;
 padding:20px 22px 18px}}
 .chart-cap{{font-family:var(--serif);font-weight:600;font-size:1.05rem;color:var(--navy);margin:0 0 1em}}
+.chart-img{{margin:1.7em 0;border-radius:10px;overflow:hidden}}
+.chart-img img{{width:100%;height:auto;display:block;border-radius:10px}}
+.chart-img .chart-cap{{font-size:.92rem;color:var(--muted);margin:.6em 0 0;text-align:center}}
 .bars{{display:flex;flex-direction:column;gap:13px}}
 .bar-row{{display:grid;grid-template-columns:minmax(120px,200px) 1fr auto;align-items:center;gap:14px}}
 .bar-label{{font-size:.86rem;font-weight:600;color:var(--ink);display:flex;
