@@ -2743,7 +2743,7 @@ def render_study(study, *, cities_nav=None, hero=None):
 
     # the four league tables
     dom_tbl = _study_table(
-        study["by_dom_slowest"],
+        study.get("by_dom_slowest",[]),
         [("City centre", _study_place_cell),
          ("Avg days on market", lambda r: str(r["mean_dom"])),
          ("Sold median", lambda r: money(r["sold_median"])),
@@ -2764,7 +2764,7 @@ def render_study(study, *, cities_nav=None, hero=None):
          ("Avg days on market", lambda r: str(r["mean_dom"]) if r.get("mean_dom") is not None else "-")],
         "Share of available stock listed 90+ days")
     psm_tbl = _study_table(
-        study["by_psm"],
+        study.get("by_psm",[]),
         [("City centre", _study_place_cell),
          ("Price per m²", lambda r: money(r["psm_median"])),
          ("Sold median", lambda r: money(r["sold_median"])),
@@ -2776,6 +2776,7 @@ def render_study(study, *, cities_nav=None, hero=None):
     jsonld = _study_jsonld(study, faqs)
 
     ds, df, st = a.get("dom_slowest") or {}, a.get("dom_fastest") or {}, a.get("stuck_top") or {}
+    pt, pb = a.get("psm_top") or {}, a.get("psm_bottom") or {}
     body = f"""<article class="wrap">
   {_hero_figure(hero)}
   <header class="report-head">
@@ -2842,10 +2843,10 @@ def render_study(study, *, cities_nav=None, hero=None):
 
   <section id="psm"><h2>4. Price per square metre, city by city</h2>
   <p>Headline prices mislead because they mix flat sizes. Price per square metre is the honest
-  cross-city comparison. It runs from {money((pt or {}).get('psm_median',0))}/m² in
-  {e((pt or {}).get('city','N/A'))} {e((pt or {}).get('district',''))} to
-  {money((pb or {}).get('psm_median',0))}/m² in {e((pb or {}).get('city','N/A'))}
-  {e((pb or {}).get('district',''))} - roughly {a['psm_spread_x']} times.</p>
+  cross-city comparison. It runs from {money(pt.get('psm_median',0))}/m² in
+  {e(pt.get('city','N/A'))} {e(pt.get('district',''))} to
+  {money(pb.get('psm_median',0))}/m² in {e(pb.get('city','N/A'))}
+  {e(pb.get('district',''))} - roughly {a['psm_spread_x']} times.</p>
   {psm_tbl}</section>
 
   {_ad_slot("study", "mid")}
