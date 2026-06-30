@@ -1,10 +1,17 @@
 [Unit]
-Description=Run the Honestly daily blog publish every morning
+Description=Run the Honestly blog publish every 3 hours (8 refreshes/day, full district rotation)
 
 [Timer]
-# 07:07 local every day (off the :00 mark so it doesn't stampede shared APIs at once).
+# Every 3 hours starting at 01:07 UTC (off the :00 mark to avoid API stampedes).
+# 8 cycles/day × 8 cities = 64 refreshes/day across 94 districts = full cycle in ~1.5 days.
+OnCalendar=*-*-* 01:07:00
+OnCalendar=*-*-* 04:07:00
 OnCalendar=*-*-* 07:07:00
-# If the box was off at 07:07, run as soon as it next boots so a day is never skipped.
+OnCalendar=*-*-* 10:07:00
+OnCalendar=*-*-* 13:07:00
+OnCalendar=*-*-* 16:07:00
+OnCalendar=*-*-* 19:07:00
+OnCalendar=*-*-* 22:07:00
 Persistent=true
 
 [Install]
