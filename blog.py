@@ -2723,14 +2723,16 @@ def render_study(study, *, cities_nav=None, hero=None):
     canonical = SITE + _study_url(study)
     title = "UK City-Centre Property Index | Honestly"
     gap_word = _gap_word(a["median_asking_gap_pct"])
+    slowest_info = a.get('dom_slowest') or {}
+    fastest_info = a.get('dom_fastest') or {}
     tldr = (
         f"As of {brand.DATESTR}, across {a['n_districts']} city-centre postcode districts in "
         f"{a['n_cities']} UK cities, the typical city-centre flat takes about "
         f"{a['median_mean_dom']} days to sell and is listed {gap_word} the local sold median of "
-        f"{money(a['median_sold_median'])}. The slowest centre, {a['dom_slowest']['city']} "
-        f"{a['dom_slowest']['district']}, averages {a['dom_slowest']['mean_dom']} days - about "
-        f"{a['dom_spread_x']} times the fastest, {a['dom_fastest']['city']} "
-        f"{a['dom_fastest']['district']} at {a['dom_fastest']['mean_dom']} days. Sold prices are "
+        f"{money(a['median_sold_median'])}. The slowest centre, {slowest_info.get('city','N/A')} "
+        f"{slowest_info.get('district','')}, averages {slowest_info.get('mean_dom','N/A')} days - about "
+        f"{a['dom_spread_x']} times the fastest, {fastest_info.get('city','N/A')} "
+        f"{fastest_info.get('district','')} at {fastest_info.get('mean_dom','N/A')} days. Sold prices are "
         f"{_study_authorities(study)} records; asking prices are live listings, reported side by "
         f"side.")
     desc_meta = e(tldr[:157] + ("..." if len(tldr) > 157 else ""))
