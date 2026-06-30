@@ -237,11 +237,17 @@ class UKQuantValuator:
     # ─────────────────────────────────────────────── step 0: prepare comps
 
     def _prepare_comps(self) -> list[dict]:
-        """Enrich each comp with derived fields needed by the pipeline."""
+        """Enrich and FILTER comps. Hard-rejects comps outside 15% size tolerance."""
         import datetime as _dt
         today = _dt.date.today()
         out = []
         for c in self.strict_comps:
+            sqm = c.get("sqm")
+            # Hard reject: comps more than 15% different in size from subject
+            if self.subject_sqm and sqm and sqm > 0:
+                size_delta = abs(sqm - self.subject_sqm) / self.subject_sqm
+                if size_delta > 0.15:
+                    continue
             # Months since sale
             try:
                 sale_date = _dt.date.fromisoformat(str(c.get("date", ""))[:10])
@@ -251,21 +257,17 @@ class UKQuantValuator:
             # Distance in miles
             dist = c.get("dist")
             if dist is None:
-                dist = 0.5  # conservative default
+                dist = 0.5
             # £/sqm
             price = c.get("price", 0)
-            sqm = c.get("sqm")
             psm = price / sqm if sqm and sqm > 0 else None
-            # Weight with size penalty: comps at extreme size edge get heavily penalized
+            # Weight: distance and recency only (size filtering is done above)
             w = _weight(dist, months)
-            # Size penalty: comps >10% size difference get progressive penalty
+            # Mild penalty for comps at 10-15% size edge
             if self.subject_sqm and sqm and sqm > 0:
                 size_delta = abs(sqm - self.subject_sqm) / self.subject_sqm
-                if size_delta > 0.10:
-                    # 10-15% delta: mild penalty (0.7x)
-                    # 15%+ delta: heavy penalty (0.3x)
-                    size_penalty = 0.3 if size_delta > 0.15 else 0.7
-                    w *= size_penalty
+                if 0.10 < size_delta <= 0.15:
+                    w *= 0.7  # mild penalty for edge comps
 
             enriched = dict(c)
             enriched["_months"] = months
