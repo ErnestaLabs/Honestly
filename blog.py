@@ -2279,12 +2279,14 @@ def _data_section(model):
     # Charts: prefer generated PNG images, fall back to CSS bars
     charts = model.get("charts") or {}
     chart_html = ""
-    if charts.get("asking_vs_sold"):
-        chart_html += f'<figure class="chart-img"><img src="{e(charts["asking_vs_sold"])}" alt="Asking vs sold prices in {e(d)}" loading="lazy"><figcaption class="chart-cap">Figure: Asking vs sold median prices in {e(d)}. Source: HM Land Registry Price Paid Data and live listings.</figcaption></figure>'
-    else:
-        chart_html = _chart_asking_vs_sold(model) if s.get("ok") and l.get("ok") else ""
     if charts.get("sold_by_type"):
-        chart_html += f'<figure class="chart-img"><img src="{e(charts["sold_by_type"])}" alt="Sold prices by property type in {e(d)}" loading="lazy"><figcaption class="chart-cap">Figure: Sold price by property type in {e(d)}. Source: HM Land Registry Price Paid Data.</figcaption></figure>'
+        chart_html += f'<figure class="chart-img"><img src="{e(charts["sold_by_type"])}" alt="Sold prices by property type in {e(d)}" loading="lazy" width="750" height="400"></figure>'
+    if charts.get("sales_volume"):
+        chart_html += f'<figure class="chart-img"><img src="{e(charts["sales_volume"])}" alt="Sales volume by property type in {e(d)}" loading="lazy" width="750" height="320"></figure>'
+    if charts.get("price_trend"):
+        chart_html += f'<figure class="chart-img"><img src="{e(charts["price_trend"])}" alt="Price trend in {e(d)}" loading="lazy" width="750" height="350"></figure>'
+    if not chart_html:
+        chart_html = _chart_asking_vs_sold(model) if s.get("ok") and l.get("ok") else ""
 
     # Description
     rec = s.get("recency", {})

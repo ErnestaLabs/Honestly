@@ -509,7 +509,7 @@ if __name__ == "__main__":
 
 
 # ---------------------------------------------------------------------------
-# Chart generation (matplotlib) -- real PNG graphs for blog articles
+# Chart generation (matplotlib) -- Bloomberg-quality branded charts
 # ---------------------------------------------------------------------------
 import matplotlib
 matplotlib.use('Agg')
@@ -518,122 +518,189 @@ import matplotlib.ticker as mticker
 from pathlib import Path
 
 # Brand colours
-BRAND = {
+CLR = {
     'navy': '#0e2747', 'green': '#15807f', 'gold': '#d89a32',
-    'cream': '#f6f3ec', 'ink': '#1c1a16', 'muted': '#6b6557',
-    'terra': '#2aa39a', 'tg': '#229ED9'
+    'cream': '#f6f3ec', 'ink': '#1c1a16', 'muted': '#8a8475',
+    'terra': '#2aa39a', 'tg': '#229ED9', 'line': '#e7e1d4',
+    'paper': '#fbf9f4', 'red': '#c0392b'
 }
+
+# Bloomberg-style matplotlib rc
+plt.rcParams.update({
+    'font.family': 'sans-serif',
+    'font.sans-serif': ['DejaVu Sans', 'Arial', 'Helvetica'],
+    'font.serif': ['DejaVu Serif', 'Georgia', 'Times New Roman'],
+    'axes.titlesize': 14,
+    'axes.titleweight': 'bold',
+    'axes.labelsize': 10,
+    'axes.labelcolor': CLR['muted'],
+    'xtick.labelsize': 9,
+    'ytick.labelsize': 9,
+    'xtick.color': CLR['muted'],
+    'ytick.color': CLR['muted'],
+    'axes.edgecolor': CLR['line'],
+    'axes.grid': True,
+    'grid.alpha': 0.4,
+    'grid.color': CLR['line'],
+    'grid.linewidth': 0.5,
+})
 
 CHART_DIR = Path(__file__).resolve().parent / 'site' / 'img' / 'charts'
 CHART_WEB_PREFIX = '/img/charts/'
 CHART_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def money_fmt(x, pos=None):
-    """Format axis values as money: 350000 -> 350k."""
-    if x >= 1_000_000:
-        return f'{x/1_000_000:.1f}M'
-    if x >= 1_000:
-        return f'{x/1_000:.0f}k'
-    return str(int(x))
+def _money(x, pos=None):
+    if x >= 1_000_000: return f'£{x/1_000_000:.1f}M'
+    if x >= 1_000: return f'£{x/1_000:.0f}k'
+    return f'£{int(x):,}'
 
 
-def chart_asking_vs_sold(slug, district, sold_median, asking_median):
-    """Generate a branded bar chart comparing sold vs asking median prices."""
-    path = CHART_DIR / f'{slug}-asking-vs-sold.png'
-    if path.exists():
-        return str(path)
-
-    fig, ax = plt.subplots(figsize=(7, 3.5))
-    fig.patch.set_facecolor(BRAND['cream'])
-    ax.set_facecolor(BRAND['cream'])
-
-    labels = ['Sold median', 'Asking median']
-    values = [sold_median, asking_median]
-    colors = [BRAND['green'], BRAND['gold']]
-
-    bars = ax.bar(labels, values, color=colors, width=0.5, edgecolor='none')
-    for bar, val in zip(bars, values):
-        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + max(values)*0.02,
-                f'£{val:,.0f}', ha='center', va='bottom', fontsize=10, fontweight='bold',
-                color=BRAND['ink'], fontfamily='sans-serif')
-
-    ax.yaxis.set_major_formatter(mticker.FuncFormatter(money_fmt))
-    ax.set_ylabel('Price', fontsize=9, color=BRAND['muted'])
-    ax.set_title(f'Asking vs Sold in {district}', fontsize=13, fontweight='bold',
-                 color=BRAND['navy'], pad=10, fontfamily='serif')
+def _bloomberg_figure(figsize=(8, 4.5)):
+    """Create a clean Bloomberg-style figure with cream background."""
+    fig, ax = plt.subplots(figsize=figsize)
+    fig.patch.set_facecolor(CLR['paper'])
+    ax.set_facecolor(CLR['paper'])
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_color(BRAND['muted'])
-    ax.spines['bottom'].set_color(BRAND['muted'])
-    ax.tick_params(colors=BRAND['muted'], labelsize=9)
-    fig.text(0.5, -0.02, 'Source: HM Land Registry Price Paid Data | Asking: live listings',
-             ha='center', fontsize=7, color=BRAND['muted'], fontstyle='italic')
-    plt.tight_layout()
-    fig.savefig(path, dpi=150, bbox_inches='tight', facecolor=BRAND['cream'])
-    plt.close(fig)
-    return str(path)
+    ax.spines['left'].set_color(CLR['line'])
+    ax.spines['bottom'].set_color(CLR['line'])
+    ax.tick_params(length=0)
+    return fig, ax
+
+
+def _source_line(fig, text):
+    fig.text(0.08, 0.01, text, fontsize=7, color=CLR['muted'], fontstyle='italic',
+             fontfamily='sans-serif')
 
 
 def chart_sold_by_type(slug, district, by_type):
-    """Generate a horizontal bar chart of sold prices by property type."""
+    """Horizontal bar: median sold price by property type."""
     if not by_type or len(by_type) < 2:
         return None
     path = CHART_DIR / f'{slug}-sold-by-type.png'
     if path.exists():
         return str(path)
 
-    labels = [bt['label'] for bt in by_type if bt.get('median')]
-    values = [bt['median'] for bt in by_type if bt.get('median')]
-    if len(labels) < 2:
+    items = [(bt['label'], bt['median'], bt.get('n', 0)) for bt in by_type if bt.get('median')]
+    if len(items) < 2:
         return None
+    items.sort(key=lambda x: x[1])
+    labels = [f'{l}  ' for l, v, n in items]
+    values = [v for l, v, n in items]
+    counts = [n for l, v, n in items]
 
-    fig, ax = plt.subplots(figsize=(7, len(labels)*0.6 + 1.5))
-    fig.patch.set_facecolor(BRAND['cream'])
-    ax.set_facecolor(BRAND['cream'])
+    fig, ax = _bloomberg_figure(figsize=(7.5, len(labels)*0.55 + 1.8))
+    colors = [CLR['green'] if i == len(labels)-1 else CLR['terra'] if i == len(labels)-2
+              else CLR['tg'] for i in range(len(labels))]
 
-    colors = [BRAND['green']] + [BRAND['terra']] + [BRAND['tg']] * (len(labels) - 2)
-    bars = ax.barh(labels, values, color=colors[:len(labels)], height=0.5, edgecolor='none')
+    bars = ax.barh(labels, values, color=colors, height=0.55, zorder=3)
+    for bar, val, cnt in zip(bars, values, counts):
+        ax.text(bar.get_width() + max(values)*0.015, bar.get_y() + bar.get_height()/2,
+                f'£{val:,.0f}  ({cnt} sales)', va='center', fontsize=9.5, fontweight='bold',
+                color=CLR['ink'])
+
+    ax.xaxis.set_major_formatter(mticker.FuncFormatter(_money))
+    ax.set_xlim(0, max(values)*1.35)
+    ax.set_title(f'{district}: Sold Price by Property Type', fontsize=13, fontweight='bold',
+                 color=CLR['navy'], pad=12, loc='left')
+    _source_line(fig, 'Source: HM Land Registry Price Paid Data')
+    plt.tight_layout(rect=[0, 0.04, 1, 0.97])
+    fig.savefig(path, dpi=180, bbox_inches='tight', facecolor=CLR['paper'])
+    plt.close(fig)
+    return str(path)
+
+
+def chart_sales_volume(slug, district, by_type):
+    """Vertical bar: number of sales by property type."""
+    if not by_type or len(by_type) < 2:
+        return None
+    path = CHART_DIR / f'{slug}-sales-volume.png'
+    if path.exists():
+        return str(path)
+
+    items = [(bt['label'], bt.get('n', 0)) for bt in by_type if bt.get('n')]
+    if len(items) < 2:
+        return None
+    items.sort(key=lambda x: x[1], reverse=True)
+    labels = [l for l, n in items]
+    values = [n for l, n in items]
+
+    fig, ax = _bloomberg_figure(figsize=(7.5, 3.2))
+    colors = [CLR['green'], CLR['terra'], CLR['tg'], CLR['gold']][:len(labels)]
+    bars = ax.bar(labels, values, color=colors, width=0.55, zorder=3)
     for bar, val in zip(bars, values):
-        ax.text(bar.get_width() + max(values)*0.02, bar.get_y() + bar.get_height()/2,
-                f'£{val:,.0f}', va='center', fontsize=9, fontweight='bold',
-                color=BRAND['ink'], fontfamily='sans-serif')
+        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + max(values)*0.03,
+                str(val), ha='center', fontsize=10, fontweight='bold', color=CLR['ink'])
 
-    ax.xaxis.set_major_formatter(mticker.FuncFormatter(money_fmt))
-    ax.set_title(f'Sold Price by Property Type in {district}', fontsize=13, fontweight='bold',
-                 color=BRAND['navy'], pad=10, fontfamily='serif')
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_color(BRAND['muted'])
-    ax.spines['bottom'].set_color(BRAND['muted'])
-    ax.tick_params(colors=BRAND['muted'], labelsize=9)
-    fig.text(0.5, -0.02, 'Source: HM Land Registry Price Paid Data',
-             ha='center', fontsize=7, color=BRAND['muted'], fontstyle='italic')
-    plt.tight_layout()
-    fig.savefig(path, dpi=150, bbox_inches='tight', facecolor=BRAND['cream'])
+    ax.set_ylabel('Number of sales')
+    ax.set_title(f'{district}: Sales Volume by Property Type', fontsize=13, fontweight='bold',
+                 color=CLR['navy'], pad=12, loc='left')
+    ax.set_ylim(0, max(values)*1.25)
+    ax.yaxis.set_major_locator(mticker.MaxNLocator(integer=True))
+    _source_line(fig, 'Source: HM Land Registry Price Paid Data')
+    plt.tight_layout(rect=[0, 0.04, 1, 0.97])
+    fig.savefig(path, dpi=180, bbox_inches='tight', facecolor=CLR['paper'])
+    plt.close(fig)
+    return str(path)
+
+
+def chart_price_trend(slug, district, hpi_series):
+    """Line chart: price trend over time."""
+    if not hpi_series or len(hpi_series) < 3:
+        return None
+    path = CHART_DIR / f'{slug}-price-trend.png'
+    if path.exists():
+        return str(path)
+
+    dates = [p[0] for p in hpi_series]
+    values = [p[1] for p in hpi_series]
+
+    fig, ax = _bloomberg_figure(figsize=(7.5, 3.5))
+    ax.plot(dates, values, color=CLR['green'], linewidth=2.2, zorder=3, marker='o',
+            markersize=4, markerfacecolor=CLR['green'], markeredgecolor='white',
+            markeredgewidth=1)
+    ax.fill_between(dates, values, alpha=0.08, color=CLR['green'])
+
+    ax.yaxis.set_major_formatter(mticker.FuncFormatter(_money))
+    ax.set_title(f'{district}: Price Trend', fontsize=13, fontweight='bold',
+                 color=CLR['navy'], pad=12, loc='left')
+    _source_line(fig, 'Source: HM Land Registry Price Paid Data')
+    plt.tight_layout(rect=[0, 0.04, 1, 0.97])
+    fig.savefig(path, dpi=180, bbox_inches='tight', facecolor=CLR['paper'])
     plt.close(fig)
     return str(path)
 
 
 def attach_charts(model):
-    """Generate chart images for a district model and attach URLs.
-    Called from publish_daily.py before rendering."""
+    """Generate 2-3 chart images and attach URLs to the model."""
     slug = model.get('slug', '')
     district = model.get('district', '')
     s = model.get('sold') or {}
     l = model.get('listings') or {}
 
     charts = {}
-    if s.get('ok') and s.get('median_price') and l.get('ok') and l.get('asking_median'):
-        p = chart_asking_vs_sold(slug, district, s['median_price'], l['asking_median'])
-        if p:
-            charts['asking_vs_sold'] = CHART_WEB_PREFIX + Path(p).name
-
+    # Chart 1: sold by type (always generates if data exists)
     if s.get('ok') and s.get('by_type'):
         p = chart_sold_by_type(slug, district, s['by_type'])
         if p:
             charts['sold_by_type'] = CHART_WEB_PREFIX + Path(p).name
 
+    # Chart 2: sales volume by type
+    if s.get('ok') and s.get('by_type'):
+        p = chart_sales_volume(slug, district, s['by_type'])
+        if p:
+            charts['sales_volume'] = CHART_WEB_PREFIX + Path(p).name
+
+    # Chart 3: price trend if we have a series
+    hpi_data = model.get('hpi_series') or model.get('price_trend') or []
+    if hpi_data:
+        p = chart_price_trend(slug, district, hpi_data)
+        if p:
+            charts['price_trend'] = CHART_WEB_PREFIX + Path(p).name
+
     if charts:
         model['charts'] = charts
+        # Force re-render so charts appear (bust the stale cache check)
+        model['_charts_generated'] = True
     return model
