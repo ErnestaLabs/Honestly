@@ -341,8 +341,9 @@ def publish_one(city, district, *, key=None):
     if blog_images is not None:
         try:
             blog_images.attach(model)               # adds model['hero'] / ['area_photo'] in place
+            blog_images.attach_charts(model)         # generates chart PNGs -> model['charts']
         except Exception:
-            pass                                     # imagery is decorative; never block a publish
+            pass                                     # imagery/charts are decorative; never block a publish
     sold = model.get("sold") or {}
     listings = model.get("listings") or {}
     sold_ok = sold.get("ok")

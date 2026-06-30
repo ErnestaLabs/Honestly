@@ -506,3 +506,133 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# ---------------------------------------------------------------------------
+# Chart generation (matplotlib) -- real PNG graphs for blog articles
+# ---------------------------------------------------------------------------
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+from pathlib import Path
+
+# Brand colours
+BRAND = {
+    'navy': '#0e2747', 'green': '#15807f', 'gold': '#d89a32',
+    'cream': '#f6f3ec', 'ink': '#1c1a16', 'muted': '#6b6557',
+    'terra': '#2aa39a', 'tg': '#229ED9'
+}
+
+CHART_DIR = Path(__file__).resolve().parent / 'site' / 'img' / 'charts'
+CHART_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def money_fmt(x, pos=None):
+    """Format axis values as money: 350000 -> 350k."""
+    if x >= 1_000_000:
+        return f'{x/1_000_000:.1f}M'
+    if x >= 1_000:
+        return f'{x/1_000:.0f}k'
+    return str(int(x))
+
+
+def chart_asking_vs_sold(slug, district, sold_median, asking_median):
+    """Generate a branded bar chart comparing sold vs asking median prices."""
+    path = CHART_DIR / f'{slug}-asking-vs-sold.png'
+    if path.exists():
+        return str(path)
+
+    fig, ax = plt.subplots(figsize=(7, 3.5))
+    fig.patch.set_facecolor(BRAND['cream'])
+    ax.set_facecolor(BRAND['cream'])
+
+    labels = ['Sold median', 'Asking median']
+    values = [sold_median, asking_median]
+    colors = [BRAND['green'], BRAND['gold']]
+
+    bars = ax.bar(labels, values, color=colors, width=0.5, edgecolor='none')
+    for bar, val in zip(bars, values):
+        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + max(values)*0.02,
+                f'£{val:,.0f}', ha='center', va='bottom', fontsize=10, fontweight='bold',
+                color=BRAND['ink'], fontfamily='sans-serif')
+
+    ax.yaxis.set_major_formatter(mticker.FuncFormatter(money_fmt))
+    ax.set_ylabel('Price', fontsize=9, color=BRAND['muted'])
+    ax.set_title(f'Asking vs Sold in {district}', fontsize=13, fontweight='bold',
+                 color=BRAND['navy'], pad=10, fontfamily='serif')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_color(BRAND['muted'])
+    ax.spines['bottom'].set_color(BRAND['muted'])
+    ax.tick_params(colors=BRAND['muted'], labelsize=9)
+    fig.text(0.5, -0.02, 'Source: HM Land Registry Price Paid Data | Asking: live listings',
+             ha='center', fontsize=7, color=BRAND['muted'], fontstyle='italic')
+    plt.tight_layout()
+    fig.savefig(path, dpi=150, bbox_inches='tight', facecolor=BRAND['cream'])
+    plt.close(fig)
+    return str(path)
+
+
+def chart_sold_by_type(slug, district, by_type):
+    """Generate a horizontal bar chart of sold prices by property type."""
+    if not by_type or len(by_type) < 2:
+        return None
+    path = CHART_DIR / f'{slug}-sold-by-type.png'
+    if path.exists():
+        return str(path)
+
+    labels = [bt['label'] for bt in by_type if bt.get('median')]
+    values = [bt['median'] for bt in by_type if bt.get('median')]
+    if len(labels) < 2:
+        return None
+
+    fig, ax = plt.subplots(figsize=(7, len(labels)*0.6 + 1.5))
+    fig.patch.set_facecolor(BRAND['cream'])
+    ax.set_facecolor(BRAND['cream'])
+
+    colors = [BRAND['green']] + [BRAND['terra']] + [BRAND['tg']] * (len(labels) - 2)
+    bars = ax.barh(labels, values, color=colors[:len(labels)], height=0.5, edgecolor='none')
+    for bar, val in zip(bars, values):
+        ax.text(bar.get_width() + max(values)*0.02, bar.get_y() + bar.get_height()/2,
+                f'£{val:,.0f}', va='center', fontsize=9, fontweight='bold',
+                color=BRAND['ink'], fontfamily='sans-serif')
+
+    ax.xaxis.set_major_formatter(mticker.FuncFormatter(money_fmt))
+    ax.set_title(f'Sold Price by Property Type in {district}', fontsize=13, fontweight='bold',
+                 color=BRAND['navy'], pad=10, fontfamily='serif')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_color(BRAND['muted'])
+    ax.spines['bottom'].set_color(BRAND['muted'])
+    ax.tick_params(colors=BRAND['muted'], labelsize=9)
+    fig.text(0.5, -0.02, 'Source: HM Land Registry Price Paid Data',
+             ha='center', fontsize=7, color=BRAND['muted'], fontstyle='italic')
+    plt.tight_layout()
+    fig.savefig(path, dpi=150, bbox_inches='tight', facecolor=BRAND['cream'])
+    plt.close(fig)
+    return str(path)
+
+
+def attach_charts(model):
+    """Generate chart images for a district model and attach URLs.
+    Called from publish_daily.py before rendering."""
+    slug = model.get('slug', '')
+    district = model.get('district', '')
+    s = model.get('sold') or {}
+    l = model.get('listings') or {}
+
+    charts = {}
+    if s.get('ok') and s.get('median_price') and l.get('ok') and l.get('asking_median'):
+        p = chart_asking_vs_sold(slug, district, s['median_price'], l['asking_median'])
+        if p:
+            charts['asking_vs_sold'] = '/' + str(Path(p).relative_to(CHART_DIR.parent))
+
+    if s.get('ok') and s.get('by_type'):
+        p = chart_sold_by_type(slug, district, s['by_type'])
+        if p:
+            charts['sold_by_type'] = '/' + str(Path(p).relative_to(CHART_DIR.parent))
+
+    if charts:
+        model['charts'] = charts
+    return model

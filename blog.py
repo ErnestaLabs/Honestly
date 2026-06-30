@@ -2273,8 +2273,15 @@ def _data_section(model):
 <thead><tr><th>Type</th><th>Sales</th><th>Median price</th><th>Median per sq metre</th></tr></thead>
 <tbody>{type_rows}</tbody></table>'''
 
-    # Chart: asking vs sold
-    chart_html = _chart_asking_vs_sold(model) if s.get("ok") and l.get("ok") else ""
+    # Charts: prefer generated PNG images, fall back to CSS bars
+    charts = model.get("charts") or {}
+    chart_html = ""
+    if charts.get("asking_vs_sold"):
+        chart_html += f'<figure class="chart-img"><img src="{e(charts["asking_vs_sold"])}" alt="Asking vs sold prices in {e(d)}" loading="lazy"><figcaption class="chart-cap">Figure: Asking vs sold median prices in {e(d)}. Source: HM Land Registry Price Paid Data and live listings.</figcaption></figure>'
+    else:
+        chart_html = _chart_asking_vs_sold(model) if s.get("ok") and l.get("ok") else ""
+    if charts.get("sold_by_type"):
+        chart_html += f'<figure class="chart-img"><img src="{e(charts["sold_by_type"])}" alt="Sold prices by property type in {e(d)}" loading="lazy"><figcaption class="chart-cap">Figure: Sold price by property type in {e(d)}. Source: HM Land Registry Price Paid Data.</figcaption></figure>'
 
     # Description
     rec = s.get("recency", {})
