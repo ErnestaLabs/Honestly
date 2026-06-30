@@ -171,13 +171,12 @@ def value(address, key=None, beds=None, baths=1, finish="average",
     r = lite_value(address, beds=beds, baths=baths, finish=finish,
                    investment=investment, ptype=ptype, sqm=sqm, key=key)
     r["product_tier"] = product_tier
-    # ── Wire UKQuantValuator on top of the existing engine ──
-    # The quant engine replaces the central/low/high/guide and confidence
-    # with mathematically defined formulas. All other keys are preserved.
-    try:
-        r = _apply_quant_valuation(r)
-    except Exception:
-        pass  # if quant fails, the original engine output stands unchanged
+    # ── Quant valuation: Pro tier only. Lite uses the strict lite_value math directly. ──
+    if product_tier == "pro":
+        try:
+            r = _apply_quant_valuation(r)
+        except Exception:
+            pass
     _autostore(r, "lite" if product_tier == "lite" else "pro")
     return r
 
@@ -202,10 +201,10 @@ _PDTYPE_LABEL = {"flat": "flats", "terraced_house": "terraced houses",
 _LITE_WINDOWS = (12, 24)
 _LITE_MIN_COMPS = 5
 _LITE_MIN_STRICT_COMPS = 5
-_LITE_BASE_RADIUS_M = 805       # ~0.5 miles ideal/default comparable radius
-_LITE_EXPANDED_RADIUS_M = 1207  # ~0.75 miles absolute max (never 1 mile in dense urban areas)
-_LITE_MAX_COMP_RADIUS_M = 805
-_LITE_MAX_EXPANDED_COMP_RADIUS_M = 1207
+_LITE_BASE_RADIUS_M = 500       # ~0.31 miles - tight default comparable radius (2-3 blocks)
+_LITE_EXPANDED_RADIUS_M = 805  # ~0.5 miles absolute max for London/dense urban
+_LITE_MAX_COMP_RADIUS_M = 500
+_LITE_MAX_EXPANDED_COMP_RADIUS_M = 805
 _LITE_SIMILAR_PRICE_PCT = 0.30  # comparable must sit within +/-30% of the anchor price
 _LITE_AREA_TOLERANCE_STRICT = 0.15   # default: floor area within 15% (hard cap)
 _LITE_AREA_TOLERANCE_RELAXED = 0.20  # relaxed: when strict < 5, area within 20%
