@@ -2151,7 +2151,7 @@ def _district_name(model):
 
 
 def _key_takeaways_box(model):
-    """Navy box with 3 key data bullets immediately below the header."""
+    """Navy box with 3-4 key data bullets immediately below the header."""
     d = model.get("district") or "this postcode"
     s = model.get("sold") or {}
     l = model.get("listings") or {}
@@ -2162,11 +2162,11 @@ def _key_takeaways_box(model):
         bullets.append(f'Median sale price: {money_short(s["median_price"])}')
     if s.get("ok") and s.get("psm_median"):
         bullets.append(f'Price per square metre: {money(s["psm_median"])}')
+    if l.get("ok") and l.get("mean_dom"):
+        bullets.append(f'Average time to sell: {l["mean_dom"]} days on market')
     if h.get("ok") and h.get("annual_change_pct") is not None:
         direction = "up" if h["annual_change_pct"] > 0 else "down"
         bullets.append(f'{model["city"]["name"]} index: {pct(h["annual_change_pct"])} year on year ({direction})')
-    if l.get("ok") and l.get("mean_dom"):
-        bullets.append(f'Average time to sell: {l["mean_dom"]} days on market')
 
     if not bullets:
         return ""
@@ -2241,39 +2241,55 @@ def _cta_full(model):
 
 
 def _data_section(model):
-    """The meat: flats vs houses data with stylized stat blocks."""
+    """The meat: sold data with stat blocks, charts, and type breakdown."""
     d = model.get("district") or "this postcode"
     s = model.get("sold") or {}
     l = model.get("listings") or {}
 
-    stats_html = ""
-    if s.get("ok"):
-        stats_parts = []
-        if s.get("median_price"):
-            stats_parts.append(f'<div class="stat"><span class="stat-v">{money_short(s["median_price"])}</span><span class="stat-l">Median sale price</span></div>')
-        if s.get("psm_median"):
-            stats_parts.append(f'<div class="stat"><span class="stat-v">{money(s["psm_median"])}</span><span class="stat-l">Price per square metre</span></div>')
-        if s.get("recency",{}).get("last_12m"):
-            stats_parts.append(f'<div class="stat"><span class="stat-v">{s["recency"]["last_12m"]}</span><span class="stat-l">Sales last 12 months</span></div>')
-        if stats_parts:
-            stats_html = f'<div class="stats-row">{"".join(stats_parts)}</div>'
+    # Stat blocks
+    stats_parts = []
+    if s.get("ok") and s.get("median_price"):
+        stats_parts.append(f'<div class="stat"><span class="stat-v">{money_short(s["median_price"])}</span><span class="stat-l">Median sale price</span></div>')
+    if s.get("ok") and s.get("psm_median"):
+        stats_parts.append(f'<div class="stat"><span class="stat-v">{money(s["psm_median"])}</span><span class="stat-l">Price per square metre</span></div>')
+    if s.get("ok") and s.get("recency",{}).get("last_12m"):
+        stats_parts.append(f'<div class="stat"><span class="stat-v">{s["recency"]["last_12m"]}</span><span class="stat-l">Sales last 12 months</span></div>')
+    if l.get("ok") and l.get("mean_dom"):
+        stats_parts.append(f'<div class="stat"><span class="stat-v">{l["mean_dom"]} days</span><span class="stat-l">Average time on market</span></div>')
+    stats_html = f'<div class="stats-row">{"".join(stats_parts)}</div>' if stats_parts else ""
 
+    # Sold price table by type
+    type_rows = ""
+    if s.get("ok") and s.get("by_type"):
+        for bt in s["by_type"]:
+            if not bt.get("n"):
+                continue
+            type_rows += (f"<tr><td>{e(bt['label'])}</td><td>{bt['n']}</td>"
+                         f"<td>{money(bt.get('median'))}</td>"
+                         f"<td>{money(bt.get('psm_median'))}</td></tr>")
+    type_html = ""
+    if type_rows:
+        type_html = f'''<table class="data"><caption>Sold price by property type</caption>
+<thead><tr><th>Type</th><th>Sales</th><th>Median price</th><th>Median per sq metre</th></tr></thead>
+<tbody>{type_rows}</tbody></table>'''
+
+    # Chart: asking vs sold
     chart_html = _chart_asking_vs_sold(model) if s.get("ok") and l.get("ok") else ""
 
-    type_html = ""
-    if s.get("ok") and s.get("by_type"):
-        type_rows = []
-        for t in s["by_type"]:
-            if t.get("median_price"):
-                type_rows.append(f'<tr><td>{e(t.get("type",""))}</td><td>{money_short(t["median_price"])}</td><td>{t.get("count","-")} sales</td></tr>')
-        if type_rows:
-            type_html = f'''<h3>Property type breakdown</h3>
-<table class="data"><thead><tr><th>Type</th><th>Median price</th><th>Sales</th></tr></thead><tbody>{"".join(type_rows)}</tbody></table>'''
+    # Description
+    rec = s.get("recency", {})
+    desc = ""
+    if s.get("ok") and s.get("total"):
+        desc = (f'<p>Across the last {rec.get("window_months",24)} months, {s["total"]} sales are on record in {e(d)}, '
+                f'a median of {money(s.get("median_price"))}.')
+        if s.get("recency",{}).get("last_12m"):
+            desc += f' {s["recency"]["last_12m"]} of those completed in the last 12 months.'
+        desc += ' All figures are from HM Land Registry Price Paid Data, the official record of completed transactions. Asking prices from live listings are shown separately and never blended with sold figures.</p>'
 
     return f'''<section class="sec">
   <h2>{e(d)} house price data</h2>
+  {desc}
   {stats_html}
-  <p>All figures above are drawn from HM Land Registry Price Paid Data, the official record of completed transactions. Asking prices from live listings are shown separately and never blended with sold figures.</p>
   {chart_html}
   {type_html}
 </section>'''
@@ -2360,6 +2376,17 @@ def render_post(model, *, siblings=None, cities_nav=None):
     jsonld = _jsonld(model, faqs, refs)
 
     body = f"""<article class="wrap">
+  <header class="report-head">
+    <div class="rh-body">
+      <p class="kicker"><span class="brandname">honestl<span class="brand-y">y</span></span> &middot; official-data market reports</p>
+      <h1>{e(d)} House Prices &amp; Property Market Report</h1>
+      <p class="standfirst">{e(desc)}</p>
+      <div class="herofacts">
+        <div class="hf"><span class="hf-v">{e(model.get("generated_at",""))}</span><span class="hf-l">Updated</span></div>
+        <div class="hf"><span class="hf-v">4 min</span><span class="hf-l">Read</span></div>
+      </div>
+    </div>
+  </header>
   {_hero_block(model)}
   {_key_takeaways_box(model)}
   {_intro_section(model)}
