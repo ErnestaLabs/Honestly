@@ -2194,9 +2194,15 @@ def handle(u):
     pend = PENDING.get(uid)
     if pend and pend.get("await") and not text.startswith("/"):
         field = pend["await"]
-        v = _parse_money(text)
-        if v is None:
-            return say(chat, "Send a figure like <code>525000</code>, or tap <b>Skip</b>.")
+        if field in ("beds", "baths"):
+            try: v = int(text)
+            except ValueError: v = None
+            if v is None or v < 1:
+                return say(chat, "Type a number like <code>2</code>, or tap a button.")
+        else:
+            v = _parse_money(text)
+            if v is None:
+                return say(chat, "Send a figure like <code>525000</code>, or tap <b>Skip</b>.")
         _store_answer(uid, field, str(v))
         return _ask_step(chat, uid)
     if text.startswith("/start") or text.startswith("/app"):
